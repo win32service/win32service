@@ -20,7 +20,6 @@ if ($argv[1] == 'install') {
 	debug_zval_dump($x);
 	exit;
 } else if ($argv[1] != 'run') {
-	fwrite($fp, "BOGSU!\n");
 	die("bogus args");
 }
 
