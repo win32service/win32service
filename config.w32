@@ -1,0 +1,9 @@
+// $Id$
+// vim:ft=javascript
+
+ARG_ENABLE("win32service", "Win32 Service", "no");
+
+if (PHP_WIN32SERVICE != "no") {
+	EXTENSION("win32service", "win32service.c");
+}
+
