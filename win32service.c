@@ -298,12 +298,136 @@ static PHP_FUNCTION(win32_get_last_control_message)
 	RETURN_LONG(SVCG(args.dwControl));
 }
 
+/* {{{ proto mixed win32_query_service_status(string servicename [, string machine])
+   Queries the status of a service */
+static PHP_FUNCTION(win32_query_service_status)
+{
+	char *machine = NULL, *service;
+	int machine_len, service_len;
+	SC_HANDLE hsvc, hmgr;
+	SERVICE_STATUS_PROCESS *st;
+	DWORD size;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!", &service, &service_len, &machine, &machine_len)) {
+		RETURN_FALSE;
+	}
+
+	hmgr = OpenSCManager(machine, NULL, GENERIC_READ);
+	if (hmgr) {
+		hsvc = OpenService(hmgr, service, SERVICE_QUERY_STATUS);
+		if (hsvc) {
+			size = sizeof(*st);
+			st = emalloc(size);
+			if (!QueryServiceStatusEx(hsvc, SC_STATUS_PROCESS_INFO,
+					(LPBYTE)st, size, &size)) {
+				if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
+					RETVAL_LONG(GetLastError());
+					goto out_fail;
+				}
+				st = erealloc(st, size);
+				if (!QueryServiceStatusEx(hsvc, SC_STATUS_PROCESS_INFO,
+						(LPBYTE)st, size, &size)) {
+					RETVAL_LONG(GetLastError());
+					goto out_fail;
+				}
+			}
+			/* map the struct to an array */
+			array_init(return_value);
+			add_assoc_long(return_value, "ServiceType", st->dwServiceType);	
+			add_assoc_long(return_value, "CurrentState", st->dwCurrentState);	
+			add_assoc_long(return_value, "ControlsAccepted", st->dwControlsAccepted);	
+			add_assoc_long(return_value, "Win32ExitCode", st->dwWin32ExitCode);	
+			add_assoc_long(return_value, "ServiceSpecificExitCode", st->dwServiceSpecificExitCode);	
+			add_assoc_long(return_value, "CheckPoint", st->dwCheckPoint);	
+			add_assoc_long(return_value, "WaitHint", st->dwWaitHint);	
+			add_assoc_long(return_value, "ProcessId", st->dwProcessId);	
+			add_assoc_long(return_value, "ServiceFlags", st->dwServiceFlags);	
+out_fail:
+			CloseServiceHandle(hsvc);
+		} else {
+			RETVAL_LONG(GetLastError());
+		}
+		CloseServiceHandle(hmgr);
+	} else {
+		RETVAL_LONG(GetLastError());
+	}
+}
+
+/* {{{ proto long win32_start_service(string servicename [, string machine])
+   Starts a service */
+static PHP_FUNCTION(win32_start_service)
+{
+	char *machine = NULL, *service;
+	int machine_len, service_len;
+	SC_HANDLE hsvc, hmgr;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!", &service, &service_len, &machine, &machine_len)) {
+		RETURN_FALSE;
+	}
+
+	hmgr = OpenSCManager(machine, NULL, SC_MANAGER_ALL_ACCESS);
+	if (hmgr) {
+		hsvc = OpenService(hmgr, service, SERVICE_START);
+		if (hsvc) {
+			if (StartService(hsvc, 0, NULL)) {
+				RETVAL_LONG(NO_ERROR);
+			} else {
+				RETVAL_LONG(GetLastError());
+			}
+			CloseServiceHandle(hsvc);
+		} else {
+			RETVAL_LONG(GetLastError());
+		}
+		CloseServiceHandle(hmgr);
+	} else {
+		RETVAL_LONG(GetLastError());
+	}
+}
+/* }}} */
+
+/* {{{ proto long win32_stop_service(string servicename [, string machine])
+   Stops a service */
+static PHP_FUNCTION(win32_stop_service)
+{
+	char *machine = NULL, *service;
+	int machine_len, service_len;
+	SC_HANDLE hsvc, hmgr;
+	SERVICE_STATUS st;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!", &service, &service_len, &machine, &machine_len)) {
+		RETURN_FALSE;
+	}
+
+	hmgr = OpenSCManager(machine, NULL, SC_MANAGER_ALL_ACCESS);
+	if (hmgr) {
+		hsvc = OpenService(hmgr, service, SERVICE_STOP);
+		if (hsvc) {
+			if (ControlService(hsvc, SERVICE_CONTROL_STOP, &st)) {
+				RETVAL_LONG(NO_ERROR);
+			} else {
+				RETVAL_LONG(GetLastError());
+			}
+			CloseServiceHandle(hsvc);
+		} else {
+			RETVAL_LONG(GetLastError());
+		}
+		CloseServiceHandle(hmgr);
+	} else {
+		RETVAL_LONG(GetLastError());
+	}
+}
+/* }}} */
+
+
 static function_entry functions[] = {
 	PHP_FE(win32_start_service_ctrl_dispatcher, NULL)
 	PHP_FE(win32_set_service_status, NULL)
 	PHP_FE(win32_create_service, NULL)
 	PHP_FE(win32_delete_service, NULL)
 	PHP_FE(win32_get_last_control_message, NULL)
+	PHP_FE(win32_query_service_status, NULL)
+	PHP_FE(win32_start_service, NULL)
+	PHP_FE(win32_stop_service, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -316,20 +440,41 @@ static PHP_MINIT_FUNCTION(win32service)
 {
 	ZEND_INIT_MODULE_GLOBALS(win32service, init_globals, NULL);
 
-	REGISTER_LONG_CONSTANT("WIN32_SERVICE_CONTROL_CONTINUE", SERVICE_CONTROL_CONTINUE, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("WIN32_SERVICE_CONTROL_INTERROGATE", SERVICE_CONTROL_INTERROGATE, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("WIN32_SERVICE_CONTROL_PAUSE", SERVICE_CONTROL_PAUSE, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("WIN32_SERVICE_CONTROL_STOP", SERVICE_CONTROL_STOP, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("WIN32_SERVICE_CONTROL_HARDWAREPROFILECHANGE", SERVICE_CONTROL_HARDWAREPROFILECHANGE, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("WIN32_SERVICE_CONTROL_POWEREVENT", SERVICE_CONTROL_POWEREVENT, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("WIN32_SERVICE_CONTROL_SESSIONCHANGE", SERVICE_CONTROL_SESSIONCHANGE, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("WIN32_ERROR_CALL_NOT_IMPLEMENTED", ERROR_CALL_NOT_IMPLEMENTED, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("WIN32_NO_ERROR", NO_ERROR, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("WIN32_SERVICE_RUNNING", SERVICE_RUNNING, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("WIN32_SERVICE_STOPPED", SERVICE_STOPPED, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("WIN32_SERVICE_STOP_PENDING", SERVICE_STOP_PENDING, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("WIN32_SERVICE_OWN_PROCESS", SERVICE_WIN32_OWN_PROCESS, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("WIN32_SERVICE_INTERACTIVE_PROCESS", SERVICE_INTERACTIVE_PROCESS, CONST_CS|CONST_PERSISTENT);
+#define MKCONST(x)	REGISTER_LONG_CONSTANT("WIN32_" # x, x, CONST_CS|CONST_PERSISTENT)
+
+	MKCONST(SERVICE_CONTROL_CONTINUE);
+	MKCONST(SERVICE_CONTROL_INTERROGATE);
+	MKCONST(SERVICE_CONTROL_PAUSE);
+	MKCONST(SERVICE_CONTROL_STOP);
+	MKCONST(SERVICE_CONTROL_HARDWAREPROFILECHANGE);
+	MKCONST(SERVICE_CONTROL_POWEREVENT);
+	MKCONST(SERVICE_CONTROL_SESSIONCHANGE);
+	MKCONST(ERROR_CALL_NOT_IMPLEMENTED);
+	MKCONST(NO_ERROR);
+	MKCONST(SERVICE_RUNNING);
+	MKCONST(SERVICE_STOPPED);
+	MKCONST(SERVICE_STOP_PENDING);
+	MKCONST(SERVICE_WIN32_OWN_PROCESS);
+	MKCONST(SERVICE_INTERACTIVE_PROCESS);
+	MKCONST(SERVICE_STOPPED);
+	MKCONST(SERVICE_START_PENDING);
+	MKCONST(SERVICE_STOP_PENDING);
+	MKCONST(SERVICE_RUNNING);
+	MKCONST(SERVICE_CONTINUE_PENDING);
+	MKCONST(SERVICE_PAUSE_PENDING);
+	MKCONST(SERVICE_PAUSED);
+	MKCONST(SERVICE_ACCEPT_NETBINDCHANGE);
+	MKCONST(SERVICE_ACCEPT_PARAMCHANGE);
+	MKCONST(SERVICE_ACCEPT_PAUSE_CONTINUE);
+	MKCONST(SERVICE_ACCEPT_SHUTDOWN);
+	MKCONST(SERVICE_ACCEPT_STOP);
+	MKCONST(SERVICE_ACCEPT_HARDWAREPROFILECHANGE);
+	MKCONST(SERVICE_ACCEPT_POWEREVENT);
+	MKCONST(SERVICE_ACCEPT_SESSIONCHANGE);
+	MKCONST(SERVICE_FILE_SYSTEM_DRIVER);
+	MKCONST(SERVICE_KERNEL_DRIVER);
+	MKCONST(SERVICE_WIN32_SHARE_PROCESS);
+	MKCONST(SERVICE_RUNS_IN_SYSTEM_PROCESS);
 
 	return SUCCESS;
 }
