@@ -501,6 +501,7 @@ static PHP_MINFO_FUNCTION(win32service)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Win32 Service support", "enabled");
+	php_info_print_table_row(2, "Version", PHP_WIN32SERVICE_VERSION);
 	php_info_print_table_end();
 }
 
@@ -513,7 +514,7 @@ zend_module_entry win32service_module_entry = {
 	NULL,
 	PHP_RSHUTDOWN(win32service),
 	PHP_MINFO(win32service),
-	"0.1",
+	PHP_WIN32SERVICE_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 
