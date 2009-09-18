@@ -51,7 +51,6 @@ static DWORD WINAPI service_handler(DWORD dwControl, DWORD dwEventType, LPVOID l
 
 static void WINAPI service_main(DWORD argc, char **argv)
 {
-	MSG msg;
 	zend_win32service_globals *g = (zend_win32service_globals*)tmp_service_g;
 
 	g->st.dwServiceType = SERVICE_WIN32;
@@ -242,9 +241,9 @@ static PHP_FUNCTION(win32_create_service)
 				path_and_params,
 				load_order,
 				NULL,
-				deps,
-				user,
-				password);
+				(LPCSTR)deps,
+				(LPCSTR)user,
+				(LPCSTR)password);
 
 		if (hsvc) {
 			CloseServiceHandle(hsvc);
