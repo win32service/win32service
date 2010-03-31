@@ -418,7 +418,7 @@ static PHP_FUNCTION(win32_stop_service)
 /* }}} */
 
 
-static function_entry functions[] = {
+static zend_function_entry functions[] = {
 	PHP_FE(win32_start_service_ctrl_dispatcher, NULL)
 	PHP_FE(win32_set_service_status, NULL)
 	PHP_FE(win32_create_service, NULL)
