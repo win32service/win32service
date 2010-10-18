@@ -292,10 +292,13 @@ static PHP_FUNCTION(win32_delete_service)
 }
 /* }}} */
 
+/* {{{ proto long win32_get_last_control_message()
+   Returns the last control message that was sent to this service process */
 static PHP_FUNCTION(win32_get_last_control_message)
 {
 	RETURN_LONG(SVCG(args.dwControl));
 }
+/* }}} */
 
 /* {{{ proto mixed win32_query_service_status(string servicename [, string machine])
    Queries the status of a service */
@@ -351,6 +354,7 @@ out_fail:
 		RETVAL_LONG(GetLastError());
 	}
 }
+/* }}} */
 
 /* {{{ proto long win32_start_service(string servicename [, string machine])
    Starts a service */
