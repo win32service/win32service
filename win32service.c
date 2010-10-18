@@ -55,7 +55,7 @@ static void WINAPI service_main(DWORD argc, char **argv)
 
 	g->st.dwServiceType = SERVICE_WIN32;
 	g->st.dwCurrentState = SERVICE_START_PENDING;
-	g->st.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN;
+	g->st.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN | SERVICE_ACCEPT_PRESHUTDOWN | SERVICE_ACCEPT_PAUSE_CONTINUE; // Allow the service to be paused and handle Vista-style pre-shutdown notifications.
 	
 	g->sh = RegisterServiceCtrlHandlerEx(g->service_name, service_handler, g);
 
