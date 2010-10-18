@@ -179,8 +179,11 @@ static PHP_FUNCTION(win32_create_service)
 	char *load_order;
 	char **deps = NULL;
 	char *desc;
+	BOOL delayed_start;
 	SC_HANDLE hsvc, hmgr;
 	char *path_and_params;
+	SERVICE_DESCRIPTION srvc_desc;
+	SERVICE_DELAYED_AUTO_START_INFO srvc_delayed_start;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|s!", &details, &machine, &machine_len)) {
 		RETURN_FALSE;
@@ -202,6 +205,14 @@ static PHP_FUNCTION(win32_create_service)
 		var = def; \
 	}
 
+#define BOOL_DETAIL(name, var, def) \
+	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(details), name, sizeof(name), (void**)&tmp)) { \
+		convert_to_boolean_ex(tmp); \
+		var = Z_LVAL_PP(tmp); \
+	} else { \
+		var = def; \
+	}
+
 	STR_DETAIL("service", service, NULL);
 	STR_DETAIL("display", display, NULL);
 	STR_DETAIL("user", user, NULL);
@@ -213,12 +224,25 @@ static PHP_FUNCTION(win32_create_service)
 	INT_DETAIL("svc_type", svc_type, SERVICE_WIN32_OWN_PROCESS);
 	INT_DETAIL("start_type", start_type, SERVICE_AUTO_START);
 	INT_DETAIL("error_control", error_control, SERVICE_ERROR_IGNORE);
+	BOOL_DETAIL("delayed_start", delayed_start, 0); // Allow Vista+ delayed service start.
 
 	if (service == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "missing vital parameters");
 		RETURN_FALSE;
 	}
 
+	srvc_desc.lpDescription = desc;
+	srvc_delayed_start.fDelayedAutostart = delayed_start;
+
+	// Connect to the SCManager
+	hmgr = OpenSCManager(machine, NULL, SC_MANAGER_ALL_ACCESS);
+
+	// Quit if no connection.
+	if (!hmgr) {
+		RETURN_LONG(GetLastError());
+	}
+
+	// Build service path and parameters.
 	if (path == NULL) {
 		DWORD len;
 		char buf[MAX_PATH];
@@ -237,34 +261,42 @@ static PHP_FUNCTION(win32_create_service)
 			spprintf(&path_and_params, 0, "%s %s", path, params);
 	}
 
-	hmgr = OpenSCManager(machine, NULL, SC_MANAGER_ALL_ACCESS);
-	if (hmgr) {
-		hsvc = CreateService(hmgr,
-				service,
-				display ? display : service,
-				SERVICE_ALL_ACCESS,
-				svc_type,
-				start_type,
-				error_control,
-				path_and_params,
-				load_order,
-				NULL,
-				(LPCSTR)deps,
-				(LPCSTR)user,
-				(LPCSTR)password);
-
-		if (hsvc) {
-			CloseServiceHandle(hsvc);
-			RETVAL_TRUE;
-		} else {
-			RETVAL_LONG(GetLastError());
-		}
-		CloseServiceHandle(hmgr);
-	} else {
-		RETVAL_LONG(GetLastError());
+	// If interact with desktop is set and no username supplied (Only LocalSystem allows InteractWithDesktop) then pass the path and params through %COMSPEC% /C "..."
+	if (SERVICE_INTERACTIVE_PROCESS & svc_type && user == NULL) {
+		spprintf(&path_and_params, 0, "\"%s\" /C \"%s\"", getenv("COMSPEC"), path_and_params);
 	}
 
+	// Register the service.
+	hsvc = CreateService(hmgr,
+			service,
+			display ? display : service,
+			SERVICE_ALL_ACCESS,
+			svc_type,
+			start_type,
+			error_control,
+			path_and_params,
+			load_order,
+			NULL,
+			(LPCSTR)deps,
+			(LPCSTR)user,
+			(LPCSTR)password);
+
 	efree(path_and_params);
+
+	// If there was an error :
+	// - Creating the service
+	// - Setting the service description
+	// - Setting the delayed start
+	// then track the error.
+	if (!hsvc || !ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, &srvc_desc) || !ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, &srvc_delayed_start)) {
+		RETVAL_LONG(GetLastError());
+	} else {
+		RETVAL_LONG(NO_ERROR);
+	}
+
+	CloseServiceHandle(hsvc);
+	CloseServiceHandle(hmgr);
+
 }
 /* }}} */
 
