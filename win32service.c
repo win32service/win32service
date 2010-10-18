@@ -417,16 +417,53 @@ static PHP_FUNCTION(win32_stop_service)
 }
 /* }}} */
 
+/* {{{ arginfo */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_start_service_ctrl_dispatcher, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_set_service_status, 0, 0, 1)
+	ZEND_ARG_INFO(0, status)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_create_service, 0, 0, 1)
+	ZEND_ARG_INFO(0, details)
+	ZEND_ARG_INFO(0, machine)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_delete_service, 0, 0, 1)
+	ZEND_ARG_INFO(0, servicename)
+	ZEND_ARG_INFO(0, machine)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_get_last_control_message, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_query_service_status, 0, 0, 1)
+	ZEND_ARG_INFO(0, servicename)
+	ZEND_ARG_INFO(0, machine)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_start_service, 0, 0, 1)
+	ZEND_ARG_INFO(0, servicename)
+	ZEND_ARG_INFO(0, machine)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_stop_service, 0, 0, 1)
+	ZEND_ARG_INFO(0, servicename)
+	ZEND_ARG_INFO(0, machine)
+ZEND_END_ARG_INFO()
+/* }}} */
 
 static zend_function_entry functions[] = {
-	PHP_FE(win32_start_service_ctrl_dispatcher, NULL)
-	PHP_FE(win32_set_service_status, NULL)
-	PHP_FE(win32_create_service, NULL)
-	PHP_FE(win32_delete_service, NULL)
-	PHP_FE(win32_get_last_control_message, NULL)
-	PHP_FE(win32_query_service_status, NULL)
-	PHP_FE(win32_start_service, NULL)
-	PHP_FE(win32_stop_service, NULL)
+	PHP_FE(win32_start_service_ctrl_dispatcher, arginfo_win32_start_service_ctrl_dispatcher)
+	PHP_FE(win32_set_service_status,            arginfo_win32_set_service_status)
+	PHP_FE(win32_create_service,                arginfo_win32_create_service)
+	PHP_FE(win32_delete_service,                arginfo_win32_delete_service)
+	PHP_FE(win32_get_last_control_message,      arginfo_win32_get_last_control_message)
+	PHP_FE(win32_query_service_status,          arginfo_win32_query_service_status)
+	PHP_FE(win32_start_service,                 arginfo_win32_start_service)
+	PHP_FE(win32_stop_service,                  arginfo_win32_stop_service)
 	{NULL, NULL, NULL}
 };
 
