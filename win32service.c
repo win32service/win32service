@@ -134,20 +134,28 @@ static PHP_FUNCTION(win32_start_service_ctrl_dispatcher)
 }
 /* }}} */
 
-/* {{{ proto bool win32_set_service_status(int status)
+/* {{{ proto bool win32_set_service_status(int status, [int checkpoint])
    Update the service status */
 static PHP_FUNCTION(win32_set_service_status)
 {
 	long status;
+	long checkpoint = 0;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &status)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &status, &checkpoint)) {
 		RETURN_FALSE;
 	}
 
 	SVCG(st.dwCurrentState) = status;
-	SetServiceStatus(SVCG(sh), &SVCG(st));
+	// CheckPoints are only valid for the SERVICE_*_PENDING statuses.
+	if ((status == SERVICE_CONTINUE_PENDING) || (status == SERVICE_PAUSE_PENDING) || (status == SERVICE_START_PENDING) || (status == SERVICE_STOP_PENDING)) {
+		SVCG(st.dwCheckPoint) = checkpoint;
+	}
 
-	RETURN_TRUE;
+	if (!SetServiceStatus(SVCG(sh), &SVCG(st))) {
+		RETURN_LONG(GetLastError())
+	} else {
+		RETURN_TRUE;
+	}
 }
 /* }}} */
 
@@ -428,6 +436,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_set_service_status, 0, 0, 1)
 	ZEND_ARG_INFO(0, status)
+	ZEND_ARG_INFO(0, checkpoint)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_create_service, 0, 0, 1)
