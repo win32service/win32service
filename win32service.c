@@ -617,33 +617,34 @@ static PHP_MINIT_FUNCTION(win32service)
 	MKCONST(SERVICE_RUNS_IN_SYSTEM_PROCESS);           /* 0x00000001 The service runs in a system process that must always be running. */
 
 	/* Error constants generated in communication with the SCM */
-	MKCONST(ERROR_ACCESS_DENIED);                      /* 0X00000005 The handle to the SCM database does not have the appropriate access rights. */
-	MKCONST(ERROR_CIRCULAR_DEPENDENCY);                /* 0X00000423 A circular service dependency was specified. */
-	MKCONST(ERROR_DATABASE_DOES_NOT_EXIST);            /* 0X00000429 The specified database does not exist. */
-	MKCONST(ERROR_DEPENDENT_SERVICES_RUNNING);         /* 0X0000041B The service cannot be stopped because other running services are dependent on it. */
-	MKCONST(ERROR_DUPLICATE_SERVICE_NAME);             /* 0X00000436 The display name already exists in the service control manager database either as a service name or as another display name. */
-	MKCONST(ERROR_INSUFFICIENT_BUFFER);                /* 0X0000007A The buffer is too small for the SERVICE_STATUS_PROCESS structure. Nothing was written to the structure. */
-	MKCONST(ERROR_INVALID_DATA);                       /* 0X0000000D The specified service status structure is invalid. */
-	MKCONST(ERROR_INVALID_HANDLE);                     /* 0X00000006 The handle to the specified service control manager database is invalid. */
-	MKCONST(ERROR_INVALID_LEVEL);                      /* 0X0000007C The InfoLevel parameter contains an unsupported value. */
-	MKCONST(ERROR_INVALID_NAME);                       /* 0X0000007B The specified service name is invalid. */
-	MKCONST(ERROR_INVALID_PARAMETER);                  /* 0X00000057 A parameter that was specified is invalid (CreateService) or the cbSize member of SERVICE_STATUS_PROCESS is not valid (QueryServiceStatusEx). */
-	MKCONST(ERROR_INVALID_SERVICE_ACCOUNT);            /* 0X00000421 The user account name specified in the lpServiceStartName parameter does not exist. */
-	MKCONST(ERROR_INVALID_SERVICE_CONTROL);            /* 0X0000041C The requested control code is not valid, or it is unacceptable to the service. */
-	MKCONST(ERROR_PATH_NOT_FOUND);                     /* 0X00000003 The service binary file could not be found. */
-	MKCONST(ERROR_SERVICE_ALREADY_RUNNING);            /* 0X00000420 An instance of the service is already running. */
-	MKCONST(ERROR_SERVICE_CANNOT_ACCEPT_CTRL);         /* 0X00000425 The requested control code cannot be sent to the service because the state of the service is SERVICE_STOPPED, SERVICE_START_PENDING, or SERVICE_STOP_PENDING. */
-	MKCONST(ERROR_SERVICE_DATABASE_LOCKED);            /* 0X0000041F The database is locked. */
-	MKCONST(ERROR_SERVICE_DEPENDENCY_DELETED);         /* 0X00000433 The service depends on a service that does not exist or has been marked for deletion. */
-	MKCONST(ERROR_SERVICE_DEPENDENCY_FAIL);            /* 0X0000042C The service depends on another service that has failed to start. */
-	MKCONST(ERROR_SERVICE_DISABLED);                   /* 0X00000422 The service has been disabled. */
-	MKCONST(ERROR_SERVICE_EXISTS);                     /* 0X00000431 The specified service already exists in this database. */
-	MKCONST(ERROR_SERVICE_LOGON_FAILED);               /* 0X0000042D The service did not start due to a logon failure. This error occurs if the service is configured to run under an account that does not have the "Log on as a service" right. */
-	MKCONST(ERROR_SERVICE_MARKED_FOR_DELETE);          /* 0X00000430 The specified service has already been marked for deletion. */
-	MKCONST(ERROR_SERVICE_NO_THREAD);                  /* 0X0000041E A thread could not be created for the service. */
-	MKCONST(ERROR_SERVICE_NOT_ACTIVE);                 /* 0X00000426 The service has not been started. */
-	MKCONST(ERROR_SERVICE_REQUEST_TIMEOUT);            /* 0X0000041D The process for the service was started, but it did not call StartServiceCtrlDispatcher, or the thread that called StartServiceCtrlDispatcher may be blocked in a control handler function. */
-	MKCONST(ERROR_SHUTDOWN_IN_PROGRESS);               /* 0X0000045B The system is shutting down; this function cannot be called. */
+	MKCONST(ERROR_ACCESS_DENIED);                      /* 0x00000005 The handle to the SCM database does not have the appropriate access rights. */
+	MKCONST(ERROR_CIRCULAR_DEPENDENCY);                /* 0x00000423 A circular service dependency was specified. */
+	MKCONST(ERROR_DATABASE_DOES_NOT_EXIST);            /* 0x00000429 The specified database does not exist. */
+	MKCONST(ERROR_DEPENDENT_SERVICES_RUNNING);         /* 0x0000041B The service cannot be stopped because other running services are dependent on it. */
+	MKCONST(ERROR_DUPLICATE_SERVICE_NAME);             /* 0x00000436 The display name already exists in the service control manager database either as a service name or as another display name. */
+	MKCONST(ERROR_INSUFFICIENT_BUFFER);                /* 0x0000007A The buffer is too small for the SERVICE_STATUS_PROCESS structure. Nothing was written to the structure. */
+	MKCONST(ERROR_INVALID_DATA);                       /* 0x0000000D The specified service status structure is invalid. */
+	MKCONST(ERROR_INVALID_HANDLE);                     /* 0x00000006 The handle to the specified service control manager database is invalid. */
+	MKCONST(ERROR_INVALID_LEVEL);                      /* 0x0000007C The InfoLevel parameter contains an unsupported value. */
+	MKCONST(ERROR_INVALID_NAME);                       /* 0x0000007B The specified service name is invalid. */
+	MKCONST(ERROR_INVALID_PARAMETER);                  /* 0x00000057 A parameter that was specified is invalid (CreateService) or the cbSize member of SERVICE_STATUS_PROCESS is not valid (QueryServiceStatusEx). */
+	MKCONST(ERROR_INVALID_SERVICE_ACCOUNT);            /* 0x00000421 The user account name specified in the lpServiceStartName parameter does not exist. */
+	MKCONST(ERROR_INVALID_SERVICE_CONTROL);            /* 0x0000041C The requested control code is not valid, or it is unacceptable to the service. */
+	MKCONST(ERROR_PATH_NOT_FOUND);                     /* 0x00000003 The service binary file could not be found. */
+	MKCONST(ERROR_SERVICE_ALREADY_RUNNING);            /* 0x00000420 An instance of the service is already running. */
+	MKCONST(ERROR_SERVICE_CANNOT_ACCEPT_CTRL);         /* 0x00000425 The requested control code cannot be sent to the service because the state of the service is SERVICE_STOPPED, SERVICE_START_PENDING, or SERVICE_STOP_PENDING. */
+	MKCONST(ERROR_SERVICE_DATABASE_LOCKED);            /* 0x0000041F The database is locked. */
+	MKCONST(ERROR_SERVICE_DEPENDENCY_DELETED);         /* 0x00000433 The service depends on a service that does not exist or has been marked for deletion. */
+	MKCONST(ERROR_SERVICE_DEPENDENCY_FAIL);            /* 0x0000042C The service depends on another service that has failed to start. */
+	MKCONST(ERROR_SERVICE_DISABLED);                   /* 0x00000422 The service has been disabled. */
+	MKCONST(ERROR_SERVICE_EXISTS);                     /* 0x00000431 The specified service already exists in this database. */
+	MKCONST(ERROR_SERVICE_LOGON_FAILED);               /* 0x0000042D The service did not start due to a logon failure. This error occurs if the service is configured to run under an account that does not have the "Log on as a service" right. */
+	MKCONST(ERROR_SERVICE_MARKED_FOR_DELETE);          /* 0x00000430 The specified service has already been marked for deletion. */
+	MKCONST(ERROR_SERVICE_NO_THREAD);                  /* 0x0000041E A thread could not be created for the service. */
+	MKCONST(ERROR_SERVICE_NOT_ACTIVE);                 /* 0x00000426 The service has not been started. */
+	MKCONST(ERROR_SERVICE_REQUEST_TIMEOUT);            /* 0x0000041D The process for the service was started, but it did not call StartServiceCtrlDispatcher, or the thread that called StartServiceCtrlDispatcher may be blocked in a control handler function. */
+	MKCONST(ERROR_SHUTDOWN_IN_PROGRESS);               /* 0x0000045B The system is shutting down; this function cannot be called. */
+	MKCONST(NO_ERROR);                                 /* 0x00000000 No error. */
 
 	return SUCCESS;
 }
