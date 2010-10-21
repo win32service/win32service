@@ -53,7 +53,7 @@ static void WINAPI service_main(DWORD argc, char **argv)
 {
 	zend_win32service_globals *g = (zend_win32service_globals*)tmp_service_g;
 
-	// g->st.dwServiceType = SERVICE_WIN32; // Do not override the service type previously defined by win32_create_service().
+	g->st.dwServiceType = SERVICE_WIN32;
 	g->st.dwCurrentState = SERVICE_START_PENDING;
 	g->st.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN | SERVICE_ACCEPT_PRESHUTDOWN | SERVICE_ACCEPT_PAUSE_CONTINUE; // Allow the service to be paused and handle Vista-style pre-shutdown notifications.
 
