@@ -53,10 +53,10 @@ static void WINAPI service_main(DWORD argc, char **argv)
 {
 	zend_win32service_globals *g = (zend_win32service_globals*)tmp_service_g;
 
-	g->st.dwServiceType = SERVICE_WIN32;
+	// g->st.dwServiceType = SERVICE_WIN32; // Do not override the service type previously defined by win32_create_service().
 	g->st.dwCurrentState = SERVICE_START_PENDING;
 	g->st.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN | SERVICE_ACCEPT_PRESHUTDOWN | SERVICE_ACCEPT_PAUSE_CONTINUE; // Allow the service to be paused and handle Vista-style pre-shutdown notifications.
-	
+
 	g->sh = RegisterServiceCtrlHandlerEx(g->service_name, service_handler, g);
 
 	if (g->sh == (SERVICE_STATUS_HANDLE)0) {
@@ -555,9 +555,17 @@ static PHP_MINIT_FUNCTION(win32service)
 	// MKCONST(SERVICE_CONTROL_PARAMCHANGE);           // 0x00000006 Notifies a service that its startup parameters have changed.
 	MKCONST(SERVICE_CONTROL_PAUSE);                    // 0x00000002 Notifies a service that it should pause.
 	// MKCONST(SERVICE_CONTROL_POWEREVENT);            // 0x0000000D
-	MKCONST(SERVICE_CONTROL_PRESHUTDOWN);              // 0x0000000F
+	MKCONST(SERVICE_CONTROL_PRESHUTDOWN);              // 0x0000000F Notifies a service that the system will be shutting down.
+	                                                   //            Services that need additional time to perform cleanup tasks beyond the tight time restriction at system shutdown can use this notification.
+	                                                   //            The service control manager sends this notification to applications that have registered for it before sending a SERVICE_CONTROL_SHUTDOWN notification to applications that have registered for that notification.
+	                                                   //            A service that handles this notification blocks system shutdown until the service stops or the preshutdown time-out interval specified through SERVICE_PRESHUTDOWN_INFO expires.
+	                                                   //            Because this affects the user experience, services should use this feature only if it is absolutely necessary to avoid data loss or significant recovery time at the next system start.
+	                                                   //            Windows Server 2003 and Windows XP/2000:  This value is not supported.
 	// MKCONST(SERVICE_CONTROL_SESSIONCHANGE);         // 0x0000000E
-	MKCONST(SERVICE_CONTROL_SHUTDOWN);                 // 0x00000005
+	MKCONST(SERVICE_CONTROL_SHUTDOWN);                 // 0x00000005 Notifies a service that the system is shutting down so the service can perform cleanup tasks.
+	                                                   //            Note that services that register for SERVICE_CONTROL_PRESHUTDOWN notifications cannot receive this notification because they have already stopped.
+	                                                   //            If a service accepts this control code, it must stop after it performs its cleanup tasks and return NO_ERROR.
+	                                                   //            After the SCM sends this control code, it will not send other control codes to the service.
 	MKCONST(SERVICE_CONTROL_STOP);                     // 0x00000001 Notifies a service that it should stop.
 
 	/* dwControlsAccepted */
