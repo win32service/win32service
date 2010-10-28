@@ -191,7 +191,11 @@ static PHP_FUNCTION(win32_create_service)
 
 #define STR_DETAIL(name, var, def)	\
 	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(details), name, sizeof(name), (void**)&tmp)) { \
-		convert_to_string_ex(tmp); \
+		if (IS_NULL != Z_TYPE_PP(tmp)) { \
+			convert_to_string_ex(tmp); \
+		} else { \
+			convert_to_null_ex(tmp); \
+		} \
 		var = Z_STRVAL_PP(tmp); \
 	} else { \
 		var = def; \
