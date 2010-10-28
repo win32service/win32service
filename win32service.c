@@ -288,7 +288,7 @@ static PHP_FUNCTION(win32_create_service)
 
 	efree(path_and_params);
 
-	// Get the current OS version.
+	/* Get the current OS version. */
 	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 	GetVersionEx(&osvi);
 
