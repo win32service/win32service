@@ -641,6 +641,7 @@ static PHP_MINIT_FUNCTION(win32service)
 	MKCONST(ERROR_SERVICE_DEPENDENCY_DELETED);         /* 0x00000433 The service depends on a service that does not exist or has been marked for deletion. */
 	MKCONST(ERROR_SERVICE_DEPENDENCY_FAIL);            /* 0x0000042C The service depends on another service that has failed to start. */
 	MKCONST(ERROR_SERVICE_DISABLED);                   /* 0x00000422 The service has been disabled. */
+	MKCONST(ERROR_SERVICE_DOES_NOT_EXIST);             /* 0x00000424 The specified service does not exist as an installed service. */
 	MKCONST(ERROR_SERVICE_EXISTS);                     /* 0x00000431 The specified service already exists in this database. */
 	MKCONST(ERROR_SERVICE_LOGON_FAILED);               /* 0x0000042D The service did not start due to a logon failure. This error occurs if the service is configured to run under an account that does not have the "Log on as a service" right. */
 	MKCONST(ERROR_SERVICE_MARKED_FOR_DELETE);          /* 0x00000430 The specified service has already been marked for deletion. */
