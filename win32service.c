@@ -184,6 +184,7 @@ static PHP_FUNCTION(win32_create_service)
 	char *path_and_params;
 	SERVICE_DESCRIPTION srvc_desc;
 	SERVICE_DELAYED_AUTO_START_INFO srvc_delayed_start;
+	OSVERSIONINFO osvi;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|s!", &details, &machine, &machine_len)) {
 		RETURN_FALSE;
@@ -287,12 +288,19 @@ static PHP_FUNCTION(win32_create_service)
 
 	efree(path_and_params);
 
+	// Get the current OS version.
+	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+	GetVersionEx(&osvi);
+
 	/* If there was an error :
 	   - Creating the service
 	   - Setting the service description
-	   - Setting the delayed start
+	   - Setting the delayed start - only on Windows Vista and greater and if the service start type is auto start.
 	   then track the error. */
-	if (!hsvc || !ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, &srvc_desc) || !ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, &srvc_delayed_start)) {
+	if (	!hsvc ||
+		!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, &srvc_desc) ||
+		(start_type & SERVICE_AUTO_START && osvi.dwMajorVersion >= 6 && !ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, &srvc_delayed_start))
+		) {
 		RETVAL_LONG(GetLastError());
 	} else {
 		RETVAL_LONG(NO_ERROR);
