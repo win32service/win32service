@@ -440,9 +440,7 @@ static PHP_FUNCTION(win32_start_service)
 }
 /* }}} */
 
-/* {{{ proto long win32_stop_service(string servicename [, string machine])
-   Stops a service */
-static PHP_FUNCTION(win32_stop_service)
+static void win32_handle_service_controls(INTERNAL_FUNCTION_PARAMETERS, long access, long status) /* {{{ */
 {
 	char *machine = NULL, *service;
 	int machine_len, service_len;
@@ -455,9 +453,9 @@ static PHP_FUNCTION(win32_stop_service)
 
 	hmgr = OpenSCManager(machine, NULL, SC_MANAGER_ALL_ACCESS);
 	if (hmgr) {
-		hsvc = OpenService(hmgr, service, SERVICE_STOP);
+		hsvc = OpenService(hmgr, service, access);
 		if (hsvc) {
-			if (ControlService(hsvc, SERVICE_CONTROL_STOP, &st)) {
+			if (ControlService(hsvc, status, &st)) {
 				RETVAL_LONG(NO_ERROR);
 			} else {
 				RETVAL_LONG(GetLastError());
@@ -470,6 +468,30 @@ static PHP_FUNCTION(win32_stop_service)
 	} else {
 		RETVAL_LONG(GetLastError());
 	}
+}
+/* }}} */
+
+/* {{{ proto long win32_stop_service(string servicename [, string machine])
+   Stops a service */
+static PHP_FUNCTION(win32_stop_service)
+{
+	win32_handle_service_controls(INTERNAL_FUNCTION_PARAM_PASSTHRU, SERVICE_STOP, SERVICE_CONTROL_STOP);
+}
+/* }}} */
+
+/* {{{ proto long win32_pause_service(string servicename [, string machine])
+   Stops a service */
+static PHP_FUNCTION(win32_pause_service)
+{
+	win32_handle_service_controls(INTERNAL_FUNCTION_PARAM_PASSTHRU, SERVICE_PAUSE_CONTINUE, SERVICE_CONTROL_PAUSE);
+}
+/* }}} */
+
+/* {{{ proto long win32_continue_service(string servicename [, string machine])
+   Stops a service */
+static PHP_FUNCTION(win32_continue_service)
+{
+	win32_handle_service_controls(INTERNAL_FUNCTION_PARAM_PASSTHRU, SERVICE_PAUSE_CONTINUE, SERVICE_CONTROL_CONTINUE);
 }
 /* }}} */
 
@@ -510,6 +532,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_stop_service, 0, 0, 1)
 	ZEND_ARG_INFO(0, servicename)
 	ZEND_ARG_INFO(0, machine)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_pause_service, 0, 0, 1)
+	ZEND_ARG_INFO(0, servicename)
+	ZEND_ARG_INFO(0, machine)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_continue_service, 0, 0, 1)
+	ZEND_ARG_INFO(0, servicename)
+	ZEND_ARG_INFO(0, machine)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 static zend_function_entry functions[] = {
@@ -521,6 +553,8 @@ static zend_function_entry functions[] = {
 	PHP_FE(win32_query_service_status,          arginfo_win32_query_service_status)
 	PHP_FE(win32_start_service,                 arginfo_win32_start_service)
 	PHP_FE(win32_stop_service,                  arginfo_win32_stop_service)
+	PHP_FE(win32_pause_service,                 arginfo_win32_pause_service)
+	PHP_FE(win32_continue_service,              arginfo_win32_continue_service)
 	{NULL, NULL, NULL}
 };
 
