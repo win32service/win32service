@@ -668,6 +668,7 @@ static PHP_MINIT_FUNCTION(win32service)
 	MKCONST(ERROR_DATABASE_DOES_NOT_EXIST);            /* 0x00000429 The specified database does not exist. */
 	MKCONST(ERROR_DEPENDENT_SERVICES_RUNNING);         /* 0x0000041B The service cannot be stopped because other running services are dependent on it. */
 	MKCONST(ERROR_DUPLICATE_SERVICE_NAME);             /* 0x00000436 The display name already exists in the service control manager database either as a service name or as another display name. */
+	MKCONST(ERROR_FAILED_SERVICE_CONTROLLER_CONNECT);  /* 0x00000427 The service process could not connect to the service controller. */
 	MKCONST(ERROR_INSUFFICIENT_BUFFER);                /* 0x0000007A The buffer is too small for the SERVICE_STATUS_PROCESS structure. Nothing was written to the structure. */
 	MKCONST(ERROR_INVALID_DATA);                       /* 0x0000000D The specified service status structure is invalid. */
 	MKCONST(ERROR_INVALID_HANDLE);                     /* 0x00000006 The handle to the specified service control manager database is invalid. */
