@@ -70,14 +70,6 @@ static void WINAPI service_main(DWORD argc, char **argv)
 		return;
 	}
 
-	g->st.dwCurrentState = SERVICE_RUNNING;
-
-	if (!SetServiceStatus(g->sh, &g->st)) {
-		g->code = GetLastError();
-		SetEvent(g->event);
-		return;
-	}
-
 	g->code = NO_ERROR;
 	SetEvent(g->event);
 }

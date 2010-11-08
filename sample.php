@@ -25,6 +25,8 @@ if ($argv[1] == 'install') {
 
 $x = win32_start_service_ctrl_dispatcher('dummyphp');
 
+win32_set_service_status(WIN32_SERVICE_RUNNING);
+
 while (WIN32_SERVICE_CONTROL_STOP != win32_get_last_control_message()) {
 	usleep(250000);
 }
