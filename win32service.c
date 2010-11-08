@@ -52,10 +52,15 @@ static DWORD WINAPI service_handler(DWORD dwControl, DWORD dwEventType, LPVOID l
 static void WINAPI service_main(DWORD argc, char **argv)
 {
 	zend_win32service_globals *g = (zend_win32service_globals*)tmp_service_g;
+	OSVERSIONINFO osvi;
+
+	/* Get the current OS version. */
+	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+	GetVersionEx(&osvi);
 
 	g->st.dwServiceType = SERVICE_WIN32;
 	g->st.dwCurrentState = SERVICE_START_PENDING;
-	g->st.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN | SERVICE_ACCEPT_PRESHUTDOWN | SERVICE_ACCEPT_PAUSE_CONTINUE; /* Allow the service to be paused and handle Vista-style pre-shutdown notifications. */
+	g->st.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN | SERVICE_ACCEPT_PAUSE_CONTINUE | (osvi.dwMajorVersion >= 6 ? SERVICE_ACCEPT_PRESHUTDOWN : 0); /* Allow the service to be paused and handle Vista-style pre-shutdown notifications. */
 
 	g->sh = RegisterServiceCtrlHandlerEx(g->service_name, service_handler, g);
 
