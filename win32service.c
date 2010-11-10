@@ -28,6 +28,9 @@
 #include "php_win32service.h"
 #include "php_win32service_int.h"
 
+#define SERVICES_REG_BASE_PRIORITY "BasePriority"
+#define SERVICES_REG_KEY_ROOT "SYSTEM\\CurrentControlSet\\Services\\"
+
 /* gargh! service_main run from a new thread that we don't spawn, so we can't do this nicely */
 static void *tmp_service_g = NULL;
 
@@ -53,10 +56,42 @@ static void WINAPI service_main(DWORD argc, char **argv)
 {
 	zend_win32service_globals *g = (zend_win32service_globals*)tmp_service_g;
 	OSVERSIONINFO osvi;
+	DWORD base_priority;
+	HKEY hKey;
+	char *service_key;
+	long registry_result = ERROR_SUCCESS;
+	DWORD dwType = REG_DWORD;
+	DWORD dwSize = sizeof(DWORD);
 
 	/* Get the current OS version. */
 	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 	GetVersionEx(&osvi);
+
+	// Set the base priority for this service.
+	spprintf(&service_key, 0, "%s%s", SERVICES_REG_KEY_ROOT, g->service_name);
+
+	registry_result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, service_key, 0, KEY_ALL_ACCESS, &hKey);
+	if (ERROR_SUCCESS == registry_result) {
+		registry_result = RegQueryValueEx(hKey, SERVICES_REG_BASE_PRIORITY, 0, &dwType, (LPBYTE)&base_priority, &dwSize);
+	}
+
+	efree(service_key);
+
+	if (hKey) {
+		RegCloseKey(hKey);
+	}
+
+	if (ERROR_SUCCESS != registry_result) {
+		g->code = registry_result;
+		SetEvent(g->event);
+		return;
+	}
+
+	if(!SetPriorityClass(GetCurrentProcess(), base_priority)) {
+		g->code = GetLastError();
+		SetEvent(g->event);
+		return;
+	}
 
 	g->st.dwServiceType = SERVICE_WIN32;
 	g->st.dwCurrentState = SERVICE_START_PENDING;
@@ -182,6 +217,10 @@ static PHP_FUNCTION(win32_create_service)
 	SERVICE_DESCRIPTION srvc_desc;
 	SERVICE_DELAYED_AUTO_START_INFO srvc_delayed_start;
 	OSVERSIONINFO osvi;
+	DWORD base_priority;
+	HKEY hKey;
+	char *service_key;
+	long registry_result;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|s!", &details, &machine, &machine_len)) {
 		RETURN_FALSE;
@@ -227,6 +266,7 @@ static PHP_FUNCTION(win32_create_service)
 	INT_DETAIL("start_type", start_type, SERVICE_AUTO_START);
 	INT_DETAIL("error_control", error_control, SERVICE_ERROR_IGNORE);
 	BOOL_DETAIL("delayed_start", delayed_start, 0); /* Allow Vista+ delayed service start. */
+	INT_DETAIL("base_priority", base_priority, NORMAL_PRIORITY_CLASS);
 
 	if (service == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "missing vital parameters");
@@ -305,6 +345,17 @@ static PHP_FUNCTION(win32_create_service)
 
 	CloseServiceHandle(hsvc);
 	CloseServiceHandle(hmgr);
+
+	/* Store the base_priority in the registry. */
+	spprintf(&service_key, 0, "%s%s", SERVICES_REG_KEY_ROOT, service);
+	if (ERROR_SUCCESS != (registry_result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, service_key, 0, KEY_ALL_ACCESS, &hKey))) {
+		RETVAL_LONG(registry_result);
+	} else if (ERROR_SUCCESS != (registry_result = RegSetValueEx(hKey, SERVICES_REG_BASE_PRIORITY, 0, REG_DWORD, (CONST BYTE*)&base_priority, sizeof(REG_DWORD)))) {
+		RETVAL_LONG(registry_result);
+	} else {
+		RegCloseKey(hKey);
+	}
+	efree(service_key);
 
 }
 /* }}} */
@@ -689,6 +740,14 @@ static PHP_MINIT_FUNCTION(win32service)
 	MKCONST(ERROR_SERVICE_REQUEST_TIMEOUT);            /* 0x0000041D The process for the service was started, but it did not call StartServiceCtrlDispatcher, or the thread that called StartServiceCtrlDispatcher may be blocked in a control handler function. */
 	MKCONST(ERROR_SHUTDOWN_IN_PROGRESS);               /* 0x0000045B The system is shutting down; this function cannot be called. */
 	MKCONST(NO_ERROR);                                 /* 0x00000000 No error. */
+
+	/* Win32 Priority Constants */
+	MKCONST(ABOVE_NORMAL_PRIORITY_CLASS);              /* 0x00008000 Process that has priority above NORMAL_PRIORITY_CLASS but below HIGH_PRIORITY_CLASS. */
+	MKCONST(BELOW_NORMAL_PRIORITY_CLASS);              /* 0x00004000 Process that has priority above IDLE_PRIORITY_CLASS but below NORMAL_PRIORITY_CLASS. */
+	MKCONST(HIGH_PRIORITY_CLASS);                      /* 0x00000080 Process that performs time-critical tasks that must be executed immediately. The threads of the process preempt the threads of normal or idle priority class processes. An example is the Task List, which must respond quickly when called by the user, regardless of the load on the operating system. Use extreme care when using the high-priority class, because a high-priority class application can use nearly all available CPU time. */
+	MKCONST(IDLE_PRIORITY_CLASS);                      /* 0x00000040 Process whose threads run only when the system is idle. The threads of the process are preempted by the threads of any process running in a higher priority class. An example is a screen saver. The idle-priority class is inherited by child processes. */
+	MKCONST(NORMAL_PRIORITY_CLASS);                    /* 0x00000020 Process with no special scheduling needs. */
+	MKCONST(REALTIME_PRIORITY_CLASS);                  /* 0x00000100 Process that has the highest possible priority. The threads of the process preempt the threads of all other processes, including operating system processes performing important tasks. For example, a real-time process that executes for more than a very brief interval can cause disk caches not to flush or cause the mouse to be unresponsive. */
 
 	return SUCCESS;
 }
