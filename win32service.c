@@ -29,7 +29,7 @@
 #include "php_win32service_int.h"
 
 /* gargh! service_main run from a new thread that we don't spawn, so we can't do this nicely */
-static void *tmp_service_g = NULL; 
+static void *tmp_service_g = NULL;
 
 static DWORD WINAPI service_handler(DWORD dwControl, DWORD dwEventType, LPVOID lpEventData, LPVOID lpContext)
 {
@@ -96,12 +96,12 @@ static PHP_FUNCTION(win32_start_service_ctrl_dispatcher)
 {
 	char *name;
 	int name_len;
-	
+
 	if (SVCG(svc_thread)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "service ctrl dispatcher already running");
 		RETURN_FALSE;
 	}
-	
+
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len)) {
 		RETURN_FALSE;
 	}
@@ -219,7 +219,7 @@ static PHP_FUNCTION(win32_create_service)
 	STR_DETAIL("display", display, NULL);
 	STR_DETAIL("user", user, NULL);
 	STR_DETAIL("password", password, "");
-	STR_DETAIL("path", path, NULL);	
+	STR_DETAIL("path", path, NULL);
 	STR_DETAIL("params", params, "");
 	STR_DETAIL("load_order", load_order, NULL);
 	STR_DETAIL("description", desc, NULL);
@@ -251,7 +251,7 @@ static PHP_FUNCTION(win32_create_service)
 
 		len = GetModuleFileName(NULL, buf, sizeof(buf));
 		buf[len] = '\0';
-	
+
 		if (strchr(buf, ' '))
 			spprintf(&path_and_params, 0, "\"%s\" %s", buf, params);
 		else
@@ -384,15 +384,15 @@ static PHP_FUNCTION(win32_query_service_status)
 			}
 			/* map the struct to an array */
 			array_init(return_value);
-			add_assoc_long(return_value, "ServiceType", st->dwServiceType);	
-			add_assoc_long(return_value, "CurrentState", st->dwCurrentState);	
-			add_assoc_long(return_value, "ControlsAccepted", st->dwControlsAccepted);	
-			add_assoc_long(return_value, "Win32ExitCode", st->dwWin32ExitCode);	
-			add_assoc_long(return_value, "ServiceSpecificExitCode", st->dwServiceSpecificExitCode);	
-			add_assoc_long(return_value, "CheckPoint", st->dwCheckPoint);	
-			add_assoc_long(return_value, "WaitHint", st->dwWaitHint);	
-			add_assoc_long(return_value, "ProcessId", st->dwProcessId);	
-			add_assoc_long(return_value, "ServiceFlags", st->dwServiceFlags);	
+			add_assoc_long(return_value, "ServiceType", st->dwServiceType);
+			add_assoc_long(return_value, "CurrentState", st->dwCurrentState);
+			add_assoc_long(return_value, "ControlsAccepted", st->dwControlsAccepted);
+			add_assoc_long(return_value, "Win32ExitCode", st->dwWin32ExitCode);
+			add_assoc_long(return_value, "ServiceSpecificExitCode", st->dwServiceSpecificExitCode);
+			add_assoc_long(return_value, "CheckPoint", st->dwCheckPoint);
+			add_assoc_long(return_value, "WaitHint", st->dwWaitHint);
+			add_assoc_long(return_value, "ProcessId", st->dwProcessId);
+			add_assoc_long(return_value, "ServiceFlags", st->dwServiceFlags);
 out_fail:
 			CloseServiceHandle(hsvc);
 		} else {
@@ -466,7 +466,6 @@ static void win32_handle_service_controls(INTERNAL_FUNCTION_PARAMETERS, long acc
 		RETVAL_LONG(GetLastError());
 	}
 }
-/* }}} */
 
 /* {{{ proto long win32_stop_service(string servicename [, string machine])
    Stops a service */
@@ -477,7 +476,7 @@ static PHP_FUNCTION(win32_stop_service)
 /* }}} */
 
 /* {{{ proto long win32_pause_service(string servicename [, string machine])
-   Stops a service */
+   Pauses a service */
 static PHP_FUNCTION(win32_pause_service)
 {
 	win32_handle_service_controls(INTERNAL_FUNCTION_PARAM_PASSTHRU, SERVICE_PAUSE_CONTINUE, SERVICE_CONTROL_PAUSE);
@@ -485,7 +484,7 @@ static PHP_FUNCTION(win32_pause_service)
 /* }}} */
 
 /* {{{ proto long win32_continue_service(string servicename [, string machine])
-   Stops a service */
+   Resumes a service */
 static PHP_FUNCTION(win32_continue_service)
 {
 	win32_handle_service_controls(INTERNAL_FUNCTION_PARAM_PASSTHRU, SERVICE_PAUSE_CONTINUE, SERVICE_CONTROL_CONTINUE);
@@ -598,7 +597,7 @@ static PHP_MINIT_FUNCTION(win32service)
 	/* MKCONST(SERVICE_CONTROL_PARAMCHANGE);           /* 0x00000006 Notifies a service that its startup parameters have changed. */
 	MKCONST(SERVICE_CONTROL_PAUSE);                    /* 0x00000002 Notifies a service that it should pause. */
 	/* MKCONST(SERVICE_CONTROL_POWEREVENT);            /* 0x0000000D */
-	MKCONST(SERVICE_CONTROL_PRESHUTDOWN);              /* 0x0000000F Notifies a service that the system will be shutting down. 
+	MKCONST(SERVICE_CONTROL_PRESHUTDOWN);              /* 0x0000000F Notifies a service that the system will be shutting down.
 	                                                                 Services that need additional time to perform cleanup tasks beyond the tight time restriction at system shutdown can use this notification.
 	                                                                 The service control manager sends this notification to applications that have registered for it before sending a SERVICE_CONTROL_SHUTDOWN notification to applications that have registered for that notification.
 	                                                                 A service that handles this notification blocks system shutdown until the service stops or the preshutdown time-out interval specified through SERVICE_PRESHUTDOWN_INFO expires.
