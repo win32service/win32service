@@ -226,12 +226,16 @@ static PHP_FUNCTION(win32_create_service)
 		RETURN_FALSE;
 	}
 
-#define STR_DETAIL(name, var, def)	\
+#define STR_DETAIL(name, var, def) \
 	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(details), name, sizeof(name), (void**)&tmp)) { \
 		if (IS_NULL != Z_TYPE_PP(tmp)) { \
 			convert_to_string_ex(tmp); \
 		} else { \
 			convert_to_null_ex(tmp); \
+		} \
+		if (strlen(Z_STRVAL_PP(tmp)) != Z_STRLEN_PP(tmp)) { \
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "malformed " name); \
+			RETURN_FALSE; \
 		} \
 		var = Z_STRVAL_PP(tmp); \
 	} else { \
@@ -626,6 +630,7 @@ static PHP_MINIT_FUNCTION(win32service)
 	MKCONST(SERVICE_WIN32_OWN_PROCESS);                /* 0x00000010 Service that runs in its own process. */
 	/* MKCONST(SERVICE_WIN32_SHARE_PROCESS);           /* 0x00000020 Service that shares a process with one or more other services. */
 	MKCONST(SERVICE_INTERACTIVE_PROCESS);              /* 0x00000100 The service can interact with the desktop. */
+	MKCONST(SERVICE_WIN32_OWN_PROCESS_INTERACTIVE);    /* 0x00000110 Service that runs in its own process and interacts with the desktop. */
 
 	/* dwCurrentState */
 	MKCONST(SERVICE_CONTINUE_PENDING);                 /* 0x00000005 The service continue is pending. */
