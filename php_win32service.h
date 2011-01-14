@@ -30,6 +30,10 @@ extern zend_module_entry win32service_module_entry;
 # error This extension is for win32 only
 #endif
 
+#ifndef SERVICE_WIN32_OWN_PROCESS_INTERACTIVE
+#define SERVICE_WIN32_OWN_PROCESS_INTERACTIVE SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS
+#endif
+
 #endif
 
 
