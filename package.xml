@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" packagerversion="1.4.7" version="2.0" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+  <name>win32service</name>
+  <channel>pecl.php.net</channel>
+  <summary>A Windows specific extension to allow PHP to interact with Windows Services.</summary>
+  <description>
+   The win32service extension is a Windows specific extension that allows PHP to communicate with the Service Control Manager to start, stop, register and unregister services, and even allows your PHP scripts to run as a service.
+  </description>
+  <lead>
+    <name>Richard Quadling</name>
+    <user>rquadling</user>
+    <email>rquadling@php.net</email>
+    <active>yes</active>
+  </lead>
+  <date>2011-03-15</date>
+  <version>
+    <release>0.1.0</release>
+    <api>0.1.0</api>
+  </version>
+  <stability>
+    <release>beta</release>
+    <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP License</license>
+  <notes>- Initial PECL release</notes>
+  <contents>
+    <dir name="/">
+      <file name="win32service.c" role="src"/>
+      <file name="config.w32" role="src"/>
+      <file name="CREDITS" role="doc"/>
+      <file name="php_win32service.h" role="src"/>
+      <file name="php_win32service_int.h" role="src"/>
+      <file name="sample.php" role="php"/>
+    </dir>
+  </contents>
+  <dependencies>
+    <required>
+      <php>
+        <min>5.0.0</min>
+      </php>
+      <pearinstaller>
+        <min>1.4.8</min>
+      </pearinstaller>
+    </required>
+  </dependencies>
+  <providesextension>win32service</providesextension>
+  <extsrcrelease/>
+  <changelog/>
+</package>
