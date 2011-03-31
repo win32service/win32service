@@ -27,6 +27,7 @@
 #include "ext/standard/info.h"
 #include "php_win32service.h"
 #include "php_win32service_int.h"
+#include "SAPI.h"
 
 #define SERVICES_REG_BASE_PRIORITY "BasePriority"
 #define SERVICES_REG_KEY_ROOT "SYSTEM\\CurrentControlSet\\Services\\"
@@ -616,6 +617,11 @@ static void init_globals(zend_win32service_globals *g)
 
 static PHP_MINIT_FUNCTION(win32service)
 {
+	if (strcmp(sapi_module.name, "cli") != 0) {
+		zend_error(E_CORE_WARNING, "The Win32Service extension is only available when using the CLI SAPI");
+		return FAILURE;
+	}
+
 	ZEND_INIT_MODULE_GLOBALS(win32service, init_globals, NULL);
 
 #define MKCONST(x)	REGISTER_LONG_CONSTANT("WIN32_" # x, x, CONST_CS|CONST_PERSISTENT)
