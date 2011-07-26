@@ -607,7 +607,7 @@ static zend_function_entry functions[] = {
 	PHP_FE(win32_stop_service,                  arginfo_win32_stop_service)
 	PHP_FE(win32_pause_service,                 arginfo_win32_pause_service)
 	PHP_FE(win32_continue_service,              arginfo_win32_continue_service)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static void init_globals(zend_win32service_globals *g)
