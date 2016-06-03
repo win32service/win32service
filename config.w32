@@ -1,4 +1,4 @@
-// $Id: config.w32 309260 2011-03-15 17:03:59Z rquadling $
+// $Id: config.w32 178547 2005-01-30 18:25:16Z wez $
 // vim:ft=javascript
 
 ARG_ENABLE("win32service", "Win32 Service", "no");
