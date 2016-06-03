@@ -30,7 +30,7 @@ build_script:
 
     C:\projects\php-sdk\bin\phpsdk_setvars.bat
 
-    git clone-q --branch=PHP-7.0 https://github.com/php/php-src C:\projects\php-src
+    git clone -q --branch=PHP-7.0 https://github.com/php/php-src C:\projects\php-src
 
     mkdir C:\projects\php-src\ext\win32service
 
