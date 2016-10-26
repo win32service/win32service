@@ -229,16 +229,16 @@ static PHP_FUNCTION(win32_create_service)
 
 #define STR_DETAIL(name, var, def) \
 	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(details), name, sizeof(name), (void**)&tmp)) { \
-		if (IS_NULL != Z_TYPE_PP(tmp)) { \
+		if (IS_NULL != Z_TYPE_P(*tmp)) { \
 			convert_to_string_ex(tmp); \
 		} else { \
 			convert_to_null_ex(tmp); \
 		} \
-		if (strlen(Z_STRVAL_PP(tmp)) != Z_STRLEN_PP(tmp)) { \
+		if (strlen(Z_STRVAL_P(*tmp)) != Z_STRLEN_P(*tmp)) { \
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "malformed " name); \
 			RETURN_FALSE; \
 		} \
-		var = Z_STRVAL_PP(tmp); \
+		var = Z_STRVAL_P(*tmp); \
 	} else { \
 		var = def; \
 	}
@@ -246,7 +246,7 @@ static PHP_FUNCTION(win32_create_service)
 #define INT_DETAIL(name, var, def) \
 	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(details), name, sizeof(name), (void**)&tmp)) { \
 		convert_to_long_ex(tmp); \
-		var = Z_LVAL_PP(tmp); \
+		var = Z_LVAL_P(*tmp); \
 	} else { \
 		var = def; \
 	}
@@ -254,7 +254,7 @@ static PHP_FUNCTION(win32_create_service)
 #define BOOL_DETAIL(name, var, def) \
 	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(details), name, sizeof(name), (void**)&tmp)) { \
 		convert_to_boolean_ex(tmp); \
-		var = Z_LVAL_PP(tmp); \
+		var = Z_LVAL_P(*tmp); \
 	} else { \
 		var = def; \
 	}
