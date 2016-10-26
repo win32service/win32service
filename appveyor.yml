@@ -66,4 +66,7 @@ build_script:
 
 
 artifacts:
+  - path: build
+    name: master
+    type: zip
   - path: 'build/ext/php_win32service*.dll'
