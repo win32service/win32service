@@ -6,15 +6,19 @@ environment:
     - ARCH: amd64
       DEPTS_ARCH: x64
       ZTS_STATE: enable
+      ZTS_SHORT: ts
     - ARCH: x86
       DEPTS_ARCH: x86
       ZTS_STATE: enable
+      ZTS_SHORT: ts
     - ARCH: amd64
       DEPTS_ARCH: x64
       ZTS_STATE: disable
+      ZTS_SHORT: nts
     - ARCH: x86
       DEPTS_ARCH: x86
       ZTS_STATE: disable
+      ZTS_SHORT: nts
 
 
 install:
@@ -54,9 +58,12 @@ build_script:
 
     mkdir C:\projects\win32service\build\modules.d
 
-    echo extension=php_ds.dll > C:\projects\win32service\build\modules.d\php.ini
+    echo extension=php_win32service.dll > C:\projects\win32service\build\modules.d\php.ini
+
+    cd %APPVEYOR_BUILD_FOLDER%\build\ext
+
+    rename php_win32service.dll php_win32service-7.0-vc14-%ZTS_SHORT%-%DEPTS_ARCH%.dll
+
 
 artifacts:
-  - path: build
-    name: master
-    type: zip
+  - path: 'build/ext/php_win32service*.dll'
