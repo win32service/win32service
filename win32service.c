@@ -196,7 +196,7 @@ static PHP_FUNCTION(win32_set_service_status)
    Creates a new service entry in the SCM database */
 static PHP_FUNCTION(win32_create_service)
 {
-	zval **tmp;
+	zval *tmp;
 	zval *details;
 	char *machine = NULL;
 	int machine_len;
@@ -228,33 +228,33 @@ static PHP_FUNCTION(win32_create_service)
 	}
 
 #define STR_DETAIL(name, var, def) \
-	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(details), name, sizeof(name), (void**)&tmp)) { \
-		if (IS_NULL != Z_TYPE_P(*tmp)) { \
+	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), name, sizeof(name)-1)) != NULL) { \
+		if (IS_NULL != Z_TYPE_P(tmp)) { \
 			convert_to_string_ex(tmp); \
 		} else { \
 			convert_to_null_ex(tmp); \
 		} \
-		if (strlen(Z_STRVAL_P(*tmp)) != Z_STRLEN_P(*tmp)) { \
+		if (strlen(Z_STRVAL_P(tmp)) != Z_STRLEN_P(tmp)) { \
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "malformed " name); \
 			RETURN_FALSE; \
 		} \
-		var = Z_STRVAL_P(*tmp); \
+		var = Z_STRVAL_P(tmp); \
 	} else { \
 		var = def; \
 	}
 
 #define INT_DETAIL(name, var, def) \
-	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(details), name, sizeof(name), (void**)&tmp)) { \
+	if ((tmp = zend_hash_find(Z_ARRVAL_P(details), name, sizeof(name)-1)) != NULL) { \
 		convert_to_long_ex(tmp); \
-		var = Z_LVAL_P(*tmp); \
+		var = Z_LVAL_P(tmp); \
 	} else { \
 		var = def; \
 	}
 
 #define BOOL_DETAIL(name, var, def) \
-	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(details), name, sizeof(name), (void**)&tmp)) { \
+	if ((tmp = zend_hash_find(Z_ARRVAL_P(details), name, sizeof(name)-1)) != NULL) { \
 		convert_to_boolean_ex(tmp); \
-		var = Z_LVAL_P(*tmp); \
+		var = Z_LVAL_P(tmp); \
 	} else { \
 		var = def; \
 	}
