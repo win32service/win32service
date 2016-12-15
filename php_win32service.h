@@ -13,6 +13,7 @@
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
   | Author: Wez Furlong <wez@php.net>                                    |
+  | Maintainer: Jean-Baptiste Nahan <jb@nahan.fr>                        |
   +----------------------------------------------------------------------+
 */
 
