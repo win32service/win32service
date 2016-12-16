@@ -98,7 +98,7 @@ static void WINAPI service_main(DWORD argc, char **argv)
 */
 	g->st.dwServiceType = SERVICE_WIN32;
 	g->st.dwCurrentState = SERVICE_START_PENDING;
-	g->st.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN | SERVICE_ACCEPT_PAUSE_CONTINUE | (osvi.dwMajorVersion >= 6 ? SERVICE_ACCEPT_PRESHUTDOWN : 0); /* Allow the service to be paused and handle Vista-style pre-shutdown notifications. */
+/*	g->st.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN | SERVICE_ACCEPT_PAUSE_CONTINUE | (osvi.dwMajorVersion >= 6 ? SERVICE_ACCEPT_PRESHUTDOWN : 0); /* Allow the service to be paused and handle Vista-style pre-shutdown notifications. */
 	g->st.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN | SERVICE_ACCEPT_PAUSE_CONTINUE |
 					SERVICE_ACCEPT_HARDWAREPROFILECHANGE | SERVICE_ACCEPT_NETBINDCHANGE | SERVICE_ACCEPT_PARAMCHANGE |
 					SERVICE_ACCEPT_POWEREVENT ;
