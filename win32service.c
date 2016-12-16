@@ -70,7 +70,7 @@ static void WINAPI service_main(DWORD argc, char **argv)
 	GetVersionEx(&osvi);
 
 	// Set the base priority for this service.
-	spprintf(&service_key, 0, "%s%s", SERVICES_REG_KEY_ROOT, g->service_name);
+	/*spprintf(&service_key, 0, "%s%s", SERVICES_REG_KEY_ROOT, g->service_name);
 
 	registry_result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, service_key, 0, KEY_ALL_ACCESS, &hKey);
 	if (ERROR_SUCCESS == registry_result) {
@@ -93,7 +93,7 @@ static void WINAPI service_main(DWORD argc, char **argv)
 		g->code = GetLastError();
 		SetEvent(g->event);
 		return;
-	}
+	}*/
 
 	g->st.dwServiceType = SERVICE_WIN32;
 	g->st.dwCurrentState = SERVICE_START_PENDING;
