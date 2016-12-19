@@ -36,9 +36,6 @@
 /* gargh! service_main run from a new thread that we don't spawn, so we can't do this nicely */
 static void *tmp_service_g = NULL;
 
-void mon test()
-{}
-
 static DWORD WINAPI service_handler(DWORD dwControl, DWORD dwEventType, LPVOID lpEventData, LPVOID lpContext)
 {
 	zend_win32service_globals *g = (zend_win32service_globals*)lpContext;
