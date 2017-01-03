@@ -200,8 +200,8 @@ static PHP_FUNCTION(win32_create_service)
 	zval *tmp;
 	zval *details;
 	char *machine = NULL;
-	int machine_len;
-	char *service;
+	size_t machine_len;
+	char *service = NULL;
 	char *display;
 	char *user;
 	char *password;
@@ -370,9 +370,12 @@ static PHP_FUNCTION(win32_create_service)
    Deletes a service entry from the SCM database */
 static PHP_FUNCTION(win32_delete_service)
 {
-	char *machine = NULL, *service;
-	int machine_len, service_len;
-	SC_HANDLE hsvc, hmgr;
+	char *machine = NULL;
+	char *service = NULL;
+	size_t machine_len = 0;
+	size_t	service_len = 0;
+	SC_HANDLE hsvc;
+	SC_HANDLE hmgr;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!", &service, &service_len, &machine, &machine_len)) {
 		RETURN_FALSE;
@@ -410,9 +413,12 @@ static PHP_FUNCTION(win32_get_last_control_message)
    Queries the status of a service */
 static PHP_FUNCTION(win32_query_service_status)
 {
-	char *machine = NULL, *service;
-	int machine_len, service_len;
-	SC_HANDLE hsvc, hmgr;
+	char *machine = NULL;
+	char *service = NULL;
+	size_t machine_len = 0;
+	size_t	service_len = 0;
+	SC_HANDLE hsvc;
+	SC_HANDLE hmgr;
 	SERVICE_STATUS_PROCESS *st;
 	DWORD size;
 
@@ -466,9 +472,12 @@ out_fail:
    Starts a service */
 static PHP_FUNCTION(win32_start_service)
 {
-	char *machine = NULL, *service;
-	int machine_len, service_len;
-	SC_HANDLE hsvc, hmgr;
+	char *machine = NULL;
+	char *service = NULL;
+	size_t machine_len = 0;
+	size_t	service_len = 0;
+	SC_HANDLE hsvc;
+	SC_HANDLE hmgr;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!", &service, &service_len, &machine, &machine_len)) {
 		RETURN_FALSE;
@@ -496,9 +505,12 @@ static PHP_FUNCTION(win32_start_service)
 
 static void win32_handle_service_controls(INTERNAL_FUNCTION_PARAMETERS, long access, long status) /* {{{ */
 {
-	char *machine = NULL, *service;
-	int machine_len, service_len;
-	SC_HANDLE hsvc, hmgr;
+	char *machine = NULL;
+	char *service = NULL;
+	size_t machine_len = 0;
+	size_t	service_len = 0;
+	SC_HANDLE hsvc;
+	SC_HANDLE hmgr;
 	SERVICE_STATUS st;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!", &service, &service_len, &machine, &machine_len)) {
