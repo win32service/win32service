@@ -34,7 +34,7 @@ Run `buildconf.bat` from the PHP source folder. And run the comand for your want
 
 ### Build
 
-Run `nmake` for effective build the PHP core and all extention enabled.
+Run `nmake` for effective build the PHP core and all extensions enabled.
 
 ### Rebuild case
 
@@ -44,8 +44,28 @@ If you want rebuild run `nmake clean && nmake`.
 
 By default, the result of build is installed on this folder `c:\php\debug`. For install run `nmake install` from the PHP source folder.
 
+### Configure PHP
 
-## Enable php.exe Just-in-time debug
+Copy the standard developpement php.ini file into `c:\php\debug`.
+
+Add the extension loading `extension=php_win32service.dll` on the extension section.
+
+Check the php version and loaded extensions with `c:\php\build\php.exe -v` and `c:\php\build\php.exe -m`
+
+You can get the configuration and version of extension with this command `php --ri win32service`.
+
+Expected result :
+
+```
+C:\php\debug>php --ri win32service
+
+win32service
+
+Win32 Service support => enabled
+Version => 0.1.2-RC1
+```
+
+## Enable php.exe Just-in-time (JIT) debug
 
 For enable the jit debug for `php.exe`, open `regedit` and go to this registry key `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\Windows Error Reporting\DebugApplications` and add one DWORD value with name `php.exe` and dicimal value `1`.
 Now on every crash you can debug PHP.
