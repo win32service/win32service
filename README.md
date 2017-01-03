@@ -6,6 +6,8 @@ The win32service extension is a Windows specific extension that allows PHP to co
 
 The goal is build this extension with php 7.0 in first time.
 
-[![Build status](https://ci.appveyor.com/api/projects/status/7wqljie1knsrtfkh?svg=true)](https://ci.appveyor.com/project/macintoshplus/win32service)
+[![Build status](https://ci.appveyor.com/api/projects/status/7wqljie1knsrtfkh/branch/php-7.0?svg=true)](https://ci.appveyor.com/project/macintoshplus/win32service/branch/php-7.0)
 
 15/12/2016 : This extension work with PHP 7.0
+
+03/01/2017 : Fix crash on AMD64 and TS build
