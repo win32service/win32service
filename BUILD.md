@@ -7,7 +7,7 @@ Please download the pre-build version on [Release page](https://github.com/InExt
 
 # For Test and Debug
 
-## Prerequis
+## Prerequisites
 
 * Install an build environment for PHP 7+. [See for help](https://wiki.php.net/internals/windows/stepbystepbuild)
 * Clone this repository on `<path to php source>\..\pecl\win32service`
@@ -27,7 +27,7 @@ Run `<path to php sdk>\php-sdk\bin\phpsdk_setvars.bat`
 
 ### Configure build
 
-Run `buildconf.bat` from the PHP source folder. And run the comand for your whanted build 
+Run `buildconf.bat` from the PHP source folder. And run the comand for your wanted build 
 
 * ZTS : `configure.bat --with-mp=auto --enable-cli --disable-zts --enable-win32service=shared --with-php-build=deps --enable-debug --enable-mbstring`
 * TS : `configure.bat --with-mp=auto --enable-cli --enable-zts --enable-win32service=shared --with-php-build=deps --enable-debug --enable-mbstring`
