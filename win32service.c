@@ -132,7 +132,7 @@ static DWORD WINAPI svc_thread_proc(LPVOID _globals)
 static PHP_FUNCTION(win32_start_service_ctrl_dispatcher)
 {
 	char *name;
-	int name_len;
+	size_t name_len;
 
 	if (SVCG(svc_thread)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "service ctrl dispatcher already running");
