@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -25,7 +25,7 @@
 extern zend_module_entry win32service_module_entry;
 #define phpext_win32service_ptr	&win32service_module_entry
 
-#define PHP_WIN32SERVICE_VERSION "0.1.2-dev"
+#define PHP_WIN32SERVICE_VERSION "0.1.2-RC1"
 
 #ifndef PHP_WIN32
 # error This extension is for win32 only
