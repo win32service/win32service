@@ -3,13 +3,13 @@ BUILD THIS EXTENSION
 
 # For Production
 
-Please download the pre-build version on Release page.
+Please download the pre-build version on [Release page](https://github.com/InExtenso/win32service/releases).
 
 # For Test and Debug
 
 ## Prerequis
 
-* Install an build environment for PHP 7+
+* Install an build environment for PHP 7+. [See for help](https://wiki.php.net/internals/windows/stepbystepbuild)
 * Clone this repository on `<path to php source>\..\pecl\win32service`
 
 ## Build
