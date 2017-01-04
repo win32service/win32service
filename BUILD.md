@@ -72,6 +72,8 @@ Now on every crash you can debug PHP.
 
 ## Tests
 
+### sample.php
+
 Go to the `win32service` code source and run this command `c:\php\debug\php.exe sample.php install`.
 The normal output is `int(0)`.
 
@@ -80,4 +82,33 @@ You can click on "Start" and after every minutes click on "Stop". On the command
 
 After test, you can remove this service with this command `c:\php\debug\php.exe sample.php uninstall`.
 The normal output is `int(0)`.
+
+### service_dummy.php
+
+This file control the service `sample dummy PHP service` for start and stop according to their state.
+
+Usage from the `win32service` folder is `c:\php\debug\php.exe service_dummy.php`.
+
+### service.php
+
+This file create, start, stop, delete, debug and run an service named `Windows service PHP test`.
+
+This file can test this functions:
+
+* win32_create_service
+* win32_delete_service
+* win32_get_last_control_message
+* win32_query_service_status
+* win32_set_service_status
+* win32_start_service_ctrl_dispatcher
+* win32_start_service
+* win32_stop_service
+
+Usage:
+
+* Create: run `c:\php\debug\php.exe service.php create`
+* Start: run `c:\php\debug\php.exe service.php start`
+* Stop: run `c:\php\debug\php.exe service.php stop`
+* Debug: run `c:\php\debug\php.exe service.php debug`
+* Delete: run `c:\php\debug\php.exe service.php delete`
 
