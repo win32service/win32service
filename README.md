@@ -1,5 +1,5 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/7wqljie1knsrtfkh/branch/php-7.0?svg=true)](https://ci.appveyor.com/project/macintoshplus/win32service/branch/php-7.0)
-[![License](https://img.shields.io/badge/license-PHP_License_v3.01-blue.svg)](https://github.com/InExtenso/win32service/blob/php-7.0/LICENSE)
+[![License](https://img.shields.io/badge/license-PHP_License-blue.svg?style=plastic)](http://www.php.net/license/3_01.txt)
 
 # Win32Service
 
