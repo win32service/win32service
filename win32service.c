@@ -635,7 +635,7 @@ static PHP_MINIT_FUNCTION(win32service)
 		return FAILURE;
 	}
 	
-	if (PHP_MAJOR_VERSION <7 || (PHP_MAJOR_VERSION == 7 && (PHP_MINOR_VERSION == 0 || PHP_MINOR_VERSION == 1) && PHP_RELEASE_VERSION == 0) {
+	if (PHP_MAJOR_VERSION <7 || (PHP_MAJOR_VERSION == 7 && (PHP_MINOR_VERSION == 0 || PHP_MINOR_VERSION == 1) && PHP_RELEASE_VERSION == 0)) {
 		zend_error(E_CORE_ERROR, "The Win32Service extension not work on PHP 7.0.0 and 7.1.0. Work with 7.0.1+ or 7.1.1+");
 		return FAILURE;
 	}
