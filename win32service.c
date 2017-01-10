@@ -131,6 +131,11 @@ static DWORD WINAPI svc_thread_proc(LPVOID _globals)
    Registers the script with the SCM, so that it can act as the service with the given name */
 static PHP_FUNCTION(win32_start_service_ctrl_dispatcher)
 {
+	if (strcmp(sapi_module.name, "cli") != 0) {
+		zend_error(E_ERROR, "This function work only when using the CLI SAPI and called into the service code.");
+		RETURN_FALSE;
+	}
+	
 	char *name;
 	size_t name_len;
 
@@ -172,6 +177,11 @@ static PHP_FUNCTION(win32_start_service_ctrl_dispatcher)
    Update the service status */
 static PHP_FUNCTION(win32_set_service_status)
 {
+	if (strcmp(sapi_module.name, "cli") != 0) {
+		zend_error(E_ERROR, "This function work only when using the CLI SAPI and called into the service code.");
+		RETURN_FALSE;
+	}
+	
 	long status;
 	long checkpoint = 0;
 
@@ -405,6 +415,11 @@ static PHP_FUNCTION(win32_delete_service)
    Returns the last control message that was sent to this service process */
 static PHP_FUNCTION(win32_get_last_control_message)
 {
+	if (strcmp(sapi_module.name, "cli") != 0) {
+		zend_error(E_ERROR, "This function work only when using the CLI SAPI and called into the service code.");
+		RETURN_FALSE;
+	}
+	
 	RETURN_LONG(SVCG(args.dwControl));
 }
 /* }}} */
@@ -630,10 +645,9 @@ static void init_globals(zend_win32service_globals *g)
 
 static PHP_MINIT_FUNCTION(win32service)
 {
-	if (strcmp(sapi_module.name, "cli") != 0) {
-		zend_error(E_CORE_WARNING, "The Win32Service extension is only available when using the CLI SAPI");
-		return FAILURE;
-	}
+	/*if (strcmp(sapi_module.name, "cli") != 0) {
+		zend_error(E_NOTICE, "The Win32Service extension does work when using the CLI SAPI with administrator right level. On other SAPI, please check security consideration.");
+	}*/
 	
 	if (PHP_MAJOR_VERSION == 7 && (PHP_MINOR_VERSION == 0 || PHP_MINOR_VERSION == 1) && PHP_RELEASE_VERSION == 0) {
 #if PHP_MINOR_VERSION == 0
@@ -810,8 +824,32 @@ static PHP_RSHUTDOWN_FUNCTION(win32service)
 static PHP_MINFO_FUNCTION(win32service)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "Win32 Service support", "enabled");
+	php_info_print_table_row(2, "Win32 Service support", "enabled");
 	php_info_print_table_row(2, "Version", PHP_WIN32SERVICE_VERSION);
+	php_info_print_table_row(2, "Current SAPI", sapi_module.name);
+	if (strcmp(sapi_module.name, "cli") != 0) {
+		php_info_print_table_row(2, "NOTE", "The Win32Service extension does work when using the CLI SAPI with administrator right level. On other SAPI, please check security consideration.");
+	}
+	php_info_print_table_end();
+	
+	php_info_print_table_start();
+	php_info_print_table_header(2, "Function", "State for the current SAPI");
+	if (!strcmp(sapi_module.name, "cli")) {
+		php_info_print_table_row(2, "win32_start_service_ctrl_dispatcher", "enabled");
+		php_info_print_table_row(2, "win32_set_service_status", "enabled");
+		php_info_print_table_row(2, "win32_get_last_control_message", "enabled");
+	} else {
+		php_info_print_table_row(2, "win32_start_service_ctrl_dispatcher", "disabled");
+		php_info_print_table_row(2, "win32_set_service_status", "disabled");
+		php_info_print_table_row(2, "win32_get_last_control_message", "disabled");
+	}
+	php_info_print_table_row(2, "win32_create_service", "enabled");
+	php_info_print_table_row(2, "win32_delete_service", "enabled");
+	php_info_print_table_row(2, "win32_query_service_status", "enabled");
+	php_info_print_table_row(2, "win32_start_service", "enabled");
+	php_info_print_table_row(2, "win32_stop_service", "enabled");
+	php_info_print_table_row(2, "win32_pause_service", "enabled");
+	php_info_print_table_row(2, "win32_continue_service", "enabled");
 	php_info_print_table_end();
 }
 
