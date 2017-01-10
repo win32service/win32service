@@ -29,8 +29,8 @@ Run `<path to php sdk>\php-sdk\bin\phpsdk_setvars.bat`
 
 Run `buildconf.bat` from the PHP source folder. And run the comand for your wanted build 
 
-* ZTS : `configure.bat --with-mp=auto --enable-cli --disable-zts --enable-win32service=shared --with-php-build=deps --enable-debug --enable-mbstring`
-* TS : `configure.bat --with-mp=auto --enable-cli --enable-zts --enable-win32service=shared --with-php-build=deps --enable-debug --enable-mbstring`
+* ZTS : `configure.bat --disable-all --with-mp=auto --enable-cli --disable-zts --enable-win32service=shared --with-php-build=deps --enable-debug`
+* TS : `configure.bat --disable-all --with-mp=auto --enable-cli --enable-zts --enable-win32service=shared --with-php-build=deps --enable-debug`
 
 ### Build
 
