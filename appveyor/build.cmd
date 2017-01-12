@@ -35,9 +35,17 @@ setlocal enableextensions enabledelayedexpansion
 			call configure.bat --disable-all --with-mp=auto --enable-cli --!ZTS_STATE!-zts --enable-win32service=shared --with-config-file-scan-dir=%APPVEYOR_BUILD_FOLDER%\build\modules.d --with-prefix=%APPVEYOR_BUILD_FOLDER%\build --with-php-build=deps
 
 			nmake
+
+			if %errorlevel% neq 0 exit /b 3
+
 			nmake install
 
+			if %errorlevel% neq 0 exit /b 3
+
 			cd %APPVEYOR_BUILD_FOLDER%
+
+			if not exist build\ext\php_win32service.dll exit /b 3
+
 			move build\ext\php_win32service.dll artifacts\php_win32service-%PHP_REL%-vc14-!ZTS_SHORT!-!DEPTS_ARCH!.dll
 		)
 	)
