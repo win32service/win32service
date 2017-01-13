@@ -9,7 +9,7 @@ setlocal enableextensions enabledelayedexpansion
 		if "!ZTS_STATE!"=="enable" set ZTS_SHORT=ts
 		if "!ZTS_STATE!"=="disable" set ZTS_SHORT=nts
 
-		cd C:\projects\php-src
+		cd /d C:\projects\php-src
 
 		call buildconf.bat
 
@@ -27,9 +27,9 @@ setlocal enableextensions enabledelayedexpansion
 
 		if %errorlevel% neq 0 exit /b 3
 
-		cd %APPVEYOR_BUILD_FOLDER%
+		cd /d %APPVEYOR_BUILD_FOLDER%
 
-		if not exist build\ext\php_win32service.dll exit /b 3
+		if not exist "%APPVEYOR_BUILD_FOLDER%\build\ext\php_win32service.dll" exit /b 3
 
 		move build\ext\php_win32service.dll artifacts\php_win32service-%PHP_REL%-vc14-!ZTS_SHORT!-%ARCH%.dll
 	)
