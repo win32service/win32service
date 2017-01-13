@@ -4,8 +4,11 @@ The win32service extension is a Windows specific extension that allows PHP to co
 
 # Goal of this repos
 
-The goal is build this extension with php 7.0 in first time.
+The goal is build this extension with php 7.0 in first time. This goal is ended on 2017 january.
 
-[![Build status](https://ci.appveyor.com/api/projects/status/7wqljie1knsrtfkh?svg=true)](https://ci.appveyor.com/project/macintoshplus/win32service)
+# Repos organisation
 
-15/12/2016 : This extension work with PHP 7.0
+* This `master` branch is the oldest version. Do not use this but choice another version.
+* The `php7` branch contains the new version ready for PHP 7.0 and PHP 7.1 and work with all SAPI.
+* The `php7-cli` branch contains the original version ready for PHP 7.0 and PHP 7.1 but restricted for work only on CLI-SAPI.
+
