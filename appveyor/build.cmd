@@ -38,6 +38,8 @@ setlocal enableextensions enabledelayedexpansion
 
 		call !SDK_RUNNER! -t %APPVEYOR_BUILD_FOLDER%\appveyor\build_task.cmd
 
+		if %errorlevel% neq 0 exit /b 3
+
 	)
 
 	if "%APPVEYOR_REPO_TAG_NAME%"=="" (

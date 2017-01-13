@@ -2,7 +2,7 @@
 setlocal enableextensions enabledelayedexpansion
 	cd %APPVEYOR_BUILD_FOLDER%\appveyor
 	wget -N --progress=bar:force:noscroll http://windows.php.net/downloads/php-sdk/deps-%PHP_REL%-vc14-!ARCH!.7z -P %CACHE_ROOT%
-	7z x -y deps-%PHP_REL%-vc14-%ARCH%.7z -o%CACHE_ROOT%
+	7z x -y %CACHE_ROOT%\deps-%PHP_REL%-vc14-%ARCH%.7z -o%CACHE_ROOT%
 
 	for %%z in (%ZTS_STATES%) do (
 		set ZTS_STATE=%%z
