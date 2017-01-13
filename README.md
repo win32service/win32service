@@ -4,7 +4,7 @@ The win32service extension is a Windows specific extension that allows PHP to co
 
 # Goal of this repos
 
-The goal is build this extension with php 7.0 in first time. This goal is ended on 2017 january.
+The goal is build this extension with php 7.0 in first time. This goal was reached in january 2017.
 
 # Repos organisation
 
