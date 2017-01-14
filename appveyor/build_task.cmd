@@ -1,8 +1,7 @@
 @echo off
 setlocal enableextensions enabledelayedexpansion
-	cd %APPVEYOR_BUILD_FOLDER%\appveyor
 	wget -N --progress=bar:force:noscroll http://windows.php.net/downloads/php-sdk/deps-%PHP_REL%-vc14-!ARCH!.7z -P %CACHE_ROOT%
-	7z x -y %CACHE_ROOT%\deps-%PHP_REL%-vc14-%ARCH%.7z -o%CACHE_ROOT%
+	7z x -y %CACHE_ROOT%\deps-%PHP_REL%-vc14-%ARCH%.7z -oC:\projects\php-src
 
 	for %%z in (%ZTS_STATES%) do (
 		set ZTS_STATE=%%z
@@ -15,7 +14,7 @@ setlocal enableextensions enabledelayedexpansion
 
 		if %errorlevel% neq 0 exit /b 3
 
-		call configure.bat --disable-all --with-mp=auto --enable-cli --!ZTS_STATE!-zts --enable-win32service=shared --with-config-file-scan-dir=%APPVEYOR_BUILD_FOLDER%\build\modules.d --with-prefix=%APPVEYOR_BUILD_FOLDER%\build --with-php-build=%CACHE_ROOT%\deps
+		call configure.bat --disable-all --with-mp=auto --enable-cli --!ZTS_STATE!-zts --enable-win32service=shared --with-config-file-scan-dir=%APPVEYOR_BUILD_FOLDER%\build\modules.d --with-prefix=%APPVEYOR_BUILD_FOLDER%\build --with-php-build=deps
 
 		if %errorlevel% neq 0 exit /b 3
 
