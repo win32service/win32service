@@ -3,7 +3,7 @@ version: '{branch}.{build}'
 
 cache:
   - c:\build-cache
-  - c:\build-cache\sdk -> .appveyor.yml
+  - c:\build-cache\sdk
 
 environment:
   SDK_REMOTE: https://github.com/OSTC/php-sdk-binary-tools.git
