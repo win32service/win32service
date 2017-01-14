@@ -21,10 +21,6 @@ setlocal enableextensions enabledelayedexpansion
 	xcopy %APPVEYOR_BUILD_FOLDER%\LICENSE %APPVEYOR_BUILD_FOLDER%\artifacts\ /y /f
 	xcopy %APPVEYOR_BUILD_FOLDER%\examples %APPVEYOR_BUILD_FOLDER%\artifacts\examples\ /y /f
 
-	rem cd %APPVEYOR_BUILD_FOLDER%\appveyor
-	rem wget -N --progress=bar:force:noscroll http://windows.php.net/downloads/php-sdk/php-sdk-binary-tools-20110915.zip
-	rem 7z x -y php-sdk-binary-tools-20110915.zip -oC:\projects\php-sdk
-
 	if "%APPVEYOR_REPO_TAG_NAME%"=="" (
 		set APPVEYOR_REPO_TAG_NAME=%APPVEYOR_REPO_BRANCH%-%APPVEYOR_REPO_COMMIT:~0,8%
 		for /f "delims=" %%l in (php_win32service.h) do (
