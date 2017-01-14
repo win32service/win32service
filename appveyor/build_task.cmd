@@ -30,6 +30,12 @@ setlocal enableextensions enabledelayedexpansion
 
 		if not exist "%APPVEYOR_BUILD_FOLDER%\build\ext\php_win32service.dll" exit /b 3
 
+		xcopy %APPVEYOR_BUILD_FOLDER%\LICENSE %APPVEYOR_BUILD_FOLDER%\php_win32service-%PHP_REL%-vc14-!ZTS_SHORT!-%ARCH%\ /y /f
+		xcopy %APPVEYOR_BUILD_FOLDER%\examples %APPVEYOR_BUILD_FOLDER%\php_win32service-%PHP_REL%-vc14-!ZTS_SHORT!-%ARCH%\examples\ /y /f
+		xcopy %APPVEYOR_BUILD_FOLDER%\build\ext\php_win32service.dll %APPVEYOR_BUILD_FOLDER%\php_win32service-%PHP_REL%-vc14-!ZTS_SHORT!-%ARCH%\ /y /f
+		7z a php_win32service-%PHP_REL%-vc14-!ZTS_SHORT!-%ARCH%.zip %APPVEYOR_BUILD_FOLDER%\php_win32service-%PHP_REL%-vc14-!ZTS_SHORT!-%ARCH%\*
+		appveyor PushArtifact appveyor php_win32service-%PHP_REL%-vc14-!ZTS_SHORT!-%ARCH%.zip
+
 		move build\ext\php_win32service.dll artifacts\php_win32service-%PHP_REL%-vc14-!ZTS_SHORT!-%ARCH%.dll
 	)
 endlocal
