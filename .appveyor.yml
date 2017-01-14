@@ -13,7 +13,7 @@ environment:
 
   matrix:
     - PHP_REL: 7.0
-      ARCHITECTURES: amd64 x86
+      ARCHITECTURES: x64 x86
       ZTS_STATES: enable disable
     - PHP_REL: 7.1
       ARCHITECTURES: x64 x86
