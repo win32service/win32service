@@ -34,7 +34,7 @@ setlocal enableextensions enabledelayedexpansion
 		xcopy %APPVEYOR_BUILD_FOLDER%\examples %APPVEYOR_BUILD_FOLDER%\php_win32service-%PHP_REL%-vc14-!ZTS_SHORT!-%ARCH%\examples\ /y /f
 		xcopy %APPVEYOR_BUILD_FOLDER%\build\ext\php_win32service.dll %APPVEYOR_BUILD_FOLDER%\php_win32service-%PHP_REL%-vc14-!ZTS_SHORT!-%ARCH%\ /y /f
 		7z a php_win32service-%PHP_REL%-vc14-!ZTS_SHORT!-%ARCH%.zip %APPVEYOR_BUILD_FOLDER%\php_win32service-%PHP_REL%-vc14-!ZTS_SHORT!-%ARCH%\*
-		appveyor PushArtifact appveyor php_win32service-%PHP_REL%-vc14-!ZTS_SHORT!-%ARCH%.zip
+		appveyor PushArtifact php_win32service-%PHP_REL%-vc14-!ZTS_SHORT!-%ARCH%.zip
 
 		move build\ext\php_win32service.dll artifacts\php_win32service-%PHP_REL%-vc14-!ZTS_SHORT!-%ARCH%.dll
 	)

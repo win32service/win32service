@@ -2,7 +2,7 @@ image: Visual Studio 2015
 version: '{branch}.{build}'
 
 cache:
-  - c:\build-cache -> .appveyor.yml
+  - c:\build-cache
   - c:\build-cache\sdk -> .appveyor.yml
 
 environment:
@@ -12,9 +12,9 @@ environment:
   CACHE_ROOT: c:\build-cache
 
   matrix:
-#    - PHP_REL: 7.0
-#      ARCHITECTURES: amd64 x86
-#      ZTS_STATES: enable disable
+    - PHP_REL: 7.0
+      ARCHITECTURES: amd64 x86
+      ZTS_STATES: enable disable
     - PHP_REL: 7.1
       ARCHITECTURES: x64 x86
       ZTS_STATES: enable disable
