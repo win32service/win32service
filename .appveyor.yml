@@ -27,5 +27,5 @@ build_script:
 
 artifacts:
   - path: artifacts
-    name: php_win32service-%APPVEYOR_REPO_TAG_NAME%-%PHP_REL%-vc14
+    name: php_win32service-%APPVEYOR_REPO_TAG_NAME%-%PHP_REL%
     type: zip
