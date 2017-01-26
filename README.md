@@ -8,7 +8,7 @@ The [win32service](https://pecl.php.net/package/win32service) extension is a Win
 The goal is build this extension with php 7.0 in first time. This goal was reached in january 2017.
 
 # Repos organisation
-* This [`archived-svn`](https://github.com/alphp/win32service/tree/archived-svn) branch is a copy from the [Archived SVN Repository](http://svn.php.net/pecl/win32service/trunk/) with all history of changes. Do not use this but choice another version. 
+* This [`archived-svn`](https://github.com/InExtenso/win32service/tree/archived-svn) branch is a copy from the [Archived SVN Repository](http://svn.php.net/pecl/win32service/trunk/) with all history of changes. Do not use this but choice another version. 
 * The [`master`](https://github.com/InExtenso/win32service/tree/master) branch is the oldest version. Do not use this but choice another version.
 * The [`php7`](https://github.com/InExtenso/win32service/tree/php7) branch contains the new version ready for PHP 7.0 and PHP 7.1 and work with all SAPI.
 * The [`php7-cli`](https://github.com/InExtenso/win32service/tree/php7-cli) branch contains the original version ready for PHP 7.0 and PHP 7.1 but restricted for work only on CLI-SAPI.
