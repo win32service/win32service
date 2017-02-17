@@ -1,0 +1,31 @@
+image: Visual Studio 2015
+version: '{branch}.{build}'
+
+cache:
+  - c:\build-cache
+  - c:\build-cache\sdk
+
+environment:
+  SDK_REMOTE: https://github.com/OSTC/php-sdk-binary-tools.git
+  SDK_BRANCH: php-sdk-2.0.0beta1
+  SDK_CACHE: c:\build-cache\sdk
+  CACHE_ROOT: c:\build-cache
+
+  matrix:
+    - PHP_REL: 7.0
+      ARCHITECTURES: x64 x86
+      ZTS_STATES: enable disable
+    - PHP_REL: 7.1
+      ARCHITECTURES: x64 x86
+      ZTS_STATES: enable disable
+
+install:
+  - appveyor\install.cmd
+
+build_script:
+  - appveyor\build.cmd
+
+artifacts:
+  - path: artifacts
+    name: php_win32service-%APPVEYOR_REPO_TAG_NAME%-%PHP_REL%
+    type: zip
