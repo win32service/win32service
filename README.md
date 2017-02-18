@@ -15,7 +15,7 @@ Read the `phpinfo()` for know the available function on the currend SAPI.
 
 # Install
 
-(Download the latest)[https://github.com/InExtenso/win32service/releases] version for your PHP 7 version.
+[Download the latest](https://github.com/InExtenso/win32service/releases) version for your PHP 7 version.
 
 Unzip the package and copy the extention into the folder `ext` of your PHP installation.
 
@@ -39,9 +39,9 @@ Good coding !
 
 Crash, featur request, or suggest, please open an issue.
 
-Help for the extension function, visit the (official PHP web site)[http://php.net/manual/en/book.win32service.php]
+Help for the extension function, visit the [official PHP web site](http://php.net/manual/en/book.win32service.php)
 
-(Extension PHP pour réaliser des services Windows [FR])[https://nahan.fr/extension-php-pour-realiser-des-services-windows/]
+[Extension PHP pour réaliser des services Windows [FR]](https://nahan.fr/extension-php-pour-realiser-des-services-windows/)
 
 # Contributing
 
