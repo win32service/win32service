@@ -11,3 +11,38 @@ The [win32service](https://pecl.php.net/package/win32service) extension is a Win
 This version is available for PHP 7.0 and PHP 7.1 and work for all SAPI.
 
 Read the `phpinfo()` for know the available function on the currend SAPI.
+
+
+# Install
+
+[Download the latest](https://github.com/InExtenso/win32service/releases) version for your PHP 7 version.
+
+Unzip the package and copy the extention into the folder `ext` of your PHP installation.
+
+After copy, edit the the file `php.ini` and add one line for load the extension. In example for PHP 7.0 in TS mode and 32 bit architecture : `extension = php_win32service-7.0-ts-vc14-x86.dll`.
+
+Check in command line if the extension is correctly loaded with this command `php --ri win32service`.
+
+If the output indicate this extension is not loaded, check the PHP configuration.
+
+# Use
+
+The downloaded zip contain examples scripts used for testing. The file `service.php` contains an skeleton for implement one service in PHP.
+
+For use this example, open an command line window in administrator mode. Go to the example folder and run this command `php service.php create` for install the test service.
+
+Now a new service is added into the Windows service manager. You can start, stop this service from the Windows service manager or from the administrator command line.
+
+Good coding !
+
+# Help
+
+Crash, featur request, or suggest, please open an issue.
+
+Help for the extension function, visit the [official PHP web site](http://php.net/manual/en/book.win32service.php)
+
+[Extension PHP pour réaliser des services Windows [FR]](https://nahan.fr/extension-php-pour-realiser-des-services-windows/)
+
+# Contributing
+
+If you want contribute, you can open an issue for propose your idea. If you can writing the code, fork this repository and write the code, finally propose your enhancement by a pull request.
