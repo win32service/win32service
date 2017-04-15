@@ -135,7 +135,7 @@ static PHP_FUNCTION(win32_start_service_ctrl_dispatcher)
 		zend_error(E_ERROR, "This function work only when using the CLI SAPI and called into the service code.");
 		RETURN_FALSE;
 	}
-	
+
 	char *name;
 	size_t name_len;
 
@@ -181,7 +181,7 @@ static PHP_FUNCTION(win32_set_service_status)
 		zend_error(E_ERROR, "This function work only when using the CLI SAPI and called into the service code.");
 		RETURN_FALSE;
 	}
-	
+
 	long status;
 	long checkpoint = 0;
 
@@ -419,7 +419,7 @@ static PHP_FUNCTION(win32_get_last_control_message)
 		zend_error(E_ERROR, "This function work only when using the CLI SAPI and called into the service code.");
 		RETURN_FALSE;
 	}
-	
+
 	RETURN_LONG(SVCG(args.dwControl));
 }
 /* }}} */
@@ -648,8 +648,8 @@ static PHP_MINIT_FUNCTION(win32service)
 	/*if (strcmp(sapi_module.name, "cli") != 0) {
 		zend_error(E_NOTICE, "The Win32Service extension does work when using the CLI SAPI with administrator right level. On other SAPI, please check security consideration.");
 	}*/
-	
-	if (PHP_MAJOR_VERSION == 7 && (PHP_MINOR_VERSION == 0 || PHP_MINOR_VERSION == 1) && PHP_RELEASE_VERSION == 0) {
+
+	if (PHP_MAJOR_VERSION == 7 && PHP_MINOR_VERSION < 2 && PHP_RELEASE_VERSION < 1) {
 #if PHP_MINOR_VERSION == 0
 		zend_error(E_CORE_ERROR, "The Win32Service extension not work on PHP 7.0.0. Work with 7.0.1+");
 #elif PHP_MINOR_VERSION == 1
@@ -831,7 +831,7 @@ static PHP_MINFO_FUNCTION(win32service)
 		php_info_print_table_row(2, "NOTE", "The Win32Service extension does work when using the CLI SAPI with administrator right level. On other SAPI, please check security consideration.");
 	}
 	php_info_print_table_end();
-	
+
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Function", "State for the current SAPI");
 	if (!strcmp(sapi_module.name, "cli")) {
