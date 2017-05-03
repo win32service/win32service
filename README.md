@@ -10,7 +10,17 @@ The [win32service](https://pecl.php.net/package/win32service) extension is a Win
 
 This version is available for PHP 7.0 and PHP 7.1 and work for all SAPI.
 
-Read the `phpinfo()` for know the available function on the currend SAPI.
+Read the `phpinfo()` for know the available function on the current SAPI.
+
+# Less administrator privileges
+
+This branch allow control the service with low level privileges.
+
+* Create and add the service
+* Set the minimal ACL `RPWPRC` onto the service with `sc set`. Note this command overwite all ACL. Read first the current ACL with `sc show`. See https://support.microsoft.com/en-us/help/914392/best-practices-and-guidance-for-writers-of-service-discretionary-access-control-lists
+* Enable the win32service extension build from this branch into your PHP installation.
+* Use the account with low level privileges for run the PHP script for control the defined service. All work.
+Now attempt control another service without set the ACL. Nothing work.
 
 
 # Install

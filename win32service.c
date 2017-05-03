@@ -498,7 +498,7 @@ static PHP_FUNCTION(win32_start_service)
 		RETURN_FALSE;
 	}
 
-	hmgr = OpenSCManager(machine, NULL, SC_MANAGER_ALL_ACCESS);
+	hmgr = OpenSCManager(machine, NULL, SC_MANAGER_CONNECT);
 	if (hmgr) {
 		hsvc = OpenService(hmgr, service, SERVICE_START);
 		if (hsvc) {
@@ -532,7 +532,7 @@ static void win32_handle_service_controls(INTERNAL_FUNCTION_PARAMETERS, long acc
 		RETURN_FALSE;
 	}
 
-	hmgr = OpenSCManager(machine, NULL, SC_MANAGER_ALL_ACCESS);
+	hmgr = OpenSCManager(machine, NULL, SC_MANAGER_CONNECT);
 	if (hmgr) {
 		hsvc = OpenService(hmgr, service, access);
 		if (hsvc) {
