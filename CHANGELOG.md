@@ -1,3 +1,6 @@
+# version 0.2.1 (2017-05-02)
+
+* fix issue with PHP 7.1.4
 
 # version 0.2.0 (2017-01-16)
 

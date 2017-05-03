@@ -12,31 +12,45 @@
     <email>rquadling@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2011-03-15</date>
+  <lead>
+    <name>Jean-Baptiste Nahan</name>
+    <user>macintoshplus</user>
+    <email>jb@nahan.fr</email>
+    <active>yes</active>
+  </lead>
+  <date>2017-05-02</date>
+  <time>18:45:00</time>
   <version>
-    <release>0.1.0</release>
-    <api>0.1.0</api>
+    <release>0.2.1</release>
+    <api>0.2.0</api>
   </version>
   <stability>
-    <release>beta</release>
+    <release>stable</release>
     <api>stable</api>
   </stability>
   <license uri="http://www.php.net/license">PHP License</license>
-  <notes>- Initial PECL release</notes>
+  <notes><![CDATA[
+     Fix issue with PHP 7.1.4.
+     The binary is also available here: https://github.com/InExtenso/win32service/releases/tag/v0.2.1
+ ]]></notes>
   <contents>
     <dir name="/">
-      <file name="win32service.c" role="src"/>
-      <file name="config.w32" role="src"/>
+      <file name="CHANGELOG.md" role="doc"/>
       <file name="CREDITS" role="doc"/>
+      <file name="LICENSE" role="doc"/>
+      <file name="config.w32" role="src"/>
       <file name="php_win32service.h" role="src"/>
       <file name="php_win32service_int.h" role="src"/>
-      <file name="sample.php" role="php"/>
+      <file name="win32service.c" role="src"/>
+      <file name="examples/sample.php" role="php"/>
+      <file name="examples/service.php" role="php"/>
+      <file name="examples/service_dummy.php" role="php"/>
     </dir>
   </contents>
   <dependencies>
     <required>
       <php>
-        <min>7.0.0</min>
+        <min>7.0.1</min>
       </php>
       <pearinstaller>
         <min>1.4.8</min>
@@ -45,5 +59,92 @@
   </dependencies>
   <providesextension>win32service</providesextension>
   <extsrcrelease/>
-  <changelog/>
+  <changelog>
+    <release>
+            <version>
+                <release>0.2.1</release>
+                <api>0.2.0</api>
+            </version>
+            <stability>
+                <release>stable</release>
+                <api>stable</api>
+            </stability>
+            <license uri="http://www.php.net/license">PHP License</license>
+            <notes><![CDATA[
+Fix issue with PHP 7.1.4: Not detect PHP RELEASE VERSION correctly.
+ ]]></notes>
+        </release>
+    <release>
+            <version>
+                <release>0.2.0</release>
+                <api>0.2.0</api>
+            </version>
+            <stability>
+                <release>stable</release>
+                <api>stable</api>
+            </stability>
+            <license uri="http://www.php.net/license">PHP License</license>
+            <notes><![CDATA[
+No change
+ ]]></notes>
+        </release>
+        <release>
+            <version>
+              <release>0.1.2-RC2</release>
+              <api>0.1.0</api>
+            </version>
+            <stability>
+              <release>beta</release>
+              <api>stable</api>
+            </stability>
+            <license uri="http://www.php.net/license">PHP License</license>
+            <notes><![CDATA[
+* add error message if extension is loaded into PHP 7.0.0 or PHP 7.1.0.
+* add an condition for build this extension if PHP major version is less than 7
+* build for PHP 7.0 and PHP 7.1 branch
+              ]]></notes>
+        </release>
+        <release>
+            <version>
+              <release>0.1.2-RC1</release>
+              <api>0.1.0</api>
+            </version>
+            <stability>
+              <release>beta</release>
+              <api>stable</api>
+            </stability>
+            <license uri="http://www.php.net/license">PHP License</license>
+            <notes><![CDATA[
+Fixed some issues on PHP 7.0 build.
+
+This release is only for test.
+              ]]></notes>
+        </release>
+        <release>
+            <version>
+              <release>0.1.2-dev</release>
+              <api>0.1.0</api>
+            </version>
+            <stability>
+              <release>beta</release>
+              <api>stable</api>
+            </stability>
+            <license uri="http://www.php.net/license">PHP License</license>
+            <notes><![CDATA[
+Fix build error with Z_*_PP symbol.
+              ]]></notes>
+        </release>
+        <release>
+            <version>
+              <release>0.1.0</release>
+              <api>0.1.0</api>
+            </version>
+            <stability>
+              <release>beta</release>
+              <api>stable</api>
+            </stability>
+            <license uri="http://www.php.net/license">PHP License</license>
+            <notes>- Initial PECL release</notes>
+        </release>
+  </changelog>
 </package>
