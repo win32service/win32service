@@ -2,7 +2,7 @@
 setlocal enableextensions enabledelayedexpansion
 	cinst wget
 	mkdir C:\projects\win32service\build
-	if not exist "%SDK_CACHE%" (
+	if not exist "%SDK_CACHE%\.git" (
 		echo Cloning remote SDK repository
 		echo git clone -q --branch %SDK_BRANCH% %SDK_REMOTE% "%SDK_CACHE%"
 		git clone -q --depth=1 --branch %SDK_BRANCH% %SDK_REMOTE% "%SDK_CACHE%"
