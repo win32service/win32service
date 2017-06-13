@@ -1,7 +1,7 @@
 @echo off
 setlocal enableextensions enabledelayedexpansion
-	wget -N --progress=bar:force:noscroll http://windows.php.net/downloads/php-sdk/deps-%PHP_REL%-vc14-%PHP_SDK_ARCH%.7z -P %CACHE_ROOT%
-	7z x -y %CACHE_ROOT%\deps-%PHP_REL%-vc14-%PHP_SDK_ARCH%.7z -oC:\projects\php-src
+	wget -N --progress=bar:force:noscroll http://windows.php.net/downloads/php-sdk/deps-%PHP_REL%-%VC_VERSION%-%PHP_SDK_ARCH%.7z -P %CACHE_ROOT%
+	7z x -y %CACHE_ROOT%\deps-%PHP_REL%-%VC_VERSION%-%PHP_SDK_ARCH%.7z -oC:\projects\php-src
 
 	for %%z in (%ZTS_STATES%) do (
 		set ZTS_STATE=%%z
@@ -30,12 +30,12 @@ setlocal enableextensions enabledelayedexpansion
 
 		if not exist "%APPVEYOR_BUILD_FOLDER%\build\ext\php_win32service.dll" exit /b 3
 
-		xcopy %APPVEYOR_BUILD_FOLDER%\LICENSE %APPVEYOR_BUILD_FOLDER%\php_win32service-%PHP_REL%-!ZTS_SHORT!-vc14-%PHP_SDK_ARCH%\ /y /f
-		xcopy %APPVEYOR_BUILD_FOLDER%\examples %APPVEYOR_BUILD_FOLDER%\php_win32service-%PHP_REL%-!ZTS_SHORT!-vc14-%PHP_SDK_ARCH%\examples\ /y /f
-		xcopy %APPVEYOR_BUILD_FOLDER%\build\ext\php_win32service.dll %APPVEYOR_BUILD_FOLDER%\php_win32service-%PHP_REL%-!ZTS_SHORT!-vc14-%PHP_SDK_ARCH%\ /y /f
-		7z a php_win32service-%PHP_REL%-!ZTS_SHORT!-vc14-%PHP_SDK_ARCH%.zip %APPVEYOR_BUILD_FOLDER%\php_win32service-%PHP_REL%-!ZTS_SHORT!-vc14-%PHP_SDK_ARCH%\*
-		appveyor PushArtifact php_win32service-%PHP_REL%-!ZTS_SHORT!-vc14-%PHP_SDK_ARCH%.zip -FileName php_win32service-%APPVEYOR_REPO_TAG_NAME%-%PHP_REL%-!ZTS_SHORT!-vc14-%PHP_SDK_ARCH%.zip
+		xcopy %APPVEYOR_BUILD_FOLDER%\LICENSE %APPVEYOR_BUILD_FOLDER%\php_win32service-%PHP_REL%-!ZTS_SHORT!-%VC_VERSION%-%PHP_SDK_ARCH%\ /y /f
+		xcopy %APPVEYOR_BUILD_FOLDER%\examples %APPVEYOR_BUILD_FOLDER%\php_win32service-%PHP_REL%-!ZTS_SHORT!-%VC_VERSION%-%PHP_SDK_ARCH%\examples\ /y /f
+		xcopy %APPVEYOR_BUILD_FOLDER%\build\ext\php_win32service.dll %APPVEYOR_BUILD_FOLDER%\php_win32service-%PHP_REL%-!ZTS_SHORT!-%VC_VERSION%-%PHP_SDK_ARCH%\ /y /f
+		7z a php_win32service-%PHP_REL%-!ZTS_SHORT!-%VC_VERSION%-%PHP_SDK_ARCH%.zip %APPVEYOR_BUILD_FOLDER%\php_win32service-%PHP_REL%-!ZTS_SHORT!-%VC_VERSION%-%PHP_SDK_ARCH%\*
+		appveyor PushArtifact php_win32service-%PHP_REL%-!ZTS_SHORT!-%VC_VERSION%-%PHP_SDK_ARCH%.zip -FileName php_win32service-%APPVEYOR_REPO_TAG_NAME%-%PHP_REL%-!ZTS_SHORT!-%VC_VERSION%-%PHP_SDK_ARCH%.zip
 
-		move build\ext\php_win32service.dll artifacts\php_win32service-%PHP_REL%-!ZTS_SHORT!-vc14-%PHP_SDK_ARCH%.dll
+		move build\ext\php_win32service.dll artifacts\php_win32service-%PHP_REL%-!ZTS_SHORT!-%VC_VERSION%-%PHP_SDK_ARCH%.dll
 	)
 endlocal
