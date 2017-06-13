@@ -3,7 +3,7 @@ setlocal enableextensions enabledelayedexpansion
 	for %%a in (%ARCHITECTURES%) do (
 		set ARCH=%%a
 
-		set SDK_RUNNER=%SDK_CACHE%\phpsdk-%VC_VERSION%-!ARCH!.bat
+		set SDK_RUNNER=%SDK_CACHE%\phpsdk-!VC_VERSION!-!ARCH!.bat
 		if not exist "!SDK_RUNNER!" (
 			echo "!SDK_RUNNER!" doesn't exist
 			exit /b 3
