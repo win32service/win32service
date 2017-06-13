@@ -1,4 +1,4 @@
-image: Visual Studio 2015
+
 version: '{branch}.{build}'
 
 cache:
@@ -15,12 +15,15 @@ environment:
     - PHP_REL: 7.0
       ARCHITECTURES: x64 x86
       ZTS_STATES: enable disable
+      image: Visual Studio 2015
     - PHP_REL: 7.1
       ARCHITECTURES: x64 x86
       ZTS_STATES: enable disable
+      image: Visual Studio 2015
     - PHP_REL: master
       ARCHITECTURES: x64 x86
       ZTS_STATES: enable disable
+      image: Visual Studio 2017
 
 install:
   - appveyor\install.cmd
