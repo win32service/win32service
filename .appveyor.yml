@@ -12,10 +12,19 @@ environment:
   CACHE_ROOT: c:\build-cache
 
   matrix:
-    - PHP_REL: 7.0
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      PHP_BUILD_CRT: vc14
+      PHP_REL: 7.0
       ARCHITECTURES: x64 x86
       ZTS_STATES: enable disable
-    - PHP_REL: 7.1
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      PHP_BUILD_CRT: vc14
+      PHP_REL: 7.1
+      ARCHITECTURES: x64 x86
+      ZTS_STATES: enable disable
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PHP_BUILD_CRT: vc15
+      PHP_REL: master
       ARCHITECTURES: x64 x86
       ZTS_STATES: enable disable
 
