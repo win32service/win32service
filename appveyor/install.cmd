@@ -2,7 +2,7 @@
 setlocal enableextensions enabledelayedexpansion
 	cinst wget
 	mkdir C:\projects\win32service\build
-	if not exist "%SDK_CACHE%" (
+	if not exist "%SDK_CACHE%\.git" (
 		echo Cloning remote SDK repository
 		echo git clone -q --branch %SDK_BRANCH% %SDK_REMOTE% "%SDK_CACHE%"
 		git clone -q --depth=1 --branch %SDK_BRANCH% %SDK_REMOTE% "%SDK_CACHE%"
@@ -11,6 +11,10 @@ setlocal enableextensions enabledelayedexpansion
 		git --git-dir="%SDK_CACHE%\.git" --work-tree="%SDK_CACHE%" fetch --prune origin
 		echo Checkout SDK repository branch
 		git --git-dir="%SDK_CACHE%\.git" --work-tree="%SDK_CACHE%" checkout --force %SDK_BRANCH%
+		if %errorlevel% neq 0 (
+			rmdir /s /q %SDK_CACHE%
+			git clone -q --depth=1 --branch %SDK_BRANCH% %SDK_REMOTE% "%SDK_CACHE%"
+		)
 	)
 
 	echo git clone -q --depth=1 --branch=PHP-%PHP_REL% https://github.com/php/php-src C:\projects\php-src
