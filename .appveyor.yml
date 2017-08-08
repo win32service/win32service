@@ -23,7 +23,7 @@ environment:
       ZTS_STATES: enable disable
       VC_VERSION: vc14
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      PHP_REL: master
+      PHP_REL: 7.2
       ARCHITECTURES: x64 x86
       ZTS_STATES: enable disable
       VC_VERSION: vc15
