@@ -1,20 +1,26 @@
 @echo off
 setlocal enableextensions enabledelayedexpansion
 	cinst wget
-	mkdir C:\projects\win32service\build
-	if not exist "%SDK_CACHE%\.git" (
+
+	if not exist "%PHP_BUILD_CACHE_BASE_DIR%" (
+		echo Creating %PHP_BUILD_CACHE_BASE_DIR%
+		mkdir "%PHP_BUILD_CACHE_BASE_DIR%"
+	)
+
+	if not exist "%PHP_BUILD_OBJ_DIR%" (
+		echo Creating %PHP_BUILD_OBJ_DIR%
+		mkdir "%PHP_BUILD_OBJ_DIR%"
+	)
+
+	if not exist "%PHP_BUILD_CACHE_SDK_DIR%" (
 		echo Cloning remote SDK repository
-		echo git clone -q --branch %SDK_BRANCH% %SDK_REMOTE% "%SDK_CACHE%"
-		git clone -q --depth=1 --branch %SDK_BRANCH% %SDK_REMOTE% "%SDK_CACHE%"
+		rem git clone -q --depth=1 --branch %SDK_BRANCH% %SDK_REMOTE% "%PHP_BUILD_CACHE_SDK_DIR%" 2>&1
+		git clone --branch %SDK_BRANCH% %SDK_REMOTE% "%PHP_BUILD_CACHE_SDK_DIR%" 2>&1
 	) else (
 		echo Fetching remote SDK repository
-		git --git-dir="%SDK_CACHE%\.git" --work-tree="%SDK_CACHE%" fetch --prune origin
+		git --git-dir="%PHP_BUILD_CACHE_SDK_DIR%\.git" --work-tree="%PHP_BUILD_CACHE_SDK_DIR%" fetch --prune origin 2>&1
 		echo Checkout SDK repository branch
-		git --git-dir="%SDK_CACHE%\.git" --work-tree="%SDK_CACHE%" checkout --force %SDK_BRANCH%
-		if %errorlevel% neq 0 (
-			rmdir /s /q %SDK_CACHE%
-			git clone -q --depth=1 --branch %SDK_BRANCH% %SDK_REMOTE% "%SDK_CACHE%"
-		)
+		git --git-dir="%PHP_BUILD_CACHE_SDK_DIR%\.git" --work-tree="%PHP_BUILD_CACHE_SDK_DIR%" checkout --force %SDK_BRANCH%
 	)
 
 	if "%PHP_REL%"=="master" (
@@ -29,6 +35,15 @@ setlocal enableextensions enabledelayedexpansion
 
 	xcopy %APPVEYOR_BUILD_FOLDER%\LICENSE %APPVEYOR_BUILD_FOLDER%\artifacts\ /y /f
 	xcopy %APPVEYOR_BUILD_FOLDER%\examples %APPVEYOR_BUILD_FOLDER%\artifacts\examples\ /y /f
+
+	if "%APPVEYOR%" equ "True" rmdir /s /q C:\cygwin >NUL 2>NUL
+	if %errorlevel% neq 0 exit /b 3
+	if "%APPVEYOR%" equ "True" rmdir /s /q C:\cygwin64 >NUL 2>NUL
+	if %errorlevel% neq 0 exit /b 3
+	if "%APPVEYOR%" equ "True" rmdir /s /q C:\mingw >NUL 2>NUL
+	if %errorlevel% neq 0 exit /b 3
+	if "%APPVEYOR%" equ "True" rmdir /s /q C:\mingw-w64 >NUL 2>NUL
+	if %errorlevel% neq 0 exit /b 3
 
 	if "%APPVEYOR_REPO_TAG_NAME%"=="" (
 		set APPVEYOR_REPO_TAG_NAME=%APPVEYOR_REPO_BRANCH%-%APPVEYOR_REPO_COMMIT:~0,8%
