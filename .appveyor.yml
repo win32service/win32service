@@ -2,9 +2,8 @@ image: Visual Studio 2015
 version: '{branch}.{build}'
 
 cache:
-  - packages -> .appveyor.yml
-  - c:\build-cache
-  - c:\build-cache\sdk
+  #- c:\build-cache
+  #- c:\build-cache\sdk
 
 environment:
   SDK_REMOTE: https://github.com/OSTC/php-sdk-binary-tools.git
