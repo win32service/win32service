@@ -1,7 +1,8 @@
 @echo off
 setlocal enableextensions enabledelayedexpansion
-	wget -N --progress=bar:force:noscroll http://windows.php.net/downloads/php-sdk/deps-%PHP_REL%-%PHP_BUILD_CRT%-%PHP_SDK_ARCH%.7z -P %CACHE_ROOT%
-	7z x -y %CACHE_ROOT%\deps-%PHP_REL%-%PHP_BUILD_CRT%-%PHP_SDK_ARCH%.7z -oC:\projects\php-src
+	rem wget -N --progress=bar:force:noscroll http://windows.php.net/downloads/php-sdk/deps-%PHP_REL%-%PHP_BUILD_CRT%-%PHP_SDK_ARCH%.7z -P %CACHE_ROOT%
+	rem 7z x -y %CACHE_ROOT%\deps-%PHP_REL%-%PHP_BUILD_CRT%-%PHP_SDK_ARCH%.7z -oC:\projects\php-src
+	call %SDK_CACHE%\bin\phpsdk_deps.bat --update --branch %PHP_REL%
 
 	for %%z in (%ZTS_STATES%) do (
 		set ZTS_STATE=%%z
