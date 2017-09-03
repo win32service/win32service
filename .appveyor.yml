@@ -2,6 +2,7 @@ image: Visual Studio 2015
 version: '{branch}.{build}'
 
 cache:
+  - packages -> .appveyor.yml
   - c:\build-cache
   - c:\build-cache\sdk
 
