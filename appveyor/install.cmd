@@ -1,11 +1,21 @@
 @echo off
 setlocal enableextensions enabledelayedexpansion
 	cinst wget
-	mkdir C:\projects\win32service\build
-	if not exist "%PHP_BUILD_CACHE_SDK_DIR%\.git" (
+	
+	if not exist "%PHP_BUILD_CACHE_BASE_DIR%" (
+		echo Creating %PHP_BUILD_CACHE_BASE_DIR%
+		mkdir "%PHP_BUILD_CACHE_BASE_DIR%"
+	)
+
+	if not exist "%PHP_BUILD_OBJ_DIR%" (
+		echo Creating %PHP_BUILD_OBJ_DIR%
+		mkdir "%PHP_BUILD_OBJ_DIR%"
+	)
+
+	if not exist "%PHP_BUILD_CACHE_SDK_DIR%" (
 		echo Cloning remote SDK repository
 		rem git clone -q --depth=1 --branch %SDK_BRANCH% %SDK_REMOTE% "%PHP_BUILD_CACHE_SDK_DIR%" 2>&1
-		git clone -q --branch %SDK_BRANCH% %SDK_REMOTE% "%PHP_BUILD_CACHE_SDK_DIR%" 2>&1
+		git clone --branch %SDK_BRANCH% %SDK_REMOTE% "%PHP_BUILD_CACHE_SDK_DIR%" 2>&1
 	) else (
 		echo Fetching remote SDK repository
 		git --git-dir="%PHP_BUILD_CACHE_SDK_DIR%\.git" --work-tree="%PHP_BUILD_CACHE_SDK_DIR%" fetch --prune origin 2>&1
