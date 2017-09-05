@@ -2,8 +2,8 @@
 version: '{branch}.{build}'
 
 cache:
-  - c:\build-cache
-  - c:\build-cache\sdk
+#  - c:\build-cache
+#  - c:\build-cache\sdk
 
 environment:
   PHP_BUILD_CACHE_BASE_DIR: c:\build-cache
