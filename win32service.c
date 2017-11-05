@@ -472,6 +472,7 @@ static PHP_FUNCTION(win32_query_service_status)
 			add_assoc_long(return_value, "ProcessId", st->dwProcessId);
 			add_assoc_long(return_value, "ServiceFlags", st->dwServiceFlags);
 out_fail:
+			efree(st);
 			CloseServiceHandle(hsvc);
 		} else {
 			RETVAL_LONG(GetLastError());
