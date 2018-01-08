@@ -8,7 +8,7 @@ The [win32service](https://pecl.php.net/package/win32service) extension is a Win
 
 # PHP7
 
-This version is available for PHP 7.0 and PHP 7.1 and work for all SAPI.
+This version is available for PHP 7.0, PHP 7.1 and PHP 7.2 and work for all SAPI.
 
 Read the `phpinfo()` for know the available function on the current SAPI.
 
@@ -29,11 +29,13 @@ Now attempt control another service without set the ACL. Nothing work.
 
 Unzip the package and copy the extention into the folder `ext` of your PHP installation.
 
-After copy, edit the the file `php.ini` and add one line for load the extension. In example for PHP 7.0 in TS mode and 32 bit architecture : `extension = php_win32service-7.0-ts-vc14-x86.dll`.
+After copy, edit the the file `php.ini` and add one line for load the extension depending on your version of PHP (7.0/7.1/7.2, x64/x86, ZTS/NTS). In example for PHP 7.0 in TS mode and 32 bit architecture : `extension = php_win32service-7.0-ts-vc14-x86.dll`.
 
 Check in command line if the extension is correctly loaded with this command `php --ri win32service`.
 
 If the output indicate this extension is not loaded, check the PHP configuration.
+
+> Note : For PHP 7.2, the first binary available is available on [AppVeyor Artifact](https://ci.appveyor.com/project/macintoshplus/win32service/build/job/u30oquj5q2h8t1k1/artifacts). Feedback are welcome.
 
 # Use
 
