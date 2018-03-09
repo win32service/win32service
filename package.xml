@@ -21,7 +21,7 @@
   <date>2017-05-02</date>
   <time>18:45:00</time>
   <version>
-    <release>0.2.1</release>
+    <release>0.3.0</release>
     <api>0.2.0</api>
   </version>
   <stability>
@@ -30,8 +30,10 @@
   </stability>
   <license uri="http://www.php.net/license">PHP License</license>
   <notes><![CDATA[
-     Fix issue with PHP 7.1.4.
-     The binary is also available here: https://github.com/InExtenso/win32service/releases/tag/v0.2.1
+     Add support for use a non admin account for start, stop, pause, resume service.
+     Add support for PHP 7.2.
+     Fix bugs.
+     The binary is also available here: https://github.com/InExtenso/win32service/releases/tag/v0.3.0
  ]]></notes>
   <contents>
     <dir name="/">
@@ -60,6 +62,22 @@
   <providesextension>win32service</providesextension>
   <extsrcrelease/>
   <changelog>
+    <release>
+            <version>
+                <release>0.3.0</release>
+                <api>0.2.0</api>
+            </version>
+            <stability>
+                <release>stable</release>
+                <api>stable</api>
+            </stability>
+            <license uri="http://www.php.net/license">PHP License</license>
+            <notes><![CDATA[
+Add support for use a non admin account for start, stop, pause, resume service.
+Add support for PHP 7.2.
+Fix bugs.
+ ]]></notes>
+        </release>
     <release>
             <version>
                 <release>0.2.1</release>
