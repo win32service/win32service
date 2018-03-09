@@ -1,3 +1,9 @@
+# version 0.3.0 (2018-03-09)
+
+* Add support for use a non admin account for start, stop, pause, resume service. Rights configuration is need on the target service.
+* Add support for PHP 7.2.
+* Fix bugs.
+
 # version 0.2.1 (2017-05-02)
 
 * fix issue with PHP 7.1.4
