@@ -49,7 +49,7 @@ Good coding !
 
 # Help
 
-Crash, featur request, or suggest, please open an issue.
+Crash, feature request, or suggest, please open an issue.
 
 Help for the extension function, visit the [official PHP web site](http://php.net/manual/en/book.win32service.php)
 
