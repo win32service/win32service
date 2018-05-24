@@ -8,13 +8,13 @@ setlocal enableextensions enabledelayedexpansion
 	set DEPS_DIR=%PHP_BUILD_CACHE_BASE_DIR%\deps-%PHP_REL%-%PHP_SDK_VC%-%PHP_SDK_ARCH%
 	rem SDK is cached, deps info is cached as well
 	echo Updating dependencies in %DEPS_DIR%
-	cmd /c phpsdk_deps --update --no-backup --branch %PHP_REL% --stability %STABILITY% --deps %DEPS_DIR%
+	cmd /c phpsdk_deps --update --no-backup --branch %PHP_REL% --stability %STABILITY% --deps %DEPS_DIR% --crt %PHP_BUILD_CRT%
 	if %errorlevel% neq 0 exit /b 3
 
 	rem Something went wrong, most likely when concurrent builds were to fetch deps
 	rem updates. It might be, that some locking mechanism is needed.
 	if not exist "%DEPS_DIR%" (
-		cmd /c phpsdk_deps --update --force --no-backup --branch %PHP_REL% --stability %STABILITY% --deps %DEPS_DIR%
+		cmd /c phpsdk_deps --update --force --no-backup --branch %PHP_REL% --stability %STABILITY% --deps %DEPS_DIR% --crt %PHP_BUILD_CRT%
 	)
 	if %errorlevel% neq 0 exit /b 3
 
