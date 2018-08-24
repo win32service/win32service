@@ -644,28 +644,30 @@ static void init_globals(zend_win32service_globals *g)
 	memset(g, 0, sizeof(*g));
 }
 
+static check_php_version()
+{
+	if (PHP_VERSION_ID == 70000) {
+		zend_error(E_CORE_ERROR, "The Win32Service extension not work on PHP 7.0.0. Work with 7.0.1+");
+		return FALSE;
+	}
+	if (PHP_VERSION_ID == 70100) {
+		zend_error(E_CORE_ERROR, "The Win32Service extension not work on PHP 7.1.0. Work with 7.1.1+");
+		return FALSE;
+	}
+	return TRUE;
+}
+
 static PHP_MINIT_FUNCTION(win32service)
 {
 	/*if (strcmp(sapi_module.name, "cli") != 0) {
 		zend_error(E_NOTICE, "The Win32Service extension does work when using the CLI SAPI with administrator right level. On other SAPI, please check security consideration.");
 	}*/
 
-
-	//if (PHP_MAJOR_VERSION == 7 && PHP_MINOR_VERSION < 2 && PHP_RELEASE_VERSION < 1) {
-	if (PHP_VERSION_ID == 70000) {
-		zend_error(E_CORE_ERROR, "The Win32Service extension not work on PHP 7.0.0. Work with 7.0.1+");
+	if (check_php_version() == FALSE) {
 		return FAILURE;
 	}
-	if (PHP_VERSION_ID == 70100) {
-		zend_error(E_CORE_ERROR, "The Win32Service extension not work on PHP 7.1.0. Work with 7.1.1+");
-		return FAILURE;
-	}
-		/* else {
-			zend_error(E_CORE_ERROR, "The Win32Service extension not work with this PHP version");
-		}
-		return FAILURE;
-	}*/
 
+	
 
 	ZEND_INIT_MODULE_GLOBALS(win32service, init_globals, NULL);
 
@@ -831,7 +833,12 @@ static PHP_RSHUTDOWN_FUNCTION(win32service)
 static PHP_MINFO_FUNCTION(win32service)
 {
 	php_info_print_table_start();
-	php_info_print_table_row(2, "Win32 Service support", "enabled");
+	if (check_php_version() == FALSE) {
+		php_info_print_table_row(2, "Win32 Service support", "disabled");
+	} else {
+		php_info_print_table_row(2, "Win32 Service support", "enabled");
+	}
+	
 	php_info_print_table_row(2, "Version", PHP_WIN32SERVICE_VERSION);
 	php_info_print_table_row(2, "Current SAPI", sapi_module.name);
 	if (strcmp(sapi_module.name, "cli") != 0) {
