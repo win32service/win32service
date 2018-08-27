@@ -652,7 +652,7 @@ static int check_php_version()
 
 	ZVAL_STRING(&function_name, "phpversion");
 
-	if (call_user_function(EG(function_table), NULL, &function_name, &result, 0, NULL TSRMLS_CC) == SUCCESS) {
+	if (call_user_function(EG(function_table), NULL, &function_name, &result, 0, NULL) == SUCCESS) {
 		result2 = Z_STRVAL_P(&result);
 		php_printf("VERSION = %s", result2);
 		efree(result2);
