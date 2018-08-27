@@ -648,16 +648,15 @@ static int check_php_version()
 {
 	zval result;
 	zval function_name;
+	char *result2 = NULL;
 
 	ZVAL_STRINGL(&function_name, "phpversion", 10);
 
-	
-
 	if (call_user_function(EG(function_table), NULL, &function_name, &result, 0, NULL TSRMLS_CC) == SUCCESS) {
-		php_printf("VERSION = %s", Z_STRVAL_P(result));
+		result2 = Z_STRVAL_P(result);
+		php_printf("VERSION = %s", result2);
+		efree(result2);
 	}
-
-	zval_ptr_dtor(&result);
 
 	php_printf("M=%d m=%d r=%d\n", PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION);
 
