@@ -646,6 +646,8 @@ static void init_globals(zend_win32service_globals *g)
 
 static check_php_version()
 {
+	php_printf("M=%d m=%d r=%d\n", PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION);
+
 	if (PHP_MAJOR_VERSION == 7 && PHP_MINOR_VERSION == 0 && PHP_RELEASE_VERSION == 0) {
 		zend_error(E_CORE_ERROR, "The Win32Service extension not work on PHP 7.0.0. Work with 7.0.1+");
 		return FALSE;
