@@ -646,14 +646,14 @@ static void init_globals(zend_win32service_globals *g)
 
 static int check_php_version()
 {
-	zval *result;
+	zval result;
 	zval function_name;
 
-	ZVAL_STRINGL(&function_name, "phpversion", 10, 0);
+	ZVAL_STRINGL(&function_name, "phpversion", 10);
 
-	MAKE_STD_ZVAL(result);
+	
 
-	if (call_user_function(EG(function_table), NULL, &function_name, result, 0, NULL TSRMLS_CC) == SUCCESS) {
+	if (call_user_function(EG(function_table), NULL, &function_name, &result, 0, NULL TSRMLS_CC) == SUCCESS) {
 		php_printf("VERSION = %s", Z_STRVAL_P(result));
 	}
 
