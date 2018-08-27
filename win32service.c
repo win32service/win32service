@@ -644,7 +644,7 @@ static void init_globals(zend_win32service_globals *g)
 	memset(g, 0, sizeof(*g));
 }
 
-static check_php_version()
+static bool check_php_version()
 {
 	php_printf("M=%d m=%d r=%d\n", PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION);
 
