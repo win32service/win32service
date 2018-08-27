@@ -657,7 +657,7 @@ static int check_php_version()
 
 	if (call_user_function(EG(function_table), NULL, &function_name, &result, 0, NULL) == SUCCESS) {
 		result2 = Z_STRVAL_P(&result);
-		php_printf("VERSION = %s\n", result2);
+		//php_printf("VERSION = %s\n", result2);
 		zval_ptr_dtor(&function_name);
 		zval_ptr_dtor(&result);
 
