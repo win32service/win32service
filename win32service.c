@@ -646,6 +646,19 @@ static void init_globals(zend_win32service_globals *g)
 
 static int check_php_version()
 {
+	zval *result;
+	zval function_name;
+
+	ZVAL_STRINGL(&function_name, "phpversion", 10, 0);
+
+	MAKE_STD_ZVAL(result);
+
+	if (call_user_function(EG(function_table), NULL, &function_name, result, 0, NULL TSRMLS_CC) == SUCCESS) {
+		php_printf("VERSION = %s", Z_STRVAL_P(result));
+	}
+
+	zval_ptr_dtor(&result);
+
 	php_printf("M=%d m=%d r=%d\n", PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION);
 
 	if (PHP_MAJOR_VERSION == 7 && PHP_MINOR_VERSION == 0 && PHP_RELEASE_VERSION == 0) {
