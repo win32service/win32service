@@ -663,11 +663,11 @@ static int check_php_version()
 
 		//php_printf("M=%d m=%d r=%d\n", PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION);
 
-		if (strcmp(result2, "7.0.0") != 0) {
+		if (php_version_compare(result2, "7.0.0") == 0) {
 			//zend_error(E_CORE_ERROR, "The Win32Service extension not work on PHP 7.0.0. Work with 7.0.1+");
 			return 0;
 		}
-		if (strcmp(result2, "7.1.0") != 0) {
+		if (php_version_compare(result2, "7.1.0") == 0) {
 			//zend_error(E_CORE_ERROR, "The Win32Service extension not work on PHP 7.1.0. Work with 7.1.1+");
 			return 0;
 		}
