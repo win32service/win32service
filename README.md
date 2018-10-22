@@ -6,11 +6,13 @@
 
 The [win32service](https://pecl.php.net/package/win32service) extension is a Windows specific extension that allows PHP to communicate with the Service Control Manager to start, stop, register and unregister services, and even allows your PHP scripts to run as a service.
 
-# PHP7
+# PHP 7+
 
-This version is available for PHP 7.0, PHP 7.1 and PHP 7.2 and work for all SAPI.
+This version is available for PHP 7.0, PHP 7.1, PHP 7.2, PHP 7.3 and work for all SAPI.
 
 Read the `phpinfo()` for know the available function on the current SAPI.
+
+__Caution : PHP 7.0 is end of life in december 2018__ See : http://php.net/supported-versions.php
 
 # Less administrator privileges
 
