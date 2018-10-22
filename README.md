@@ -8,7 +8,8 @@ The [win32service](https://pecl.php.net/package/win32service) extension is a Win
 
 # PHP 7+
 
-This version is available for PHP 7.0, PHP 7.1, PHP 7.2, PHP 7.3 and work for all SAPI.
+This version is available for PHP 7.0.1+, PHP 7.1.1+, PHP 7.2, PHP 7.3 and work for all SAPI.
+The PHP version 7.0.0 and 7.1.0 dont work with this extension, use the latest version of PHP 7.0 and PHP 7.1.
 
 Read the `phpinfo()` for know the available function on the current SAPI.
 
