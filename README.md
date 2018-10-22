@@ -32,13 +32,11 @@ Now attempt control another service without set the ACL. Nothing work.
 
 Unzip the package and copy the extention into the folder `ext` of your PHP installation.
 
-After copy, edit the the file `php.ini` and add one line for load the extension depending on your version of PHP (7.0/7.1/7.2, x64/x86, ZTS/NTS). In example for PHP 7.0 in TS mode and 32 bit architecture : `extension = php_win32service-7.0-ts-vc14-x86.dll`.
+After copy, edit the the file `php.ini` and add one line for load the extension depending on your version of PHP (7.0/7.1/7.2/7.3, x64/x86, ZTS/NTS). In example for PHP 7.3 in TS mode and 32 bit architecture : `extension = php_win32service-7.3-ts-vc14-x86.dll` (or use the short name available since PHP 7.2 : `extension = win32service` if the extension file is named `php_win32service.dll`).
 
 Check in command line if the extension is correctly loaded with this command `php --ri win32service`.
 
 If the output indicate this extension is not loaded, check the PHP configuration.
-
-> Note : For PHP 7.2, the first binary available is available on [AppVeyor Artifact](https://ci.appveyor.com/project/macintoshplus/win32service/build/job/u30oquj5q2h8t1k1/artifacts). Feedback are welcome.
 
 # Use
 
