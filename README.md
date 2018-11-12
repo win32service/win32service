@@ -17,7 +17,7 @@ __Caution : PHP 7.0 is end of life in december 2018__ See : http://php.net/suppo
 
 # Less administrator privileges
 
-This branch allow control the service with low level privileges.
+From the version 0.3.0, this extension allow control the service with a low level privileges account.
 
 * Create and add the service
 * Set the minimal ACL `RPWPRC` onto the service with `sc set`. Note this command overwite all ACL. Read first the current ACL with `sc show`. See https://support.microsoft.com/en-us/help/914392/best-practices-and-guidance-for-writers-of-service-discretionary-access-control-lists
@@ -28,7 +28,7 @@ Now attempt control another service without set the ACL. Nothing work.
 
 # Install
 
-[Download the latest](https://github.com/InExtenso/win32service/releases) version for your PHP 7 version.
+[Download the latest](https://github.com/win32service/win32service/releases) version for your PHP 7 version.
 
 Unzip the package and copy the extention into the folder `ext` of your PHP installation.
 
