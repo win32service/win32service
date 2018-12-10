@@ -18,10 +18,10 @@
     <email>jb@nahan.fr</email>
     <active>yes</active>
   </lead>
-  <date>2018-03-09</date>
+  <date>2018-12-10</date>
   <time>17:18:00</time>
   <version>
-    <release>0.3.0</release>
+    <release>0.3.1</release>
     <api>0.2.0</api>
   </version>
   <stability>
@@ -30,10 +30,13 @@
   </stability>
   <license uri="http://www.php.net/license">PHP License</license>
   <notes><![CDATA[
-     Add support for use a non admin account for start, stop, pause, resume service.
-     Add support for PHP 7.2.
-     Fix bugs.
-     The binary is also available here: https://github.com/InExtenso/win32service/releases/tag/v0.3.0
+     The reporitory has been transfered to an independent GitHub organisation.
+     The new website is https://win32service.github.io
+
+     * Removing the PHP version check for not working versions
+     * Add support for PHP 7.3.
+     * Fix bugs.
+     The binary is also available here: https://github.com/win32service/win32service/releases/tag/v0.3.1
  ]]></notes>
   <contents>
     <dir name="/">
@@ -62,6 +65,25 @@
   <providesextension>win32service</providesextension>
   <extsrcrelease/>
   <changelog>
+    <release>
+            <version>
+                <release>0.3.1</release>
+                <api>0.2.0</api>
+            </version>
+            <stability>
+                <release>stable</release>
+                <api>stable</api>
+            </stability>
+            <license uri="http://www.php.net/license">PHP License</license>
+            <notes><![CDATA[
+The reporitory has been transfered to an independent GitHub organisation.
+The new website is https://win32service.github.io
+
+* Removing the PHP version check for not working versions
+* Add support for PHP 7.3.
+* Fix bugs.
+ ]]></notes>
+        </release>
     <release>
             <version>
                 <release>0.3.0</release>
