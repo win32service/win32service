@@ -97,8 +97,23 @@ static void WINAPI service_main(DWORD argc, char **argv)
 
 	g->st.dwServiceType = SERVICE_WIN32;
 	g->st.dwCurrentState = SERVICE_START_PENDING;
-	g->st.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN | SERVICE_ACCEPT_PAUSE_CONTINUE | (osvi.dwMajorVersion >= 6 ? SERVICE_ACCEPT_PRESHUTDOWN : 0); /* Allow the service to be paused and handle Vista-style pre-shutdown notifications. */
+	//g->st.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN | SERVICE_ACCEPT_PAUSE_CONTINUE | (osvi.dwMajorVersion >= 6 ? SERVICE_ACCEPT_PRESHUTDOWN : 0); /* Allow the service to be paused and handle Vista-style pre-shutdown notifications. */
+    g->st.dwControlsAccepted =  SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN | SERVICE_ACCEPT_PAUSE_CONTINUE |
+						        SERVICE_ACCEPT_HARDWAREPROFILECHANGE | SERVICE_ACCEPT_NETBINDCHANGE |
+								SERVICE_ACCEPT_PARAMCHANGE | SERVICE_ACCEPT_POWEREVENT;
 
+	//XP and newer Accepts
+    if ( !(osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 0 ) ) {
+        g->st.dwControlsAccepted |= SERVICE_ACCEPT_SESSIONCHANGE;
+    }
+    //Vista and newer Accepts
+    if (osvi.dwMajorVersion >= 6) {
+        g->st.dwControlsAccepted |= SERVICE_ACCEPT_PRESHUTDOWN;
+    }
+    //Windows Server 2008, Windows Vista, Windows Server 2003, and Windows XP/2000: This control code is not supported.
+    if ( !(osvi.dwMajorVersion == 5) && !(osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0 ) ) {
+        g->st.dwControlsAccepted |= SERVICE_ACCEPT_TIMECHANGE | SERVICE_ACCEPT_TRIGGEREVENT;
+    }
 	g->sh = RegisterServiceCtrlHandlerEx(g->service_name, service_handler, g);
 
 	if (g->sh == (SERVICE_STATUS_HANDLE)0) {
@@ -270,16 +285,16 @@ static PHP_FUNCTION(win32_create_service)
 		var = def; \
 	}
 
-	STR_DETAIL("service", service, NULL);
-	STR_DETAIL("display", display, NULL);
-	STR_DETAIL("user", user, NULL);
-	STR_DETAIL("password", password, "");
-	STR_DETAIL("path", path, NULL);
-	STR_DETAIL("params", params, "");
+	STR_DETAIL(INFO_SERVICE, service, NULL);
+	STR_DETAIL(INFO_DISPLAY, display, NULL);
+	STR_DETAIL(INFO_USER, user, NULL);
+	STR_DETAIL(INFO_PASSWORD, password, "");
+	STR_DETAIL(INFO_PATH, path, NULL);
+	STR_DETAIL(INFO_PARAMS, params, "");
 	STR_DETAIL("load_order", load_order, NULL);
-	STR_DETAIL("description", desc, NULL);
+	STR_DETAIL(INFO_DESCRIPTION, desc, NULL);
 	INT_DETAIL("svc_type", svc_type, SERVICE_WIN32_OWN_PROCESS);
-	INT_DETAIL("start_type", start_type, SERVICE_AUTO_START);
+	INT_DETAIL(INFO_START_TYPE, start_type, SERVICE_AUTO_START);
 	INT_DETAIL("error_control", error_control, SERVICE_ERROR_IGNORE);
 	BOOL_DETAIL("delayed_start", delayed_start, 0); /* Allow Vista+ delayed service start. */
 	INT_DETAIL("base_priority", base_priority, NORMAL_PRIORITY_CLASS);
@@ -693,6 +708,7 @@ static PHP_MINIT_FUNCTION(win32service)
 	ZEND_INIT_MODULE_GLOBALS(win32service, init_globals, NULL);
 
 #define MKCONST(x)	REGISTER_LONG_CONSTANT("WIN32_" # x, x, CONST_CS|CONST_PERSISTENT)
+#define MKSCONST(x)	REGISTER_STRING_CONSTANT("WIN32_" # x, x, CONST_CS|CONST_PERSISTENT)
 
 	/* Constants used in communication with the SCM */
 
@@ -717,23 +733,23 @@ static PHP_MINIT_FUNCTION(win32service)
 
 	/* dwControl */
 	MKCONST(SERVICE_CONTROL_CONTINUE);                 /* 0x00000003 Notifies a paused service that it should resume. */
-	/* MKCONST(SERVICE_CONTROL_DEVICEEVENT);           /* 0x0000000B */
-	/* MKCONST(SERVICE_CONTROL_HARDWAREPROFILECHANGE); /* 0x0000000C */
+	MKCONST(SERVICE_CONTROL_DEVICEEVENT);              /* 0x0000000B */
+	MKCONST(SERVICE_CONTROL_HARDWAREPROFILECHANGE);    /* 0x0000000C */
 	MKCONST(SERVICE_CONTROL_INTERROGATE);              /* 0x00000004 Notifies a service that it should report its current status information to the service control manager. */
-	/* MKCONST(SERVICE_CONTROL_NETBINDADD);            /* 0x00000007 Notifies a network service that there is a new component for binding. */
-	/* MKCONST(SERVICE_CONTROL_NETBINDDISABLE);        /* 0x0000000A Notifies a network service that one of its bindings has been disabled. */
-	/* MKCONST(SERVICE_CONTROL_NETBINDENABLE);         /* 0x00000009 Notifies a network service that a disabled binding has been enabled. */
-	/* MKCONST(SERVICE_CONTROL_NETBINDREMOVE);         /* 0x00000008 Notifies a network service that a component for binding has been removed. */
-	/* MKCONST(SERVICE_CONTROL_PARAMCHANGE);           /* 0x00000006 Notifies a service that its startup parameters have changed. */
+	MKCONST(SERVICE_CONTROL_NETBINDADD);               /* 0x00000007 Notifies a network service that there is a new component for binding. */
+	MKCONST(SERVICE_CONTROL_NETBINDDISABLE);           /* 0x0000000A Notifies a network service that one of its bindings has been disabled. */
+	MKCONST(SERVICE_CONTROL_NETBINDENABLE);            /* 0x00000009 Notifies a network service that a disabled binding has been enabled. */
+	MKCONST(SERVICE_CONTROL_NETBINDREMOVE);            /* 0x00000008 Notifies a network service that a component for binding has been removed. */
+	MKCONST(SERVICE_CONTROL_PARAMCHANGE);              /* 0x00000006 Notifies a service that its startup parameters have changed. */
 	MKCONST(SERVICE_CONTROL_PAUSE);                    /* 0x00000002 Notifies a service that it should pause. */
-	/* MKCONST(SERVICE_CONTROL_POWEREVENT);            /* 0x0000000D */
+	MKCONST(SERVICE_CONTROL_POWEREVENT);               /* 0x0000000D */
 	MKCONST(SERVICE_CONTROL_PRESHUTDOWN);              /* 0x0000000F Notifies a service that the system will be shutting down.
 	                                                                 Services that need additional time to perform cleanup tasks beyond the tight time restriction at system shutdown can use this notification.
 	                                                                 The service control manager sends this notification to applications that have registered for it before sending a SERVICE_CONTROL_SHUTDOWN notification to applications that have registered for that notification.
 	                                                                 A service that handles this notification blocks system shutdown until the service stops or the preshutdown time-out interval specified through SERVICE_PRESHUTDOWN_INFO expires.
 	                                                                 Because this affects the user experience, services should use this feature only if it is absolutely necessary to avoid data loss or significant recovery time at the next system start.
 	                                                                 Windows Server 2003 and Windows XP/2000:  This value is not supported. */
-	/* MKCONST(SERVICE_CONTROL_SESSIONCHANGE);         /* 0x0000000E */
+	MKCONST(SERVICE_CONTROL_SESSIONCHANGE);            /* 0x0000000E */
 	MKCONST(SERVICE_CONTROL_SHUTDOWN);                 /* 0x00000005 Notifies a service that the system is shutting down so the service can perform cleanup tasks.
 	                                                                 Note that services that register for SERVICE_CONTROL_PRESHUTDOWN notifications cannot receive this notification because they have already stopped.
 	                                                                 If a service accepts this control code, it must stop after it performs its cleanup tasks and return NO_ERROR.
@@ -741,21 +757,21 @@ static PHP_MINIT_FUNCTION(win32service)
 	MKCONST(SERVICE_CONTROL_STOP);                     /* 0x00000001 Notifies a service that it should stop. */
 
 	/* dwControlsAccepted */
-	/* MKCONST(SERVICE_ACCEPT_HARDWAREPROFILECHANGE);  /* 0x00000020 The service is notified when the computer's hardware profile has changed.
+	MKCONST(SERVICE_ACCEPT_HARDWAREPROFILECHANGE);     /* 0x00000020 The service is notified when the computer's hardware profile has changed.
 	                                                                 This enables the system to send SERVICE_CONTROL_HARDWAREPROFILECHANGE notifications to the service. */
-	/* MKCONST(SERVICE_ACCEPT_NETBINDCHANGE);          /* 0x00000010 The service is a network component that can accept changes in its binding without being stopped and restarted.
+	MKCONST(SERVICE_ACCEPT_NETBINDCHANGE);             /* 0x00000010 The service is a network component that can accept changes in its binding without being stopped and restarted.
 	                                                                 This control code allows the service to receive SERVICE_CONTROL_NETBINDADD, SERVICE_CONTROL_NETBINDREMOVE, SERVICE_CONTROL_NETBINDENABLE, and SERVICE_CONTROL_NETBINDDISABLE notifications. */
-	/* MKCONST(SERVICE_ACCEPT_PARAMCHANGE);            /* 0x00000008 The service can reread its startup parameters without being stopped and restarted.
+	MKCONST(SERVICE_ACCEPT_PARAMCHANGE);               /* 0x00000008 The service can reread its startup parameters without being stopped and restarted.
 	                                                                 This control code allows the service to receive SERVICE_CONTROL_PARAMCHANGE notifications. */
 	MKCONST(SERVICE_ACCEPT_PAUSE_CONTINUE);            /* 0x00000002 The service can be paused and continued.
 	                                                                 This control code allows the service to receive SERVICE_CONTROL_PAUSE and SERVICE_CONTROL_CONTINUE notifications. */
-	/* MKCONST(SERVICE_ACCEPT_POWEREVENT);             /* 0x00000040 The service is notified when the computer's power status has changed.
+	MKCONST(SERVICE_ACCEPT_POWEREVENT);                /* 0x00000040 The service is notified when the computer's power status has changed.
 	                                                                 This enables the system to send SERVICE_CONTROL_POWEREVENT notifications to the service. */
 	MKCONST(SERVICE_ACCEPT_PRESHUTDOWN);               /* 0x00000100 The service can perform preshutdown tasks.
 	                                                                 This control code enables the service to receive SERVICE_CONTROL_PRESHUTDOWN notifications.
 	                                                                 Note that ControlService and ControlServiceEx cannot send this notification; only the system can send it.
 	                                                                 Windows Server 2003 and Windows XP/2000:  This value is not supported. */
-	/* MKCONST(SERVICE_ACCEPT_SESSIONCHANGE);          /* 0x00000080 The service is notified when the computer's session status has changed.
+	MKCONST(SERVICE_ACCEPT_SESSIONCHANGE);             /* 0x00000080 The service is notified when the computer's session status has changed.
 	                                                                 This enables the system to send SERVICE_CONTROL_SESSIONCHANGE notifications to the service.
 	                                                                 Windows 2000:  This value is not supported. */
 	MKCONST(SERVICE_ACCEPT_SHUTDOWN);                  /* 0x00000004 The service is notified when system shutdown occurs.
@@ -763,16 +779,16 @@ static PHP_MINIT_FUNCTION(win32service)
 	                                                                 Note that ControlService and ControlServiceEx cannot send this notification; only the system can send it. */
 	MKCONST(SERVICE_ACCEPT_STOP);                      /* 0x00000001 The service can be stopped.
 	                                                                 This control code allows the service to receive SERVICE_CONTROL_STOP notifications. */
-	/* MKCONST(SERVICE_ACCEPT_TIMECHANGE);             /* 0x00000200 The service is notified when the system time has changed.
+	MKCONST(SERVICE_ACCEPT_TIMECHANGE);                /* 0x00000200 The service is notified when the system time has changed.
 	                                                                 This enables the system to send SERVICE_CONTROL_TIMECHANGE notifications to the service.
 	                                                                 Windows Server 2008, Windows Vista, Windows Server 2003, and Windows XP/2000:  This control code is not supported. */
-	/* MKCONST(SERVICE_ACCEPT_TRIGGEREVENT);           /* 0x00000400 The service is notified when an event for which the service has registered occurs.
+	MKCONST(SERVICE_ACCEPT_TRIGGEREVENT);              /* 0x00000400 The service is notified when an event for which the service has registered occurs.
 	                                                                 This enables the system to send SERVICE_CONTROL_TRIGGEREVENT notifications to the service.
 	                                                                 Windows Server 2008, Windows Vista, Windows Server 2003, and Windows XP/2000:  This control code is not supported. */
 
 	/* dwStartType */
-	/* MKCONST(SERVICE_BOOT_START);                    /* 0x00000000 A device driver started by the system loader. This value is valid only for driver services. */
-	/* MKCONST(SERVICE_SYSTEM_START);                  /* 0x00000001 A device driver started by the IoInitSystem function. This value is valid only for driver services. */
+	MKCONST(SERVICE_BOOT_START);                       /* 0x00000000 A device driver started by the system loader. This value is valid only for driver services. */
+	MKCONST(SERVICE_SYSTEM_START);                     /* 0x00000001 A device driver started by the IoInitSystem function. This value is valid only for driver services. */
 	MKCONST(SERVICE_AUTO_START);                       /* 0x00000002 A service started automatically by the service control manager during system startup. */
 	MKCONST(SERVICE_DEMAND_START);                     /* 0x00000003 A service started by the service control manager when a process calls the StartService function. */
 	MKCONST(SERVICE_DISABLED);                         /* 0x00000004 A service that cannot be started. Attempts to start the service result in the error code ERROR_SERVICE_DISABLED. */
@@ -780,9 +796,9 @@ static PHP_MINIT_FUNCTION(win32service)
 	/* dwErrorControl */
 	MKCONST(SERVICE_ERROR_IGNORE);                     /* 0x00000000 The startup program ignores the error and continues the startup operation. */
 	MKCONST(SERVICE_ERROR_NORMAL);                     /* 0x00000001 The startup program logs the error in the event log but continues the startup operation. */
-	/* MKCONST(SERVICE_ERROR_SEVERE);                  /* 0x00000002 The startup program logs the error in the event log.
+	MKCONST(SERVICE_ERROR_SEVERE);                     /* 0x00000002 The startup program logs the error in the event log.
 	                                                                 If the last-known-good configuration is being started, the startup operation continues. Otherwise, the system is restarted with the last-known-good configuration. */
-	/* MKCONST(SERVICE_ERROR_CRITICAL);                /* 0x00000003 The startup program logs the error in the event log, if possible.
+	MKCONST(SERVICE_ERROR_CRITICAL);                   /* 0x00000003 The startup program logs the error in the event log, if possible.
 	                                                                 If the last-known-good configuration is being started, the startup operation fails. Otherwise, the system is restarted with the last-known good configuration. */
 
 	/* dwServiceFlags */
@@ -827,6 +843,16 @@ static PHP_MINIT_FUNCTION(win32service)
 	MKCONST(IDLE_PRIORITY_CLASS);                      /* 0x00000040 Process whose threads run only when the system is idle. The threads of the process are preempted by the threads of any process running in a higher priority class. An example is a screen saver. The idle-priority class is inherited by child processes. */
 	MKCONST(NORMAL_PRIORITY_CLASS);                    /* 0x00000020 Process with no special scheduling needs. */
 	MKCONST(REALTIME_PRIORITY_CLASS);                  /* 0x00000100 Process that has the highest possible priority. The threads of the process preempt the threads of all other processes, including operating system processes performing important tasks. For example, a real-time process that executes for more than a very brief interval can cause disk caches not to flush or cause the mouse to be unresponsive. */
+
+    /* Win32 Service informations */
+    MKSCONST(INFO_SERVICE);
+    MKSCONST(INFO_DISPLAY);
+    MKSCONST(INFO_USER);
+    MKSCONST(INFO_PASSWORD);
+    MKSCONST(INFO_PATH);
+    MKSCONST(INFO_PARAMS);
+    MKSCONST(INFO_DESCRIPTION);
+    MKSCONST(INFO_START_TYPE);
 
 	return SUCCESS;
 }

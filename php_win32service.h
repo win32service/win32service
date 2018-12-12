@@ -25,7 +25,7 @@
 extern zend_module_entry win32service_module_entry;
 #define phpext_win32service_ptr	&win32service_module_entry
 
-#define PHP_WIN32SERVICE_VERSION "0.3.1"
+#define PHP_WIN32SERVICE_VERSION "0.4.0"
 
 #ifndef PHP_WIN32
 # error This extension is for win32 only
@@ -38,6 +38,15 @@ extern zend_module_entry win32service_module_entry;
 #ifndef SERVICE_WIN32_OWN_PROCESS_INTERACTIVE
 #define SERVICE_WIN32_OWN_PROCESS_INTERACTIVE SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS
 #endif
+
+#define INFO_SERVICE        "service"
+#define INFO_DISPLAY        "display"
+#define INFO_USER           "user"
+#define INFO_PASSWORD       "password"
+#define INFO_PATH           "path"
+#define INFO_PARAMS         "params"
+#define INFO_DESCRIPTION    "description"
+#define INFO_START_TYPE     "start_type"
 
 #endif
 
