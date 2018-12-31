@@ -143,7 +143,7 @@ static DWORD WINAPI svc_thread_proc(LPVOID _globals)
 	return 0;
 }
 
-/* {{{ proto bool win32_start_service_ctrl_dispatcher(string $name)
+/* {{{ proto bool win32_start_service_ctrl_dispatcher(string $name, [bool gracefulExit])
    Registers the script with the SCM, so that it can act as the service with the given name */
 static PHP_FUNCTION(win32_start_service_ctrl_dispatcher)
 {
@@ -191,13 +191,17 @@ static PHP_FUNCTION(win32_start_service_ctrl_dispatcher)
 }
 /* }}} */
 
-/* {{{ proto bool win32_set_service_exit_mode(bool gracefulExit)
+/* {{{ proto bool win32_set_service_exit_mode([bool gracefulExit])
    Set (and get) the exit mode of the service, when set to true the service
    will shut down gracefuly when PHP exits, when set to false it will not shut
    down gracefuly, this will mean that the service will count as having failed 
    and the recovery action will be run */ 
 static PHP_FUNCTION(win32_set_service_exit_mode)
 {
+	if (strcmp(sapi_module.name, "cli") != 0) {
+		zend_error(E_ERROR, "This function work only when using the CLI SAPI and called into the service code.");
+		RETURN_FALSE;
+	}
 	zend_bool gracefulExitParam=SVCG(gracefulExit);
 	zend_bool old_gracefulExitParam=SVCG(gracefulExit);
 
@@ -890,10 +894,12 @@ static PHP_RSHUTDOWN_FUNCTION(win32service)
 {
 	if (SVCG(sh)) {
 		if (!SVCG(gracefulExit)) {
+			SVCG(st).dwCurrentState = SERVICE_STOP_PENDING;
 			SVCG(st).dwWin32ExitCode = ERROR_SERVICE_SPECIFIC_ERROR;
-			SVCG(st).dwServiceSpecificExitCode = -1;
+			SVCG(st).dwServiceSpecificExitCode = 1;
+		} else {
+			SVCG(st).dwCurrentState = SERVICE_STOPPED;
 		}
-		SVCG(st).dwCurrentState = SERVICE_STOPPED;
 		SetServiceStatus(SVCG(sh), &SVCG(st));
 		/* PostThreadMessage(SVCG(svc_thread_id), WM_QUIT, 0, 0); */
 	}
@@ -931,10 +937,12 @@ static PHP_MINFO_FUNCTION(win32service)
 		php_info_print_table_row(2, "win32_start_service_ctrl_dispatcher", "enabled");
 		php_info_print_table_row(2, "win32_set_service_status", "enabled");
 		php_info_print_table_row(2, "win32_get_last_control_message", "enabled");
+		php_info_print_table_row(2, "win32_set_service_exit_mode", "enabled");
 	} else {
 		php_info_print_table_row(2, "win32_start_service_ctrl_dispatcher", "disabled");
 		php_info_print_table_row(2, "win32_set_service_status", "disabled");
 		php_info_print_table_row(2, "win32_get_last_control_message", "disabled");
+		php_info_print_table_row(2, "win32_set_service_exit_mode", "disabled");
 	}
 	php_info_print_table_row(2, "win32_create_service", "enabled");
 	php_info_print_table_row(2, "win32_delete_service", "enabled");
