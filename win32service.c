@@ -98,24 +98,25 @@ static void WINAPI service_main(DWORD argc, char **argv)
 	g->st.dwServiceType = SERVICE_WIN32;
 	g->st.dwCurrentState = SERVICE_START_PENDING;
 	//g->st.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN | SERVICE_ACCEPT_PAUSE_CONTINUE | (osvi.dwMajorVersion >= 6 ? SERVICE_ACCEPT_PRESHUTDOWN : 0); /* Allow the service to be paused and handle Vista-style pre-shutdown notifications. */
-    g->st.dwControlsAccepted =  SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN | SERVICE_ACCEPT_PAUSE_CONTINUE |
+	g->st.dwControlsAccepted =  SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN | SERVICE_ACCEPT_PAUSE_CONTINUE |
 						        SERVICE_ACCEPT_HARDWAREPROFILECHANGE | SERVICE_ACCEPT_NETBINDCHANGE |
 								SERVICE_ACCEPT_PARAMCHANGE | SERVICE_ACCEPT_POWEREVENT;
 
 	//XP and newer Accepts
-    if ( !(osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 0 ) ) {
-        g->st.dwControlsAccepted |= SERVICE_ACCEPT_SESSIONCHANGE;
-    }
-    //Vista and newer Accepts
-    if (osvi.dwMajorVersion >= 6) {
-        g->st.dwControlsAccepted |= SERVICE_ACCEPT_PRESHUTDOWN;
-    }
-    //Windows Server 2008, Windows Vista, Windows Server 2003, and Windows XP/2000: This control code is not supported.
-    if ( !(osvi.dwMajorVersion == 5) && !(osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0 ) ) {
-        g->st.dwControlsAccepted |= SERVICE_ACCEPT_TIMECHANGE | SERVICE_ACCEPT_TRIGGEREVENT;
-    }
+	if ( !(osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 0 ) ) {
+	        g->st.dwControlsAccepted |= SERVICE_ACCEPT_SESSIONCHANGE;
+    	}
+	//Vista and newer Accepts
+	if (osvi.dwMajorVersion >= 6) {
+		g->st.dwControlsAccepted |= SERVICE_ACCEPT_PRESHUTDOWN;
+	}
+	//Windows Server 2008, Windows Vista, Windows Server 2003, and Windows XP/2000: This control code is not supported.
+	if ( !(osvi.dwMajorVersion == 5) && !(osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0 ) ) {
+		g->st.dwControlsAccepted |= SERVICE_ACCEPT_TIMECHANGE | SERVICE_ACCEPT_TRIGGEREVENT;
+	}
 	g->sh = RegisterServiceCtrlHandlerEx(g->service_name, service_handler, g);
 
+	g->gracefulExit = 1;
 	if (g->sh == (SERVICE_STATUS_HANDLE)0) {
 		g->code = GetLastError();
 		SetEvent(g->event);
@@ -153,18 +154,20 @@ static PHP_FUNCTION(win32_start_service_ctrl_dispatcher)
 
 	char *name;
 	size_t name_len;
+	zend_bool gracefulExitParam=SVCG(gracefulExit);
 
 	if (SVCG(svc_thread)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "service ctrl dispatcher already running");
 		RETURN_FALSE;
 	}
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &name, &name_len, &gracefulExitParam)) {
 		RETURN_FALSE;
 	}
 
 	SVCG(service_name) = estrdup(name);
 
+	SVCG(gracefulExit)=gracefulExitParam;
 	SVCG(te)[0].lpServiceName = SVCG(service_name);
 	SVCG(te)[0].lpServiceProc = service_main;
 	SVCG(event) = CreateEvent(NULL, TRUE, FALSE, NULL);
@@ -185,6 +188,26 @@ static PHP_FUNCTION(win32_start_service_ctrl_dispatcher)
 	}
 
 	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto bool win32_set_service_exit_mode(bool gracefulExit)
+   Set (and get) the exit mode of the service, when set to true the service
+   will shut down gracefuly when PHP exits, when set to false it will not shut
+   down gracefuly, this will mean that the service will count as having failed 
+   and the recovery action will be run */ 
+static PHP_FUNCTION(win32_set_service_exit_mode)
+{
+	zend_bool gracefulExitParam=SVCG(gracefulExit);
+	zend_bool old_gracefulExitParam=SVCG(gracefulExit);
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &gracefulExitParam)) {
+		RETURN_FALSE;
+	}
+
+	SVCG(gracefulExit)=gracefulExitParam;
+
+	RETURN_BOOL(old_gracefulExitParam);
 }
 /* }}} */
 
@@ -594,11 +617,16 @@ static PHP_FUNCTION(win32_continue_service)
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_start_service_ctrl_dispatcher, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, gracefulExit)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_set_service_status, 0, 0, 1)
 	ZEND_ARG_INFO(0, status)
 	ZEND_ARG_INFO(0, checkpoint)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_set_service_exit_mode, 0, 0, 1)
+	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_create_service, 0, 0, 1)
@@ -651,6 +679,7 @@ static zend_function_entry functions[] = {
 	PHP_FE(win32_stop_service,                  arginfo_win32_stop_service)
 	PHP_FE(win32_pause_service,                 arginfo_win32_pause_service)
 	PHP_FE(win32_continue_service,              arginfo_win32_continue_service)
+	PHP_FE(win32_set_service_exit_mode,         arginfo_win32_set_service_exit_mode)
 	PHP_FE_END
 };
 
@@ -860,6 +889,10 @@ static PHP_MINIT_FUNCTION(win32service)
 static PHP_RSHUTDOWN_FUNCTION(win32service)
 {
 	if (SVCG(sh)) {
+		if (!SVCG(gracefulExit)) {
+			SVCG(st).dwWin32ExitCode = ERROR_SERVICE_SPECIFIC_ERROR;
+			SVCG(st).dwServiceSpecificExitCode = -1;
+		}
 		SVCG(st).dwCurrentState = SERVICE_STOPPED;
 		SetServiceStatus(SVCG(sh), &SVCG(st));
 		/* PostThreadMessage(SVCG(svc_thread_id), WM_QUIT, 0, 0); */
