@@ -893,13 +893,11 @@ static PHP_MINIT_FUNCTION(win32service)
 static PHP_RSHUTDOWN_FUNCTION(win32service)
 {
 	if (SVCG(sh)) {
-		if (!SVCG(gracefulExit)) {
-			SVCG(st).dwCurrentState = SERVICE_STOP_PENDING;
+		//if (!SVCG(gracefulExit)) {
 			SVCG(st).dwWin32ExitCode = ERROR_SERVICE_SPECIFIC_ERROR;
 			SVCG(st).dwServiceSpecificExitCode = 1;
-		} else {
-			SVCG(st).dwCurrentState = SERVICE_STOPPED;
-		}
+		//}
+		SVCG(st).dwCurrentState = SERVICE_STOPPED;
 		SetServiceStatus(SVCG(sh), &SVCG(st));
 		/* PostThreadMessage(SVCG(svc_thread_id), WM_QUIT, 0, 0); */
 	}
