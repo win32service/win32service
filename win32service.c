@@ -894,7 +894,12 @@ static PHP_MINIT_FUNCTION(win32service)
 static PHP_RSHUTDOWN_FUNCTION(win32service)
 {
 	if (SVCG(sh)) {
-		if (SVCG(gracefulExit) == 0) {
+		char *str = emalloc(sizeof(char) * 35);
+		zend_bool graceful = SVCG(gracefulExit);
+		sprintf(str, "Notice : Win32Service exit mode %b", graceful);
+		php_log_err(str TSRMLS_CC);
+		if (graceful == 0) {
+			php_log_err("Notice : Win32Service exit in error" TSRMLS_CC);
 			SVCG(st).dwWin32ExitCode = ERROR_SERVICE_SPECIFIC_ERROR;
 			SVCG(st).dwServiceSpecificExitCode = 2;//SVCG(exitCode);
 		}
