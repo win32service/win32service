@@ -212,6 +212,11 @@ static PHP_FUNCTION(win32_set_service_exit_mode)
 
 	SVCG(gracefulExit)=gracefulExitParam;
 
+	char *str = emalloc(sizeof(char) * 35);
+	sprintf(str, "Notice : Win32Service exit mode change (old %d new %d)", old_gracefulExitParam, SVCG(gracefulExit));
+	php_log_err(str TSRMLS_CC);
+	efree(str);
+
 	RETURN_BOOL(old_gracefulExitParam);
 }
 /* }}} */
@@ -898,6 +903,7 @@ static PHP_RSHUTDOWN_FUNCTION(win32service)
 		char *str = emalloc(sizeof(char) * 35);
 		sprintf(str, "Notice : Win32Service exit mode %d", graceful);
 		php_log_err(str TSRMLS_CC);
+		efree(str);
 		if (graceful == 0) {
 			php_log_err("Notice : Win32Service exit in error" TSRMLS_CC);
 			SVCG(st).dwWin32ExitCode = ERROR_SERVICE_SPECIFIC_ERROR;
