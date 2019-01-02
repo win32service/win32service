@@ -925,15 +925,20 @@ static PHP_RSHUTDOWN_FUNCTION(win32service)
 {
 	if (SVCG(sh)) {
 		zend_bool graceful = SVCG(gracefulExit);
-		char *str = emalloc(sizeof(char) * 35);
-		sprintf(str, "Notice : Win32Service exit in mode %d with exitCode %d", graceful, SVCG(exitCode));
-		php_log_err(str TSRMLS_CC);
-		efree(str);
+/* Log the mode and code used for exit in PHP log */
+		char *str = emalloc(sizeof(char) * 150);
+		
 		if (graceful == 0) {
-			php_log_err("Notice : Win32Service exit in error" TSRMLS_CC);
 			SVCG(st).dwWin32ExitCode = ERROR_SERVICE_SPECIFIC_ERROR;
 			SVCG(st).dwServiceSpecificExitCode = SVCG(exitCode);
+			sprintf(str, "Info: Win32Service exit with error and exit code %d", SVCG(exitCode));
+ 		} else {
+			sprintf(str, "Info: Win32Service exit gracefuly");
 		}
+
+		php_log_err(str TSRMLS_CC);
+		efree(str);
+
 		SVCG(st).dwCurrentState = SERVICE_STOPPED;
 		SetServiceStatus(SVCG(sh), &SVCG(st));
 		/* PostThreadMessage(SVCG(svc_thread_id), WM_QUIT, 0, 0); */
