@@ -117,6 +117,7 @@ static void WINAPI service_main(DWORD argc, char **argv)
 	g->sh = RegisterServiceCtrlHandlerEx(g->service_name, service_handler, g);
 
 	g->gracefulExit = 1;
+	g->exitCode = 1;
 	if (g->sh == (SERVICE_STATUS_HANDLE)0) {
 		g->code = GetLastError();
 		SetEvent(g->event);
@@ -893,10 +894,10 @@ static PHP_MINIT_FUNCTION(win32service)
 static PHP_RSHUTDOWN_FUNCTION(win32service)
 {
 	if (SVCG(sh)) {
-		//if (!SVCG(gracefulExit)) {
+		if (SVCG(gracefulExit) == 0) {
 			SVCG(st).dwWin32ExitCode = ERROR_SERVICE_SPECIFIC_ERROR;
-			SVCG(st).dwServiceSpecificExitCode = 1;
-		//}
+			SVCG(st).dwServiceSpecificExitCode = SVCG(exitCode);
+		}
 		SVCG(st).dwCurrentState = SERVICE_STOPPED;
 		SetServiceStatus(SVCG(sh), &SVCG(st));
 		/* PostThreadMessage(SVCG(svc_thread_id), WM_QUIT, 0, 0); */
