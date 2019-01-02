@@ -35,7 +35,7 @@ ZEND_BEGIN_MODULE_GLOBALS(win32service)
 	HANDLE event;
 	DWORD  code;
 	zend_bool gracefulExit;
-	zend_integer exitCode;
+	zend_long exitCode;
 	SERVICE_STATUS 			st;
 	SERVICE_STATUS_HANDLE	sh;
 	SERVICE_TABLE_ENTRY		te[2];
