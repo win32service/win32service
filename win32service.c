@@ -898,6 +898,7 @@ static PHP_MINIT_FUNCTION(win32service)
 	MKCONST(ERROR_SERVICE_NOT_ACTIVE);                 /* 0x00000426 The service has not been started. */
 	MKCONST(ERROR_SERVICE_REQUEST_TIMEOUT);            /* 0x0000041D The process for the service was started, but it did not call StartServiceCtrlDispatcher, or the thread that called StartServiceCtrlDispatcher may be blocked in a control handler function. */
 	MKCONST(ERROR_SHUTDOWN_IN_PROGRESS);               /* 0x0000045B The system is shutting down; this function cannot be called. */
+	MKCONST(ERROR_SERVICE_SPECIFIC_ERROR);             /* 0x0000042A The service has returned a service-specific error code. */
 	MKCONST(NO_ERROR);                                 /* 0x00000000 No error. */
 
 	/* Win32 Priority Constants */
