@@ -896,7 +896,7 @@ static PHP_RSHUTDOWN_FUNCTION(win32service)
 	if (SVCG(sh)) {
 		if (SVCG(gracefulExit) == 0) {
 			SVCG(st).dwWin32ExitCode = ERROR_SERVICE_SPECIFIC_ERROR;
-			SVCG(st).dwServiceSpecificExitCode = SVCG(exitCode);
+			SVCG(st).dwServiceSpecificExitCode = 2;//SVCG(exitCode);
 		}
 		SVCG(st).dwCurrentState = SERVICE_STOPPED;
 		SetServiceStatus(SVCG(sh), &SVCG(st));
