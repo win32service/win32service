@@ -215,6 +215,30 @@ static PHP_FUNCTION(win32_set_service_exit_mode)
 }
 /* }}} */
 
+/* {{{ proto bool win32_set_service_exit_code(int exitCode)
+   Set (and get) the exit code of the service, when the service will shut down 
+   gracefuly when PHP exits it's not used, when the service will shut down not 
+   gracefuly the int is used for exitCode and the recovery action will be run 
+   if exit code is not zero */ 
+static PHP_FUNCTION(win32_set_service_exit_code)
+{
+	if (strcmp(sapi_module.name, "cli") != 0) {
+		zend_error(E_ERROR, "This function work only when using the CLI SAPI and called into the service code.");
+		RETURN_FALSE;
+	}
+	zend_long exitCodeParam=SVCG(gracefulExit);
+	zend_long old_exitCodeParam=SVCG(gracefulExit);
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &exitCodeParam)) {
+		RETURN_FALSE;
+	}
+
+	SVCG(exitCode)=exitCodeParam;
+
+	RETURN_BOOL(old_exitCodeParam);
+}
+/* }}} */
+
 /* {{{ proto bool win32_set_service_status(int status, [int checkpoint])
    Update the service status */
 static PHP_FUNCTION(win32_set_service_status)
@@ -633,6 +657,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_set_service_exit_mode, 0, 0, 1)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_set_service_exit_code, 0, 0, 1)
+	ZEND_ARG_INFO(0, code)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_create_service, 0, 0, 1)
 	ZEND_ARG_INFO(0, details)
 	ZEND_ARG_INFO(0, machine)
@@ -684,6 +712,7 @@ static zend_function_entry functions[] = {
 	PHP_FE(win32_pause_service,                 arginfo_win32_pause_service)
 	PHP_FE(win32_continue_service,              arginfo_win32_continue_service)
 	PHP_FE(win32_set_service_exit_mode,         arginfo_win32_set_service_exit_mode)
+	PHP_FE(win32_set_service_exit_code,         arginfo_win32_set_service_exit_code)
 	PHP_FE_END
 };
 
@@ -897,13 +926,13 @@ static PHP_RSHUTDOWN_FUNCTION(win32service)
 	if (SVCG(sh)) {
 		zend_bool graceful = SVCG(gracefulExit);
 		char *str = emalloc(sizeof(char) * 35);
-		sprintf(str, "Notice : Win32Service exit in mode %d", graceful);
+		sprintf(str, "Notice : Win32Service exit in mode %d with exitCode %d", graceful, SVCG(exitCode));
 		php_log_err(str TSRMLS_CC);
 		efree(str);
 		if (graceful == 0) {
 			php_log_err("Notice : Win32Service exit in error" TSRMLS_CC);
 			SVCG(st).dwWin32ExitCode = ERROR_SERVICE_SPECIFIC_ERROR;
-			SVCG(st).dwServiceSpecificExitCode = 2;//SVCG(exitCode);
+			SVCG(st).dwServiceSpecificExitCode = SVCG(exitCode);
 		}
 		SVCG(st).dwCurrentState = SERVICE_STOPPED;
 		SetServiceStatus(SVCG(sh), &SVCG(st));
@@ -944,11 +973,13 @@ static PHP_MINFO_FUNCTION(win32service)
 		php_info_print_table_row(2, "win32_set_service_status", "enabled");
 		php_info_print_table_row(2, "win32_get_last_control_message", "enabled");
 		php_info_print_table_row(2, "win32_set_service_exit_mode", "enabled");
+		php_info_print_table_row(2, "win32_set_service_exit_code", "enabled");
 	} else {
 		php_info_print_table_row(2, "win32_start_service_ctrl_dispatcher", "disabled");
 		php_info_print_table_row(2, "win32_set_service_status", "disabled");
 		php_info_print_table_row(2, "win32_get_last_control_message", "disabled");
 		php_info_print_table_row(2, "win32_set_service_exit_mode", "disabled");
+		php_info_print_table_row(2, "win32_set_service_exit_code", "disabled");
 	}
 	php_info_print_table_row(2, "win32_create_service", "enabled");
 	php_info_print_table_row(2, "win32_delete_service", "enabled");
