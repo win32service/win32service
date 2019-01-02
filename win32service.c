@@ -115,9 +115,7 @@ static void WINAPI service_main(DWORD argc, char **argv)
 		g->st.dwControlsAccepted |= SERVICE_ACCEPT_TIMECHANGE | SERVICE_ACCEPT_TRIGGEREVENT;
 	}
 	g->sh = RegisterServiceCtrlHandlerEx(g->service_name, service_handler, g);
-
-	g->gracefulExit = 1;
-	g->exitCode = 1;
+	
 	if (g->sh == (SERVICE_STATUS_HANDLE)0) {
 		g->code = GetLastError();
 		SetEvent(g->event);
@@ -168,7 +166,13 @@ static PHP_FUNCTION(win32_start_service_ctrl_dispatcher)
 
 	SVCG(service_name) = estrdup(name);
 
+	char *str = emalloc(sizeof(char) * 35);
+	sprintf(str, "Notice : Win32Service start service exit mode change (old %d new %d)", SVCG(gracefulExit), gracefulExitParam);
+	php_log_err(str TSRMLS_CC);
+	efree(str);
+
 	SVCG(gracefulExit)=gracefulExitParam;
+
 	SVCG(te)[0].lpServiceName = SVCG(service_name);
 	SVCG(te)[0].lpServiceProc = service_main;
 	SVCG(event) = CreateEvent(NULL, TRUE, FALSE, NULL);
@@ -696,6 +700,8 @@ static zend_function_entry functions[] = {
 static void init_globals(zend_win32service_globals *g)
 {
 	memset(g, 0, sizeof(*g));
+	g->gracefulExit = 1;
+	g->exitCode = 1;
 }
 /*
  * Return 0 if this ext is not compatible with the current php version, 1 otherwise.
