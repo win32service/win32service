@@ -895,7 +895,7 @@ static PHP_RSHUTDOWN_FUNCTION(win32service)
 {
 	if (SVCG(sh)) {
 		zend_bool graceful = SVCG(gracefulExit);
-		BOOL mode = Z_LVAL_P(graceful);
+		BOOL mode = Z_LVAL_P(&graceful);
 		char *str = emalloc(sizeof(char) * 35);
 		sprintf(str, "Notice : Win32Service exit mode %d", mode);
 		php_log_err(str TSRMLS_CC);
