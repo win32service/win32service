@@ -975,9 +975,9 @@ static PHP_MINIT_FUNCTION(win32service)
 
 static PHP_RSHUTDOWN_FUNCTION(win32service)
 {
-	if (SVCG(sh)) {
+	if (SVCG(sh) && SVCG(st).dwCurrentState != SERVICE_STOPPED) {
 		zend_bool graceful = SVCG(gracefulExit);
-/* Log the mode and code used for exit in PHP log */
+		/* Log the mode and code used for exit in PHP log */
 		char *str = emalloc(sizeof(char) * 150);
 		
 		if (graceful == 0) {
