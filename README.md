@@ -10,3 +10,6 @@ The [win32service](https://pecl.php.net/package/win32service) extension is a Win
 
 See: [https://win32service.github.io/](https://win32service.github.io/)
 
+# News
+
+For project news, search on Twitter: [https://twitter.com/hashtag/Win32Service](https://twitter.com/hashtag/Win32Service).
