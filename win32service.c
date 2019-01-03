@@ -656,7 +656,7 @@ static PHP_FUNCTION(win32_send_custom_control)
 	SC_HANDLE hmgr;
 	SERVICE_STATUS st;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|s!", &service, &service_len, control, &machine, &machine_len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|s!", &service, &service_len, &control, &machine, &machine_len)) {
 		RETURN_FALSE;
 	}
 
