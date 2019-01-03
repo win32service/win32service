@@ -4,12 +4,12 @@ set NO_INTERACTION=1
 set REPORT_EXIT_STATUS=1
 set SKIP_IO_CAPTURE_TESTS=1
 
-if /i "%APPVEYOR_REPO_BRANCH:~0,4%" equ "php-" (
-	set BRANCH=%APPVEYOR_REPO_BRANCH:~4,3%
-	set STABILITY=stable
-) else (
+if /i "%PHP_REL%" equ "master" (
 	set BRANCH=master
 	set STABILITY=staging
+) else (
+	set BRANCH=%PHP_REL%
+	set STABILITY=stable
 )
 set DEPS_DIR=%PHP_BUILD_CACHE_BASE_DIR%\deps-%BRANCH%-%PHP_SDK_VC%-%PHP_SDK_ARCH%
 if not exist "%DEPS_DIR%" (
