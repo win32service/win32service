@@ -1,5 +1,7 @@
 @echo off
 
+cd /d C:\projects\php-src
+
 setlocal enableextensions enabledelayedexpansion
 	for %%a in (%ARCHITECTURES%) do (
 		set ARCH=%%a
