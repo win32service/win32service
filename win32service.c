@@ -642,6 +642,49 @@ static PHP_FUNCTION(win32_continue_service)
 }
 /* }}} */
 
+
+/* {{{ proto long win32_service_send_custom_control(string servicename, int control [, string machine])
+   Stops a service */
+static PHP_FUNCTION(win32_send_custom_control)
+{
+	char *machine = NULL;
+	char *service = NULL;
+	long control;
+	size_t machine_len = 0;
+	size_t	service_len = 0;
+	SC_HANDLE hsvc;
+	SC_HANDLE hmgr;
+	SERVICE_STATUS st;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|s!", &service, &service_len, control, &machine, &machine_len)) {
+		RETURN_FALSE;
+	}
+
+	if (control < 128 || control > 255) {
+		zend_error(E_ERROR, "The control argument value is not between 128 and 255.");
+		RETURN_FALSE;
+	}
+
+	hmgr = OpenSCManager(machine, NULL, SC_MANAGER_CONNECT);
+	if (hmgr) {
+		hsvc = OpenService(hmgr, service, SERVICE_USER_DEFINED_CONTROL);
+		if (hsvc) {
+			if (ControlService(hsvc, control, &st)) {
+				RETVAL_LONG(NO_ERROR);
+			} else {
+				RETVAL_LONG(GetLastError());
+			}
+			CloseServiceHandle(hsvc);
+		} else {
+			RETVAL_LONG(GetLastError());
+		}
+		CloseServiceHandle(hmgr);
+	} else {
+		RETVAL_LONG(GetLastError());
+	}
+}
+/* }}} */
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_start_service_ctrl_dispatcher, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
@@ -698,6 +741,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_continue_service, 0, 0, 1)
 	ZEND_ARG_INFO(0, servicename)
 	ZEND_ARG_INFO(0, machine)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_send_custom_control, 0, 0, 1)
+	ZEND_ARG_INFO(0, servicename)
+	ZEND_ARG_INFO(0, control)
+	ZEND_ARG_INFO(0, machine)
+ZEND_END_ARG_INFO()
+
 /* }}} */
 
 static zend_function_entry functions[] = {
@@ -713,6 +763,7 @@ static zend_function_entry functions[] = {
 	PHP_FE(win32_continue_service,              arginfo_win32_continue_service)
 	PHP_FE(win32_set_service_exit_mode,         arginfo_win32_set_service_exit_mode)
 	PHP_FE(win32_set_service_exit_code,         arginfo_win32_set_service_exit_code)
+	PHP_FE(win32_send_custom_control,           arginfo_win32_send_custom_control)
 	PHP_FE_END
 };
 
@@ -994,6 +1045,7 @@ static PHP_MINFO_FUNCTION(win32service)
 	php_info_print_table_row(2, "win32_stop_service", "enabled");
 	php_info_print_table_row(2, "win32_pause_service", "enabled");
 	php_info_print_table_row(2, "win32_continue_service", "enabled");
+	php_info_print_table_row(2, "win32_send_custom_control", "enabled");
 	php_info_print_table_end();
 }
 
