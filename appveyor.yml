@@ -41,6 +41,9 @@ install:
 build_script:
   - appveyor\build.cmd
 
+test_script:
+  - appveyor\test.bat
+
 artifacts:
   - path: artifacts
     name: php_win32service-%APPVEYOR_REPO_TAG_NAME%-%PHP_REL%
