@@ -3,9 +3,9 @@
 cd /d C:\projects\php-src
 
 setlocal enableextensions enabledelayedexpansion
-	for %%a in (%ARCHITECTURES%) do (
-		set ARCH=%%a
-
+rem	for %%a in (%ARCHITECTURES%) do (
+rem		set ARCH=%%a
+		set ARCH=%PLATFORM%
 		set SDK_RUNNER=%PHP_BUILD_CACHE_SDK_DIR%\phpsdk-%PHP_BUILD_CRT%-!ARCH!.bat
 		if not exist "!SDK_RUNNER!" (
 			echo "!SDK_RUNNER!" doesn't exist
@@ -16,7 +16,7 @@ setlocal enableextensions enabledelayedexpansion
 
 		if %errorlevel% neq 0 exit /b 3
 
-	)
+rem	)
 endlocal
 
 exit /b 0
