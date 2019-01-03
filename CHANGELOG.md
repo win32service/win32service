@@ -1,3 +1,8 @@
+# Version 0.4.0 (in dev)
+
+* Add win32_set_service_exit_mode and win32_set_service_exit_code functions
+* Add severals constants
+
 # Version 0.3.1 (2018-12-10)
 
 The reporitory has been transfered to an independent GitHub organisation.

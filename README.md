@@ -1,4 +1,4 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/7wqljie1knsrtfkh/branch/less_admin?svg=true)](https://ci.appveyor.com/project/macintoshplus/win32service/branch/less_admin)
+[![Build status](https://ci.appveyor.com/api/projects/status/7wqljie1knsrtfkh/branch/v0.4.x?svg=true)](https://ci.appveyor.com/project/macintoshplus/win32service/branch/v0.4.x)
 [![License](https://img.shields.io/badge/license-PHP_License-blue.svg)](http://www.php.net/license/3_01.txt)
 [![Documentation](https://img.shields.io/badge/manual-win32service-blue.svg)](http://php.net/manual/en/book.win32service.php)
 

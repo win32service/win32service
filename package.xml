@@ -15,14 +15,14 @@
   <lead>
     <name>Jean-Baptiste Nahan</name>
     <user>macintoshplus</user>
-    <email>jb@nahan.fr</email>
+    <email>jbnahan@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2018-12-10</date>
+  <date>2019-01-03</date>
   <time>17:18:00</time>
   <version>
-    <release>0.3.1</release>
-    <api>0.2.0</api>
+    <release>0.4.0</release>
+    <api>0.3.0</api>
   </version>
   <stability>
     <release>stable</release>
@@ -30,13 +30,9 @@
   </stability>
   <license uri="http://www.php.net/license">PHP License</license>
   <notes><![CDATA[
-     The reporitory has been transfered to an independent GitHub organisation.
-     The new website is https://win32service.github.io
-
-     * Removing the PHP version check for not working versions
-     * Add support for PHP 7.3.
-     * Fix bugs.
-     The binary is also available here: https://github.com/win32service/win32service/releases/tag/v0.3.1
+     * Add win32_set_service_exit_mode and win32_set_service_exit_code functions
+     * Add severals constants
+     The binary is also available here: https://github.com/win32service/win32service/releases/tag/v0.4.0
  ]]></notes>
   <contents>
     <dir name="/">
@@ -50,6 +46,10 @@
       <file name="examples/sample.php" role="php"/>
       <file name="examples/service.php" role="php"/>
       <file name="examples/service_dummy.php" role="php"/>
+      <file name="examples/object_exemple/config.php" role="php"/>
+      <file name="examples/object_exemple/WinService.php" role="php"/>
+      <file name="examples/object_exemple/WinServiceAdmin.php" role="php"/>
+      <file name="examples/object_exemple/WinServiceManager.php" role="php"/>
     </dir>
   </contents>
   <dependencies>
@@ -65,6 +65,21 @@
   <providesextension>win32service</providesextension>
   <extsrcrelease/>
   <changelog>
+    <release>
+            <version>
+                <release>0.4.0</release>
+                <api>0.3.0</api>
+            </version>
+            <stability>
+                <release>stable</release>
+                <api>stable</api>
+            </stability>
+            <license uri="http://www.php.net/license">PHP License</license>
+            <notes><![CDATA[
+     * Add win32_set_service_exit_mode and win32_set_service_exit_code functions
+     * Add severals constants
+ ]]></notes>
+        </release>
     <release>
             <version>
                 <release>0.3.1</release>

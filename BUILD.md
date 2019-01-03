@@ -3,7 +3,7 @@ BUILD THIS EXTENSION
 
 # For Production
 
-Please download the pre-build version on [Release page](https://github.com/InExtenso/win32service/releases).
+Please download the pre-build version on [Release page](https://github.com/win32service/win32service/releases).
 
 # For Test and Debug
 
