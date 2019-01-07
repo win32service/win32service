@@ -18,7 +18,6 @@ $service = [
 ];
 
 var_dump(win32_create_service($service));
-
+?>
 --EXPECT--
 int(0)
-
