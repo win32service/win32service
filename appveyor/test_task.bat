@@ -32,7 +32,6 @@ mkdir c:\tests_tmp
 
 set TEST_PHP_JUNIT=c:\junit.out.xml
 
-set ADDOPT=""
 if /i "%PHP_REL%" equ "7.2" (
 	set ADDOPT=" --show-slow 1000"
 )
