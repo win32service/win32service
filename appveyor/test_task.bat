@@ -32,7 +32,7 @@ mkdir c:\tests_tmp
 
 set TEST_PHP_JUNIT=c:\junit.out.xml
 
-set ADDOPT=" "
+set ADDOPT=""
 if /i "%PHP_REL%" equ "7.2" (
 	set ADDOPT=" --show-slow 1000"
 )
@@ -43,7 +43,7 @@ if /i "%PHP_REL%" equ "7.3" (
 set PHP_MODULES="php_win32service"
 
 rem cd "%APPVEYOR_BUILD_FOLDER%"
-nmake test TESTS="-q --offline --show-diff %ADDOPT% --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp"
+nmake test TESTS="-q --offline --show-diff%ADDOPT% --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp"
 
 set EXIT_CODE=%errorlevel%
 
