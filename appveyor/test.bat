@@ -23,7 +23,7 @@ rem rmdir /Q /S ext\pcre\tests
 
 setlocal enableextensions enabledelayedexpansion
 
-set EXTENSIONTOREMOVE="Zend sapi sapi\phpdbg sapi\fpm sapi\cli sapi\cgi ext\standard ext\date ext\spl ext\reflection ext\pcre"
+set EXTENSIONTOREMOVE=Zend sapi sapi\phpdbg sapi\fpm sapi\cli sapi\cgi ext\standard ext\date ext\spl ext\reflection ext\pcre
 
 for %%e in (%EXTENSIONTOREMOVE%) do (
 	set EXTNAME=%%e
