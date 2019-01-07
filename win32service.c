@@ -215,7 +215,7 @@ static PHP_FUNCTION(win32_set_service_exit_mode)
 }
 /* }}} */
 
-/* {{{ proto bool win32_set_service_exit_code(int exitCode)
+/* {{{ proto bool win32_set_service_exit_code([int exitCode])
    Set (and get) the exit code of the service, when the service will shut down 
    gracefuly when PHP exits it's not used, when the service will shut down not 
    gracefuly the int is used for exitCode and the recovery action will be run 
