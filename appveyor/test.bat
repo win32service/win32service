@@ -4,15 +4,15 @@ cd /d C:\projects\php-src
 
 set PHP_MODULES="php_win32service"
 
-move tests tests_old
-move Zend\tests Zend\tests_old
-move ext\standard\tests ext\standard\tests_old
-move sapi\cgi\tests sapi\cgi\tests_old
-move sapi\cli\tests sapi\cli\tests_old
-move sapi\fpm\tests sapi\fpm\tests_old
-move sapi\phpdbg\tests sapi\phpdbg\tests_old
-move sapi\tests sapi\tests_old
-move ext\date\tests ext\date\tests_old
+rmdir /Q /S tests
+rmdir /Q /S Zend\tests
+rmdir /Q /S ext\standard\tests
+rmdir /Q /S sapi\cgi\tests
+rmdir /Q /S sapi\cli\tests
+rmdir /Q /S sapi\fpm\tests
+rmdir /Q /S sapi\phpdbg\tests
+rmdir /Q /S sapi\tests
+rmdir /Q /S ext\date\tests
 
 
 setlocal enableextensions enabledelayedexpansion
