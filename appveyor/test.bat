@@ -2,7 +2,7 @@
 
 cd /d C:\projects\php-src
 
-set PHP_MODULES="php_win32service"
+set PHP_MODULES=php_win32service
 
 rmdir /Q /S tests
 rem rmdir /Q /S Zend\tests
