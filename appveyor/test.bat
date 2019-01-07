@@ -4,6 +4,8 @@ cd /d C:\projects\php-src
 
 set PHP_MODULES="php_win32service"
 
+move tests tests_old
+
 setlocal enableextensions enabledelayedexpansion
 rem	for %%a in (%ARCHITECTURES%) do (
 rem		set ARCH=%%a
