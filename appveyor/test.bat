@@ -5,17 +5,31 @@ cd /d C:\projects\php-src
 set PHP_MODULES="php_win32service"
 
 rmdir /Q /S tests
-rmdir /Q /S Zend\tests
-rmdir /Q /S ext\standard\tests
-rmdir /Q /S sapi\cgi\tests
-rmdir /Q /S sapi\cli\tests
-rmdir /Q /S sapi\fpm\tests
-rmdir /Q /S sapi\phpdbg\tests
-rmdir /Q /S sapi\tests
-rmdir /Q /S ext\date\tests
+rem rmdir /Q /S Zend\tests
+rem rmdir /Q /S sapi\cgi\tests
+rem rmdir /Q /S sapi\cli\tests
+rem rmdir /Q /S sapi\fpm\tests
+rem rmdir /Q /S sapi\phpdbg\tests
+rem rmdir /Q /S sapi\tests
+
+rem rmdir /Q /S ext\standard\tests
+rem rmdir /Q /S ext\date\tests
+rem rmdir /Q /S ext\spl\tests
+rem rmdir /Q /S ext\reflection\tests
+rem rmdir /Q /S ext\pcre\tests
+rem rmdir /Q /S ext\pcre\tests
+rem rmdir /Q /S ext\pcre\tests
 
 
 setlocal enableextensions enabledelayedexpansion
+set EXTENSIONTOREMOVE="Zend sapi sapi\phpdbg sapi\fpm sapi\cli sapi\cgi ext\standard ext\date ext\spl ext\reflection ext\pcre"
+for %%e in (%EXTENSIONTOREMOVE%) do (
+	set EXTNAME=%%e
+	rmdir /Q /S !EXTNAME!\tests
+)
+
+
+
 rem	for %%a in (%ARCHITECTURES%) do (
 rem		set ARCH=%%a
 		set ARCH=%PLATFORM%
