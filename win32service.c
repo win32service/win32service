@@ -229,13 +229,13 @@ static PHP_FUNCTION(win32_set_service_exit_code)
 	zend_long exitCodeParam=SVCG(gracefulExit);
 	zend_long old_exitCodeParam=SVCG(gracefulExit);
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &exitCodeParam)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &exitCodeParam)) {
 		RETURN_FALSE;
 	}
 
 	SVCG(exitCode)=exitCodeParam;
 
-	RETURN_BOOL(old_exitCodeParam);
+	RETURN_LONG(old_exitCodeParam);
 }
 /* }}} */
 
