@@ -39,7 +39,8 @@ if /i "%PHP_REL%" equ "7.3" (
 	set ADDOPT=--show-slow 1000
 )
 
-set PHP_MODULES=php_win32service
+echo extension=php_win32service.dll > %APPVEYOR_BUILD_FOLDER%\build\modules.d\win32service.ini
+set TEST_PHP_USER=c:\projects\php-src\ext\win32service
 
 rem cd "%APPVEYOR_BUILD_FOLDER%"
 nmake test TESTS="-q --offline --show-diff %ADDOPT% --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp"
