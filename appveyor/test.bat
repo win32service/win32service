@@ -2,7 +2,7 @@
 
 cd /d C:\projects\php-src
 
-set PHP_MODULES="php_win32service"
+set PHP_MODULES=php_win32service
 
 rmdir /Q /S tests
 rem rmdir /Q /S Zend\tests
@@ -23,7 +23,7 @@ rem rmdir /Q /S ext\pcre\tests
 
 setlocal enableextensions enabledelayedexpansion
 
-set EXTENSIONTOREMOVE=Zend sapi sapi\phpdbg sapi\fpm sapi\cli sapi\cgi ext\standard ext\date ext\spl ext\reflection ext\pcre
+set EXTENSIONTOREMOVE=Zend sapi sapi\phpdbg sapi\fpm sapi\cli sapi\cgi ext\standard ext\date ext\spl ext\reflection ext\pcre ext\spl\examples
 
 for %%e in (%EXTENSIONTOREMOVE%) do (
 	set EXTNAME=%%e
