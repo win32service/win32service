@@ -16,28 +16,27 @@ environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       PHP_REL: 7.0
-      ARCHITECTURES: x64 x86
+      ARCHITECTURES: x86 x64
       ZTS_STATES: enable disable
       PHP_BUILD_CRT: vc14
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       PHP_REL: 7.1
-      ARCHITECTURES: x64 x86
+      ARCHITECTURES: x86 x64
       ZTS_STATES: enable disable
       PHP_BUILD_CRT: vc14
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       PHP_REL: 7.2
-      ARCHITECTURES: x64 x86
+      ARCHITECTURES: x86 x64
       ZTS_STATES: enable disable
       PHP_BUILD_CRT: vc15
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       PHP_REL: 7.3
-      ARCHITECTURES: x64 x86
+      ARCHITECTURES: x86 x64
       ZTS_STATES: enable disable
       PHP_BUILD_CRT: vc15
 
 platform:
         - x64
-        - x86
 
 install:
   - appveyor\install.cmd

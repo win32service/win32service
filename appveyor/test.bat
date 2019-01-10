@@ -5,21 +5,6 @@ cd /d C:\projects\php-src
 set PHP_MODULES=php_win32service
 
 rmdir /Q /S tests
-rem rmdir /Q /S Zend\tests
-rem rmdir /Q /S sapi\cgi\tests
-rem rmdir /Q /S sapi\cli\tests
-rem rmdir /Q /S sapi\fpm\tests
-rem rmdir /Q /S sapi\phpdbg\tests
-rem rmdir /Q /S sapi\tests
-
-rem rmdir /Q /S ext\standard\tests
-rem rmdir /Q /S ext\date\tests
-rem rmdir /Q /S ext\spl\tests
-rem rmdir /Q /S ext\reflection\tests
-rem rmdir /Q /S ext\pcre\tests
-rem rmdir /Q /S ext\pcre\tests
-rem rmdir /Q /S ext\pcre\tests
-
 
 setlocal enableextensions enabledelayedexpansion
 
