@@ -20,7 +20,7 @@ for %%e in (%EXTENSIONTOREMOVE%) do (
 
 rem	for %%a in (%ARCHITECTURES%) do (
 rem		set ARCH=%%a
-rem		set ARCH=x64
+		set ARCH=%PLATFORM%
 		set SDK_RUNNER=%PHP_BUILD_CACHE_SDK_DIR%\phpsdk-%PHP_BUILD_CRT%-!ARCH!.bat
 		if not exist "!SDK_RUNNER!" (
 			echo "!SDK_RUNNER!" doesn't exist
