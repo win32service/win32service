@@ -19,6 +19,7 @@ setlocal enableextensions enabledelayedexpansion
 	if %errorlevel% neq 0 exit /b 3
 
 
+
 	for %%z in (%ZTS_STATES%) do (
 		set ZTS_STATE=%%z
 		if "!ZTS_STATE!"=="enable" set ZTS_SHORT=ts
@@ -45,6 +46,11 @@ setlocal enableextensions enabledelayedexpansion
 		cd /d %APPVEYOR_BUILD_FOLDER%
 
 		if not exist "%APPVEYOR_BUILD_FOLDER%\build\ext\php_win32service.dll" exit /b 3
+		if not exist "%APPVEYOR_BUILD_FOLDER%\build\modules.d" mkdir "%APPVEYOR_BUILD_FOLDER%\build\modules.d"
+
+		echo extension=php_win32service.dll > %APPVEYOR_BUILD_FOLDER%\build\modules.d\win32service.ini
+
+		dir %APPVEYOR_BUILD_FOLDER%\build\modules.d
 
 		xcopy %APPVEYOR_BUILD_FOLDER%\LICENSE %APPVEYOR_BUILD_FOLDER%\php_win32service-%PHP_REL%-!ZTS_SHORT!-%PHP_BUILD_CRT%-%PHP_SDK_ARCH%\ /y /f
 		xcopy %APPVEYOR_BUILD_FOLDER%\examples %APPVEYOR_BUILD_FOLDER%\php_win32service-%PHP_REL%-!ZTS_SHORT!-%PHP_BUILD_CRT%-%PHP_SDK_ARCH%\examples\ /y /f
@@ -52,6 +58,6 @@ setlocal enableextensions enabledelayedexpansion
 		7z a php_win32service-%PHP_REL%-!ZTS_SHORT!-%PHP_BUILD_CRT%-%PHP_SDK_ARCH%.zip %APPVEYOR_BUILD_FOLDER%\php_win32service-%PHP_REL%-!ZTS_SHORT!-%PHP_BUILD_CRT%-%PHP_SDK_ARCH%\*
 		appveyor PushArtifact php_win32service-%PHP_REL%-!ZTS_SHORT!-%PHP_BUILD_CRT%-%PHP_SDK_ARCH%.zip -FileName php_win32service-%APPVEYOR_REPO_TAG_NAME%-%PHP_REL%-!ZTS_SHORT!-%PHP_BUILD_CRT%-%PHP_SDK_ARCH%.zip
 
-		move build\ext\php_win32service.dll artifacts\php_win32service-%PHP_REL%-!ZTS_SHORT!-%PHP_BUILD_CRT%-%PHP_SDK_ARCH%.dll
+		echo F|xcopy build\ext\php_win32service.dll artifacts\php_win32service-%PHP_REL%-!ZTS_SHORT!-%PHP_BUILD_CRT%-%PHP_SDK_ARCH%.dll /y /f
 	)
 endlocal
