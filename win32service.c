@@ -286,14 +286,25 @@ static PHP_FUNCTION(win32_create_service)
 	long svc_type;
 	long start_type;
 	long error_control;
+	long recovery_action1;
+	long recovery_action2;
+	long recovery_action3;
+	long recovery_delay;
+	char *recovery_reboot_msg = NULL;
+	char *recovery_command = NULL;
+	long recovery_reset_period;
+
 	char *load_order;
 	char **deps = NULL;
 	char *desc;
 	BOOL delayed_start;
+	BOOL recovery_enabled;
 	SC_HANDLE hsvc, hmgr;
 	char *path_and_params;
 	SERVICE_DESCRIPTION srvc_desc;
 	SERVICE_DELAYED_AUTO_START_INFO srvc_delayed_start;
+	SERVICE_FAILURE_ACTIONS srvc_failure_infos;
+	SERVICE_FAILURE_ACTIONS_FLAG srvc_failure_action;
 	OSVERSIONINFO osvi;
 	DWORD base_priority;
 	HKEY hKey;
@@ -321,7 +332,7 @@ static PHP_FUNCTION(win32_create_service)
 	}
 
 #define INT_DETAIL(name, var, def) \
-	if ((tmp = zend_hash_find(Z_ARRVAL_P(details), zend_string_init(name, sizeof(name), 0))) != NULL) { \
+	if ((tmp = zend_hash_find(Z_ARRVAL_P(details), zend_string_init(name, strlen(name), 0))) != NULL) { \
 		convert_to_long_ex(tmp); \
 		var = Z_LVAL_P(tmp); \
 	} else { \
@@ -329,9 +340,9 @@ static PHP_FUNCTION(win32_create_service)
 	}
 
 #define BOOL_DETAIL(name, var, def) \
-	if ((tmp = zend_hash_find(Z_ARRVAL_P(details), zend_string_init(name, sizeof(name), 0))) != NULL) { \
+	if ((tmp = zend_hash_find(Z_ARRVAL_P(details), zend_string_init(name, strlen(name), 0))) != NULL) { \
 		convert_to_boolean_ex(tmp); \
-		var = Z_LVAL_P(tmp); \
+		var = Z_TYPE_P(tmp) == IS_TRUE ? 1 : 0; \
 	} else { \
 		var = def; \
 	}
@@ -342,21 +353,60 @@ static PHP_FUNCTION(win32_create_service)
 	STR_DETAIL(INFO_PASSWORD, password, "");
 	STR_DETAIL(INFO_PATH, path, NULL);
 	STR_DETAIL(INFO_PARAMS, params, "");
-	STR_DETAIL("load_order", load_order, NULL);
+	STR_DETAIL(INFO_LOAD_ORDER, load_order, NULL);
 	STR_DETAIL(INFO_DESCRIPTION, desc, NULL);
-	INT_DETAIL("svc_type", svc_type, SERVICE_WIN32_OWN_PROCESS);
+	INT_DETAIL(INFO_SVC_TYPE, svc_type, SERVICE_WIN32_OWN_PROCESS);
 	INT_DETAIL(INFO_START_TYPE, start_type, SERVICE_AUTO_START);
-	INT_DETAIL("error_control", error_control, SERVICE_ERROR_IGNORE);
-	BOOL_DETAIL("delayed_start", delayed_start, 0); /* Allow Vista+ delayed service start. */
-	INT_DETAIL("base_priority", base_priority, NORMAL_PRIORITY_CLASS);
+	INT_DETAIL(INFO_ERROR_CONTROL, error_control, SERVICE_ERROR_IGNORE);
+	BOOL_DETAIL(INFO_DELAYED_START, delayed_start, 0); /* Allow Vista+ delayed service start. */
+	INT_DETAIL(INFO_BASE_PRIORITY, base_priority, NORMAL_PRIORITY_CLASS);
+	INT_DETAIL(INFO_RECOVERY_DELAY, recovery_delay, 60000);
+	INT_DETAIL(INFO_RECOVERY_ACTION_1, recovery_action1, SC_ACTION_NONE);
+	INT_DETAIL(INFO_RECOVERY_ACTION_2, recovery_action2, SC_ACTION_NONE);
+	INT_DETAIL(INFO_RECOVERY_ACTION_3, recovery_action3, SC_ACTION_NONE);
+	INT_DETAIL(INFO_RECOVERY_RESET_PERIOD, recovery_reset_period, 86400);
+	BOOL_DETAIL(INFO_RECOVERY_ENABLED, recovery_enabled, 0);
+	STR_DETAIL(INFO_RECOVERY_REBOOT_MSG, recovery_reboot_msg, NULL);
+	STR_DETAIL(INFO_RECOVERY_COMMAND, recovery_command, NULL);
+
 
 	if (service == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "missing vital parameters");
 		RETURN_FALSE;
 	}
 
+	if (recovery_action1 != SC_ACTION_NONE && recovery_action1 != SC_ACTION_REBOOT && recovery_action1 != SC_ACTION_RESTART && recovery_action1 != SC_ACTION_RUN_COMMAND) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for recovery_action_1 parameters");
+		RETURN_FALSE;
+	}
+
+	if (recovery_action2 != SC_ACTION_NONE && recovery_action2 != SC_ACTION_REBOOT && recovery_action2 != SC_ACTION_RESTART && recovery_action2 != SC_ACTION_RUN_COMMAND) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for recovery_action_2 parameters");
+		RETURN_FALSE;
+	}
+
+	if (recovery_action3 != SC_ACTION_NONE && recovery_action3 != SC_ACTION_REBOOT && recovery_action3 != SC_ACTION_RESTART && recovery_action3 != SC_ACTION_RUN_COMMAND) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for recovery_action_3 parameters");
+		RETURN_FALSE;
+	}
+
 	srvc_desc.lpDescription = desc;
 	srvc_delayed_start.fDelayedAutostart = delayed_start;
+	
+	srvc_failure_infos.dwResetPeriod = recovery_reset_period;
+	srvc_failure_infos.lpRebootMsg = recovery_reboot_msg;
+	srvc_failure_infos.lpCommand = recovery_command;
+	
+	srvc_failure_infos.cActions = 3;
+	SC_ACTION recovery_actions[3];
+	recovery_actions[0].Delay = recovery_delay;
+	recovery_actions[0].Type = recovery_action1;
+	recovery_actions[1].Delay = recovery_delay;
+	recovery_actions[1].Type = recovery_action2;
+	recovery_actions[2].Delay = recovery_delay;
+	recovery_actions[2].Type = recovery_action3;
+	srvc_failure_infos.lpsaActions = recovery_actions;
+	srvc_failure_action.fFailureActionsOnNonCrashFailures = recovery_enabled;
 
 	/* Connect to the SCManager. */
 	hmgr = OpenSCManager(machine, NULL, SC_MANAGER_ALL_ACCESS);
@@ -418,7 +468,9 @@ static PHP_FUNCTION(win32_create_service)
 	   then track the error. */
 	if (	!hsvc ||
 		!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, &srvc_desc) ||
-		(start_type & SERVICE_AUTO_START && osvi.dwMajorVersion >= 6 && !ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, &srvc_delayed_start))
+		(start_type & SERVICE_AUTO_START && osvi.dwMajorVersion >= 6 && !ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, &srvc_delayed_start)) ||
+		!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, &srvc_failure_action) || 
+		!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, &srvc_failure_infos)
 		) {
 		RETVAL_LONG(GetLastError());
 	} else {
@@ -960,6 +1012,13 @@ static PHP_MINIT_FUNCTION(win32service)
 	MKCONST(NORMAL_PRIORITY_CLASS);                    /* 0x00000020 Process with no special scheduling needs. */
 	MKCONST(REALTIME_PRIORITY_CLASS);                  /* 0x00000100 Process that has the highest possible priority. The threads of the process preempt the threads of all other processes, including operating system processes performing important tasks. For example, a real-time process that executes for more than a very brief interval can cause disk caches not to flush or cause the mouse to be unresponsive. */
 
+	/* Win32 Recovery Constants */
+	MKCONST(SC_ACTION_NONE);							/* 0x00000000 No Action */
+	MKCONST(SC_ACTION_REBOOT);							/* 0x00000001 Reboot the computer */
+	MKCONST(SC_ACTION_RESTART);							/* 0x00000002 Restart the service */
+	MKCONST(SC_ACTION_RUN_COMMAND);						/* 0x00000003 Run the command */
+
+
     /* Win32 Service informations */
     MKSCONST(INFO_SERVICE);
     MKSCONST(INFO_DISPLAY);
@@ -969,6 +1028,19 @@ static PHP_MINIT_FUNCTION(win32service)
     MKSCONST(INFO_PARAMS);
     MKSCONST(INFO_DESCRIPTION);
     MKSCONST(INFO_START_TYPE);
+	MKSCONST(INFO_LOAD_ORDER);
+	MKSCONST(INFO_SVC_TYPE);
+	MKSCONST(INFO_ERROR_CONTROL);
+	MKSCONST(INFO_DELAYED_START);
+	MKSCONST(INFO_BASE_PRIORITY);
+	MKSCONST(INFO_RECOVERY_DELAY);
+	MKSCONST(INFO_RECOVERY_ACTION_1);
+	MKSCONST(INFO_RECOVERY_ACTION_2);
+	MKSCONST(INFO_RECOVERY_ACTION_3);
+	MKSCONST(INFO_RECOVERY_RESET_PERIOD);
+	MKSCONST(INFO_RECOVERY_ENABLED);
+	MKSCONST(INFO_RECOVERY_REBOOT_MSG);
+	MKSCONST(INFO_RECOVERY_COMMAND);
 
 	return SUCCESS;
 }
