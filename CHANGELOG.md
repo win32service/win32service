@@ -1,3 +1,7 @@
+# Version 0.3.2 (in dev)
+
+* Fixed #42 : Unable to use the parameters if type is not string.
+
 # Version 0.3.1 (2018-12-10)
 
 The reporitory has been transfered to an independent GitHub organisation.
