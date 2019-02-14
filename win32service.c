@@ -255,7 +255,7 @@ static PHP_FUNCTION(win32_create_service)
 	}
 
 #define INT_DETAIL(name, var, def) \
-	if ((tmp = zend_hash_find(Z_ARRVAL_P(details), zend_string_init(name, sizeof(name), 0))) != NULL) { \
+	if ((tmp = zend_hash_find(Z_ARRVAL_P(details), zend_string_init(name, strlen(name), 0))) != NULL) { \
 		convert_to_long_ex(tmp); \
 		var = Z_LVAL_P(tmp); \
 	} else { \
@@ -263,9 +263,9 @@ static PHP_FUNCTION(win32_create_service)
 	}
 
 #define BOOL_DETAIL(name, var, def) \
-	if ((tmp = zend_hash_find(Z_ARRVAL_P(details), zend_string_init(name, sizeof(name), 0))) != NULL) { \
+	if ((tmp = zend_hash_find(Z_ARRVAL_P(details), zend_string_init(name, strlen(name), 0))) != NULL) { \
 		convert_to_boolean_ex(tmp); \
-		var = Z_LVAL_P(tmp); \
+		var = Z_TYPE_P(tmp) == IS_TRUE ? 1 : 0; \
 	} else { \
 		var = def; \
 	}
