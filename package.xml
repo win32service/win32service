@@ -18,10 +18,10 @@
     <email>jb@nahan.fr</email>
     <active>yes</active>
   </lead>
-  <date>2018-12-10</date>
-  <time>17:18:00</time>
+  <date>2019-02-14</date>
+  <time>18:08:00</time>
   <version>
-    <release>0.3.1</release>
+    <release>0.3.2</release>
     <api>0.2.0</api>
   </version>
   <stability>
@@ -30,13 +30,10 @@
   </stability>
   <license uri="http://www.php.net/license">PHP License</license>
   <notes><![CDATA[
-     The reporitory has been transfered to an independent GitHub organisation.
-     The new website is https://win32service.github.io
+     The website is https://win32service.github.io
 
-     * Removing the PHP version check for not working versions
-     * Add support for PHP 7.3.
      * Fix bugs.
-     The binary is also available here: https://github.com/win32service/win32service/releases/tag/v0.3.1
+     The binary is also available here: https://github.com/win32service/win32service/releases/tag/v0.3.2
  ]]></notes>
   <contents>
     <dir name="/">
@@ -65,6 +62,20 @@
   <providesextension>win32service</providesextension>
   <extsrcrelease/>
   <changelog>
+    <release>
+            <version>
+                <release>0.3.2</release>
+                <api>0.2.0</api>
+            </version>
+            <stability>
+                <release>stable</release>
+                <api>stable</api>
+            </stability>
+            <license uri="http://www.php.net/license">PHP License</license>
+            <notes><![CDATA[
+* Fix bugs.
+ ]]></notes>
+        </release>
     <release>
             <version>
                 <release>0.3.1</release>
