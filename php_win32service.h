@@ -52,7 +52,7 @@ extern zend_module_entry win32service_module_entry;
 #define INFO_ERROR_CONTROL	"error_control"
 #define INFO_DELAYED_START	"delayed_start"
 #define INFO_BASE_PRIORITY	"base_priority"
-
+#define INFO_DEPENDENCIES   "dependencies"
 #define INFO_RECOVERY_DELAY "recovery_delay"
 #define INFO_RECOVERY_ACTION_1 "recovery_action_1"
 #define INFO_RECOVERY_ACTION_2 "recovery_action_2"

@@ -295,7 +295,7 @@ static PHP_FUNCTION(win32_create_service)
 	long recovery_reset_period;
 
 	char *load_order;
-	char **deps = NULL;
+	char *deps = NULL;
 	char *desc;
 	BOOL delayed_start;
 	BOOL recovery_enabled;
@@ -349,33 +349,40 @@ static PHP_FUNCTION(win32_create_service)
 	
 #define ARRAY_TO_STR_DETAIL(name, var, def) \
 	if ((tmp = zend_hash_find(Z_ARRVAL_P(details), zend_string_init(name, strlen(name), 0))) != NULL) { \
-		php_printf("value read\n"); \
 		if (Z_TYPE_P(tmp) == IS_STRING) { \
-			php_printf("value str\n"); \
-			char * var2; \
-			STR_DETAIL(name, var2, def); \
-			var = emalloc(sizeof(char*)*2); \
-			var[0] = var2; \
-			var[1] = '\0'; \
-		} else { \
-			php_printf("value array\n"); \
+			STR_DETAIL(name, var, def); \
+		} else if (Z_TYPE_P(tmp) == IS_ARRAY) { \
 			HashTable * myht = Z_ARRVAL_P(tmp); \
 			uint32_t  count = zend_array_count(myht); \
-			zend_ulong num; \
-			zend_string *key; \
-			zval *val; \
-			var = emalloc(sizeof(char*) * (count + 1)); \
-			ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) { \
-				convert_to_string_ex(val); \
-				var[num] = Z_STRVAL_P(val); \
-			} ZEND_HASH_FOREACH_END(); \
-			var[count+1] = '\0'; \
-			for (int i = 0; i < count ; i++) { \
-				php_printf("index %d : %s", i, var[i]); \
+			if (count == 0) { \
+				var = NULL; \
+			} else { \
+				zend_ulong num; \
+				zend_string *key; \
+				zval *val; \
+				uint32_t totalLenth = 0; \
+				char ** var2 = emalloc(sizeof(char*) * count); \
+				ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) { \
+					convert_to_string_ex(val); \
+					totalLenth += strlen(Z_STRVAL_P(val)) + 1; \
+					var2[num] = Z_STRVAL_P(val); \
+				} ZEND_HASH_FOREACH_END(); \
+				totalLenth++; \
+				var = emalloc(sizeof(char)*totalLenth); \
+				uint32_t j = 0; \
+				for (uint32_t l = 0; l < count; l++) { \
+					for (uint32_t k = 0; k <= strlen(var2[l]); k++) { \
+						var[j] = var2[l][k]; \
+						j++; \
+					} \
+					var[j] = '\0'; \
+				} \
+				var[totalLenth - 1] = '\0'; \
 			} \
+		} else { \
+			var = def; \
 		} \
 	} else { \
-		php_printf("default value\n"); \
 		var = def; \
 	}
 	
@@ -388,7 +395,7 @@ static PHP_FUNCTION(win32_create_service)
 	STR_DETAIL(INFO_PATH, path, NULL);
 	STR_DETAIL(INFO_PARAMS, params, "");
 	STR_DETAIL(INFO_LOAD_ORDER, load_order, NULL);
-	ARRAY_TO_STR_DETAIL("dependencies", deps, NULL);
+	ARRAY_TO_STR_DETAIL(INFO_DEPENDENCIES, deps, NULL);
 	STR_DETAIL(INFO_DESCRIPTION, desc, NULL);
 	INT_DETAIL(INFO_SVC_TYPE, svc_type, SERVICE_WIN32_OWN_PROCESS);
 	INT_DETAIL(INFO_START_TYPE, start_type, SERVICE_AUTO_START);
@@ -486,7 +493,7 @@ static PHP_FUNCTION(win32_create_service)
 			path_and_params,
 			load_order,
 			NULL,
-			deps,
+			(LPCSTR)deps,
 			(LPCSTR)user,
 			(LPCSTR)password);
 
@@ -1068,6 +1075,7 @@ static PHP_MINIT_FUNCTION(win32service)
 	MKSCONST(INFO_ERROR_CONTROL);
 	MKSCONST(INFO_DELAYED_START);
 	MKSCONST(INFO_BASE_PRIORITY);
+	MKSCONST(INFO_DEPENDENCIES);
 	MKSCONST(INFO_RECOVERY_DELAY);
 	MKSCONST(INFO_RECOVERY_ACTION_1);
 	MKSCONST(INFO_RECOVERY_ACTION_2);
