@@ -18,8 +18,8 @@
     <email>jbnahan@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2019-01-03</date>
-  <time>17:18:00</time>
+  <date>2019-02-20</date>
+  <time>15:48:00</time>
   <version>
     <release>0.4.0</release>
     <api>0.3.0</api>
@@ -30,8 +30,9 @@
   </stability>
   <license uri="http://www.php.net/license">PHP License</license>
   <notes><![CDATA[
-     * Add win32_set_service_exit_mode and win32_set_service_exit_code functions
-     * Add severals constants
+     * Add win32_send_custom_control, win32_set_service_exit_mode and win32_set_service_exit_code functions.
+     * Add severals constants.
+     * Add many configuration option for win32_create_service function.
      The binary is also available here: https://github.com/win32service/win32service/releases/tag/v0.4.0
  ]]></notes>
   <contents>
@@ -76,8 +77,23 @@
             </stability>
             <license uri="http://www.php.net/license">PHP License</license>
             <notes><![CDATA[
-     * Add win32_set_service_exit_mode and win32_set_service_exit_code functions
+     * Add win32_send_custom_control, win32_set_service_exit_mode and win32_set_service_exit_code functions
+     * Add many configuration option for win32_create_service function.
      * Add severals constants
+ ]]></notes>
+        </release>
+    <release>
+            <version>
+                <release>0.3.2</release>
+                <api>0.2.0</api>
+            </version>
+            <stability>
+                <release>stable</release>
+                <api>stable</api>
+            </stability>
+            <license uri="http://www.php.net/license">PHP License</license>
+            <notes><![CDATA[
+* Fix bugs.
  ]]></notes>
         </release>
     <release>
