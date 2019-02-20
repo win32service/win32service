@@ -1,4 +1,4 @@
-# Version 0.3.2 (in dev)
+# Version 0.3.2 (2019-02-14)
 
 * Fixed #42 : Unable to use the parameters if type is not string.
 
