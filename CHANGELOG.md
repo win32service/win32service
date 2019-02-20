@@ -1,8 +1,13 @@
-# Version 0.4.0 (in dev)
+# Version 0.4.0 (2019-02-20)
 
-* Add win32_set_service_exit_mode and win32_set_service_exit_code functions
+* Add `win32_set_service_exit_mode` and `win32_set_service_exit_code` functions
 * Add severals constants
-* Add win32_send_custom_control function
+* Add `win32_send_custom_control` function
+* Add parameters (`recovery`, `dependencies`) for service configuration used with `win32_create_service`.
+
+# Version 0.3.2 (2014-02-14)
+
+* Fixed #42 : Unable to use the parameters if type is not string.
 
 # Version 0.3.1 (2018-12-10)
 
