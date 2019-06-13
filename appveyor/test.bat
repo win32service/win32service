@@ -12,8 +12,10 @@ set EXTENSIONTOREMOVE=Zend sapi sapi\phpdbg sapi\fpm sapi\cli sapi\cgi ext\stand
 
 for %%e in (%EXTENSIONTOREMOVE%) do (
 	set EXTNAME=%%e
-	echo Remove tests in !EXTNAME!\tests
-	rmdir /Q /S !EXTNAME!\tests
+	if exist "!EXTNAME!\tests" (
+		echo Remove tests in !EXTNAME!\tests
+		rmdir /Q /S !EXTNAME!\tests
+	)
 )
 
 
