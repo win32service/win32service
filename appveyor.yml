@@ -9,9 +9,9 @@ environment:
   PHP_BUILD_CACHE_BASE_DIR: c:\build-cache
   PHP_BUILD_OBJ_DIR: c:\obj
   PHP_BUILD_CACHE_SDK_DIR: c:\build-cache\sdk
-  PHP_BUILD_SDK_BRANCH: php-sdk-2.1.9
+  PHP_BUILD_SDK_BRANCH: php-sdk-2.2.0beta6
   SDK_REMOTE: https://github.com/Microsoft/php-sdk-binary-tools.git
-  SDK_BRANCH: php-sdk-2.1.9
+  SDK_BRANCH: php-sdk-2.2.0beta6
 
   matrix:
 #    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
@@ -33,7 +33,7 @@ environment:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       PHP_REL: 7.4
       ZTS_STATES: enable disable
-      PHP_BUILD_CRT: vc16
+      PHP_BUILD_CRT: vs16
       
 platform:
         - x86
