@@ -1126,11 +1126,13 @@ static PHP_RSHUTDOWN_FUNCTION(win32service)
 static PHP_MINFO_FUNCTION(win32service)
 {
 	php_info_print_table_start();
-	if (check_php_version() == 0) {
+	/*if (check_php_version() == 0) {
 		php_info_print_table_row(2, "Caution", "The Win32Service extension not work on PHP 7.0.0 or PHP 7.1.0. Work with 7.0.1+ or 7.1.1+");
-	}
+	}*/
+	
 	
 	php_info_print_table_row(2, "Win32 Service support", "enabled");
+	php_info_print_table_row(2, "PHP version", "enabled");
 	php_info_print_table_row(2, "Version", PHP_WIN32SERVICE_VERSION);
 	php_info_print_table_row(2, "Current SAPI", sapi_module.name);
 	if (strcmp(sapi_module.name, "cli") != 0) {
