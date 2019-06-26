@@ -867,52 +867,9 @@ static void init_globals(zend_win32service_globals *g)
 	g->gracefulExit = 1;
 	g->exitCode = 1;
 }
-/*
- * Return 0 if this ext is not compatible with the current php version, 1 otherwise.
- * This function work only if the runtime is ready !
- */
-static int check_php_version()
-{
-	zval result;
-	zval function_name;
-	char *result2 = NULL;
-
-	ZVAL_STRING(&function_name, "phpversion");
-
-	if (call_user_function(EG(function_table), NULL, &function_name, &result, 0, NULL) == SUCCESS) {
-		result2 = Z_STRVAL_P(&result);
-		//php_printf("VERSION = %s\n", result2);
-		zval_ptr_dtor(&function_name);
-		zval_ptr_dtor(&result);
-
-		//php_printf("M=%d m=%d r=%d\n", PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION);
-
-		if (php_version_compare(result2, "7.0.0") == 0) {
-			//zend_error(E_CORE_ERROR, "The Win32Service extension not work on PHP 7.0.0. Work with 7.0.1+");
-			return 0;
-		}
-		if (php_version_compare(result2, "7.1.0") == 0) {
-			//zend_error(E_CORE_ERROR, "The Win32Service extension not work on PHP 7.1.0. Work with 7.1.1+");
-			return 0;
-		}
-		efree(result2);
-	}/* else {
-		php_printf("call_user_function fail\n");
-	}*/
-	return 1;
-}
 
 static PHP_MINIT_FUNCTION(win32service)
 {
-	/*if (strcmp(sapi_module.name, "cli") != 0) {
-		zend_error(E_NOTICE, "The Win32Service extension does work when using the CLI SAPI with administrator right level. On other SAPI, please check security consideration.");
-	}*/
-
-	/*if (check_php_version() == 0) {
-		return FAILURE;
-	}*/
-
-	
 
 	ZEND_INIT_MODULE_GLOBALS(win32service, init_globals, NULL);
 
@@ -1126,13 +1083,8 @@ static PHP_RSHUTDOWN_FUNCTION(win32service)
 static PHP_MINFO_FUNCTION(win32service)
 {
 	php_info_print_table_start();
-	/*if (check_php_version() == 0) {
-		php_info_print_table_row(2, "Caution", "The Win32Service extension not work on PHP 7.0.0 or PHP 7.1.0. Work with 7.0.1+ or 7.1.1+");
-	}*/
-	
 	
 	php_info_print_table_row(2, "Win32 Service support", "enabled");
-	php_info_print_table_row(2, "PHP version", "enabled");
 	php_info_print_table_row(2, "Version", PHP_WIN32SERVICE_VERSION);
 	php_info_print_table_row(2, "Current SAPI", sapi_module.name);
 	if (strcmp(sapi_module.name, "cli") != 0) {
