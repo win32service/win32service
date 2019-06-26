@@ -58,7 +58,7 @@ class WinService extends WinServiceAbstract {
 		$this->write_log('Do something', $debug);
 	}
 
-	private function run()
+	protected function run()
 	{
 		if (isset($this->status['CurrentState']) and $this->status['CurrentState'] == WIN32_SERVICE_START_PENDING) {
 			if ($this->start_service()) {

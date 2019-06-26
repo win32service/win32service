@@ -23,7 +23,7 @@ class WinServiceAdmin extends WinServiceAbstract {
 		return ['register', 'delete', 'debug'];
 	}
 
-	private function register()
+	protected function register()
 	{
 		if (!isset($this->status['CurrentState']) and $this->status == WIN32_ERROR_SERVICE_DOES_NOT_EXIST) {
 			$this->write_log('WARNING: Creating service');
@@ -31,7 +31,7 @@ class WinServiceAdmin extends WinServiceAbstract {
 		}
 	}
 
-	private function delete()
+	protected function delete()
 	{
 		if (isset($this->status['CurrentState']) and $this->status['CurrentState'] == WIN32_SERVICE_STOPPED) {
 			$this->write_log('WARNING: Deleting service');

@@ -25,7 +25,7 @@ class WinServiceManager extends WinServiceAbstract {
 		return ['stop', 'start', 'pause', 'continue', 'debug'];
 	}
 
-	private function stop()
+	protected function stop()
 	{
 		if (isset($this->status['CurrentState']) and $this->status['CurrentState'] == WIN32_SERVICE_RUNNING) {
 			$this->write_log('WARNING: Sending stop signal');
@@ -33,7 +33,7 @@ class WinServiceManager extends WinServiceAbstract {
 		}
 	}
 
-	private function start()
+	protected function start()
 	{
 		if (isset($this->status['CurrentState']) and $this->status['CurrentState'] == WIN32_SERVICE_STOPPED) {
 			$this->write_log('WARNING: Sending start signal');
@@ -41,7 +41,7 @@ class WinServiceManager extends WinServiceAbstract {
 		}
 	}
 
-	private function pause()
+	protected function pause()
 	{
 		if (isset($this->status['CurrentState']) and $this->status['CurrentState'] == WIN32_SERVICE_RUNNING) {
 			$this->write_log('WARNING: Sending pause signal');
@@ -49,7 +49,7 @@ class WinServiceManager extends WinServiceAbstract {
 		}
 	}
 
-	private function continue()
+	protected function continue()
 	{
 		if (isset($this->status['CurrentState']) and $this->status['CurrentState'] == WIN32_SERVICE_PAUSED) {
 			$this->write_log('WARNING: Sending continue signal');
