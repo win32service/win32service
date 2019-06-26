@@ -1,3 +1,8 @@
+# Version 0.4.1 (2019-IN DEV)
+
+* Remove the PHP version check. For fix the PHP crashes when `phpinfo` is called by CGI SAPI. (issue [#45](https://github.com/win32service/win32service/issues/45))
+* Fix PHP 7.4 object example errors (issue [#46](https://github.com/win32service/win32service/issues/46))
+
 # Version 0.4.0 (2019-02-20)
 
 * Add `win32_set_service_exit_mode` and `win32_set_service_exit_code` functions
