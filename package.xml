@@ -1,72 +1,90 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" packagerversion="1.4.7" version="2.0" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
-  <name>win32service</name>
-  <channel>pecl.php.net</channel>
-  <summary>A Windows specific extension to allow PHP to interact with Windows Services.</summary>
-  <description>
-   The win32service extension is a Windows specific extension that allows PHP to communicate with the Service Control Manager to start, stop, register and unregister services, and even allows your PHP scripts to run as a service.
-  </description>
-  <lead>
-    <name>Richard Quadling</name>
-    <user>rquadling</user>
-    <email>rquadling@php.net</email>
-    <active>yes</active>
-  </lead>
-  <lead>
-    <name>Jean-Baptiste Nahan</name>
-    <user>macintoshplus</user>
-    <email>jbnahan@php.net</email>
-    <active>yes</active>
-  </lead>
-  <date>2019-02-20</date>
-  <time>15:48:00</time>
-  <version>
-    <release>0.4.0</release>
-    <api>0.3.0</api>
-  </version>
-  <stability>
-    <release>stable</release>
-    <api>stable</api>
-  </stability>
-  <license uri="http://www.php.net/license">PHP License</license>
-  <notes><![CDATA[
-     * Add win32_send_custom_control, win32_set_service_exit_mode and win32_set_service_exit_code functions.
-     * Add severals constants.
-     * Add many configuration option for win32_create_service function.
-     The binary is also available here: https://github.com/win32service/win32service/releases/tag/v0.4.0
+<package xmlns="http://pear.php.net/dtd/package-2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         packagerversion="1.4.7" version="2.0"
+         xsi:schemaLocation="http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+    <name>win32service</name>
+    <channel>pecl.php.net</channel>
+    <summary>A Windows specific extension to allow PHP to interact with Windows Services.</summary>
+    <description>
+        The win32service extension is a Windows specific extension that allows PHP to communicate with the Service
+        Control Manager to start, stop, register and unregister services, and even allows your PHP scripts to run as a
+        service.
+    </description>
+    <lead>
+        <name>Richard Quadling</name>
+        <user>rquadling</user>
+        <email>rquadling@php.net</email>
+        <active>no</active>
+    </lead>
+    <lead>
+        <name>Jean-Baptiste Nahan</name>
+        <user>macintoshplus</user>
+        <email>jbnahan@php.net</email>
+        <active>yes</active>
+    </lead>
+    <date>2019-06-26</date>
+    <time>21:00:00</time>
+    <version>
+        <release>0.4.1</release>
+        <api>0.3.0</api>
+    </version>
+    <stability>
+        <release>stable</release>
+        <api>stable</api>
+    </stability>
+    <license uri="http://www.php.net/license">PHP License</license>
+    <notes><![CDATA[
+     * Remove the PHP version check. For fix the PHP crashes when `phpinfo` is called by CGI SAPI. (issue [#45](https://github.com/win32service/win32service/issues/45))
+     * Fix PHP 7.4 errors in object example (issue [#46](https://github.com/win32service/win32service/issues/46))
+     The binary is also available here: https://github.com/win32service/win32service/releases/tag/v0.4.1
  ]]></notes>
-  <contents>
-    <dir name="/">
-      <file name="CHANGELOG.md" role="doc"/>
-      <file name="CREDITS" role="doc"/>
-      <file name="LICENSE" role="doc"/>
-      <file name="config.w32" role="src"/>
-      <file name="php_win32service.h" role="src"/>
-      <file name="php_win32service_int.h" role="src"/>
-      <file name="win32service.c" role="src"/>
-      <file name="examples/sample.php" role="php"/>
-      <file name="examples/service.php" role="php"/>
-      <file name="examples/service_dummy.php" role="php"/>
-      <file name="examples/object_exemple/config.php" role="php"/>
-      <file name="examples/object_exemple/WinService.php" role="php"/>
-      <file name="examples/object_exemple/WinServiceAdmin.php" role="php"/>
-      <file name="examples/object_exemple/WinServiceManager.php" role="php"/>
-    </dir>
-  </contents>
-  <dependencies>
-    <required>
-      <php>
-        <min>7.0.1</min>
-      </php>
-      <pearinstaller>
-        <min>1.4.8</min>
-      </pearinstaller>
-    </required>
-  </dependencies>
-  <providesextension>win32service</providesextension>
-  <extsrcrelease/>
-  <changelog>
-    <release>
+    <contents>
+        <dir name="/">
+            <file name="CHANGELOG.md" role="doc"/>
+            <file name="CREDITS" role="doc"/>
+            <file name="LICENSE" role="doc"/>
+            <file name="config.w32" role="src"/>
+            <file name="php_win32service.h" role="src"/>
+            <file name="php_win32service_int.h" role="src"/>
+            <file name="win32service.c" role="src"/>
+            <file name="examples/sample.php" role="php"/>
+            <file name="examples/service.php" role="php"/>
+            <file name="examples/service_dummy.php" role="php"/>
+            <file name="examples/object_exemple/config.php" role="php"/>
+            <file name="examples/object_exemple/WinService.php" role="php"/>
+            <file name="examples/object_exemple/WinServiceAdmin.php" role="php"/>
+            <file name="examples/object_exemple/WinServiceManager.php" role="php"/>
+        </dir>
+    </contents>
+    <dependencies>
+        <required>
+            <php>
+                <min>7.0.1</min>
+            </php>
+            <pearinstaller>
+                <min>1.4.8</min>
+            </pearinstaller>
+        </required>
+    </dependencies>
+    <providesextension>win32service</providesextension>
+    <extsrcrelease/>
+    <changelog>
+        <release>
+            <version>
+                <release>0.4.1</release>
+                <api>0.3.0</api>
+            </version>
+            <stability>
+                <release>stable</release>
+                <api>stable</api>
+            </stability>
+            <license uri="http://www.php.net/license">PHP License</license>
+            <notes><![CDATA[
+     * Remove the PHP version check. For fix the PHP crashes when `phpinfo` is called by CGI SAPI. (issue [#45](https://github.com/win32service/win32service/issues/45))
+     * Fix PHP 7.4 object example errors (issue [#46](https://github.com/win32service/win32service/issues/46))
+ ]]></notes>
+        </release>
+        <release>
             <version>
                 <release>0.4.0</release>
                 <api>0.3.0</api>
@@ -82,7 +100,7 @@
      * Add severals constants
  ]]></notes>
         </release>
-    <release>
+        <release>
             <version>
                 <release>0.3.2</release>
                 <api>0.2.0</api>
@@ -96,7 +114,7 @@
 * Fix bugs.
  ]]></notes>
         </release>
-    <release>
+        <release>
             <version>
                 <release>0.3.1</release>
                 <api>0.2.0</api>
@@ -115,7 +133,7 @@ The new website is https://win32service.github.io
 * Fix bugs.
  ]]></notes>
         </release>
-    <release>
+        <release>
             <version>
                 <release>0.3.0</release>
                 <api>0.2.0</api>
@@ -131,7 +149,7 @@ Add support for PHP 7.2.
 Fix bugs.
  ]]></notes>
         </release>
-    <release>
+        <release>
             <version>
                 <release>0.2.1</release>
                 <api>0.2.0</api>
@@ -145,7 +163,7 @@ Fix bugs.
 Fix issue with PHP 7.1.4: Not detect PHP RELEASE VERSION correctly.
  ]]></notes>
         </release>
-    <release>
+        <release>
             <version>
                 <release>0.2.0</release>
                 <api>0.2.0</api>
@@ -161,12 +179,12 @@ No change
         </release>
         <release>
             <version>
-              <release>0.1.2-RC2</release>
-              <api>0.1.0</api>
+                <release>0.1.2-RC2</release>
+                <api>0.1.0</api>
             </version>
             <stability>
-              <release>beta</release>
-              <api>stable</api>
+                <release>beta</release>
+                <api>stable</api>
             </stability>
             <license uri="http://www.php.net/license">PHP License</license>
             <notes><![CDATA[
@@ -177,12 +195,12 @@ No change
         </release>
         <release>
             <version>
-              <release>0.1.2-RC1</release>
-              <api>0.1.0</api>
+                <release>0.1.2-RC1</release>
+                <api>0.1.0</api>
             </version>
             <stability>
-              <release>beta</release>
-              <api>stable</api>
+                <release>beta</release>
+                <api>stable</api>
             </stability>
             <license uri="http://www.php.net/license">PHP License</license>
             <notes><![CDATA[
@@ -193,12 +211,12 @@ This release is only for test.
         </release>
         <release>
             <version>
-              <release>0.1.2-dev</release>
-              <api>0.1.0</api>
+                <release>0.1.2-dev</release>
+                <api>0.1.0</api>
             </version>
             <stability>
-              <release>beta</release>
-              <api>stable</api>
+                <release>beta</release>
+                <api>stable</api>
             </stability>
             <license uri="http://www.php.net/license">PHP License</license>
             <notes><![CDATA[
@@ -207,15 +225,15 @@ Fix build error with Z_*_PP symbol.
         </release>
         <release>
             <version>
-              <release>0.1.0</release>
-              <api>0.1.0</api>
+                <release>0.1.0</release>
+                <api>0.1.0</api>
             </version>
             <stability>
-              <release>beta</release>
-              <api>stable</api>
+                <release>beta</release>
+                <api>stable</api>
             </stability>
             <license uri="http://www.php.net/license">PHP License</license>
             <notes>- Initial PECL release</notes>
         </release>
-  </changelog>
+    </changelog>
 </package>
