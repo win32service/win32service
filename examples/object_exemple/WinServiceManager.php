@@ -21,37 +21,52 @@ include(__DIR__.'/config.php');
 
 class WinServiceManager extends WinServiceAbstract {
 
+    /**
+     * @return array
+     */
 	protected function allowedCommand() {
 		return ['stop', 'start', 'pause', 'continue', 'debug'];
 	}
 
+    /**
+     * Stop the configured service
+     */
 	protected function stop()
 	{
-		if (isset($this->status['CurrentState']) and $this->status['CurrentState'] == WIN32_SERVICE_RUNNING) {
+		if (isset($this->status['CurrentState']) && $this->status['CurrentState'] == WIN32_SERVICE_RUNNING) {
 			$this->write_log('WARNING: Sending stop signal');
 			$this->win32_op_service('win32_stop_service', $this->service['service']['service'], WIN32_NO_ERROR, 'OK: Stop signal sent', true);
 		}
 	}
 
+    /**
+     * Start the configured service
+     */
 	protected function start()
 	{
-		if (isset($this->status['CurrentState']) and $this->status['CurrentState'] == WIN32_SERVICE_STOPPED) {
+		if (isset($this->status['CurrentState']) && $this->status['CurrentState'] == WIN32_SERVICE_STOPPED) {
 			$this->write_log('WARNING: Sending start signal');
 			$this->win32_op_service('win32_start_service', $this->service['service']['service'], WIN32_NO_ERROR, 'OK: Start signal sent', true);
 		}
 	}
 
+    /**
+     * Suspend the configured service
+     */
 	protected function pause()
 	{
-		if (isset($this->status['CurrentState']) and $this->status['CurrentState'] == WIN32_SERVICE_RUNNING) {
+		if (isset($this->status['CurrentState']) && $this->status['CurrentState'] == WIN32_SERVICE_RUNNING) {
 			$this->write_log('WARNING: Sending pause signal');
 			$this->win32_op_service('win32_pause_service', $this->service['service']['service'], WIN32_NO_ERROR, 'OK: Pause signal sent', true);
 		}
 	}
 
+    /**
+     * Resume the configured service
+     */
 	protected function continue()
 	{
-		if (isset($this->status['CurrentState']) and $this->status['CurrentState'] == WIN32_SERVICE_PAUSED) {
+		if (isset($this->status['CurrentState']) && $this->status['CurrentState'] == WIN32_SERVICE_PAUSED) {
 			$this->write_log('WARNING: Sending continue signal');
 			$this->win32_op_service('win32_continue_service', $this->service['service']['service'], WIN32_NO_ERROR, 'OK: Continue signal sent', true);
 		}

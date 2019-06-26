@@ -52,7 +52,7 @@ class WinService extends WinServiceAbstract {
 		return $this->win32_op_service('win32_set_service_status', WIN32_SERVICE_PAUSED, true, 'OK: Service paused');
 	}
 
-	private function main_loop($debug = false)
+	protected function main_loop($debug = false)
 	{
 		$this->write_run();
 		$this->write_log('Do something', $debug);
