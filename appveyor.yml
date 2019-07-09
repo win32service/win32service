@@ -60,7 +60,7 @@ deploy:
   auth_token:
     secure: GrQFyIPHIWQ12XchDACv4MfGCsj1ch0tMHSj81tFiILtt/FoIz8s+GxTUC18rV2y
   repository: win32service/win32service
-  artifact: /php_win32service.*\.zip/
+  artifact: /php_win32service.*[7-8]{1}\.[0-4]{1}\.zip/
   force_update: true
   draft: false
   prerelease: false
