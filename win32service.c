@@ -1083,6 +1083,16 @@ static PHP_RSHUTDOWN_FUNCTION(win32service)
 static PHP_MINFO_FUNCTION(win32service)
 {
 	php_info_print_table_start();
+    if (strcmp(sapi_module.name, "cli") != 0) {
+        php_info_print_table_row(1, "The maintainer needs your feedback (good or bad), please send it to: win32service@quadsoft.fr");
+        php_info_print_table_row(1, "Home page: http://win32service.quadsoft.fr/");
+	} else {
+        php_info_print_table_row(1, "The maintainer needs your feedback (good or bad), please send it to: <a href=\"mailto:win32service@quadsoft.fr\">win32service@quadsoft.fr</a>");
+        php_info_print_table_row(1, "Home page: <a href=\"http://win32service.quadsoft.fr/\" target=\"quadsoft\">http://win32service.quadsoft.fr/</a>");
+	}
+	php_info_print_table_end();
+
+	php_info_print_table_start();
 	
 	php_info_print_table_row(2, "Win32 Service support", "enabled");
 	php_info_print_table_row(2, "Version", PHP_WIN32SERVICE_VERSION);
