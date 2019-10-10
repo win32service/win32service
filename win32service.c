@@ -1083,12 +1083,14 @@ static PHP_RSHUTDOWN_FUNCTION(win32service)
 static PHP_MINFO_FUNCTION(win32service)
 {
 	php_info_print_table_start();
-    if (strcmp(sapi_module.name, "cli") != 0) {
-        php_info_print_table_row(1, "The maintainer needs your feedback (good or bad), please send it to: win32service@quadsoft.fr");
-        php_info_print_table_row(1, "Home page: http://win32service.quadsoft.fr/");
-	} else {
+    if (!sapi_module.phpinfo_as_text) {
         php_info_print_table_row(1, "The maintainer needs your feedback (good or bad), please send it to: <a href=\"mailto:win32service@quadsoft.fr\">win32service@quadsoft.fr</a>");
         php_info_print_table_row(1, "Home page: <a href=\"http://win32service.quadsoft.fr/\" target=\"quadsoft\">http://win32service.quadsoft.fr/</a>");
+        php_info_print_table_row(1, "Library for help you to use this extension: <a href=\"https://github.com/win32service/service-library\">service-library</a> and <a href=\"https://github.com/win32service/Win32ServiceBundle\">Win32ServiceBundle</a> for Symfony");
+	} else {
+        php_info_print_table_row(1, "The maintainer needs your feedback (good or bad), please send it to: win32service@quadsoft.fr");
+        php_info_print_table_row(1, "Home page: http://win32service.quadsoft.fr/");
+    	php_info_print_table_row(1, "Library for help you to use this extension: https://github.com/win32service/service-library and https://github.com/win32service/Win32ServiceBundle for Symfony");
 	}
 	php_info_print_table_end();
 
@@ -1098,7 +1100,11 @@ static PHP_MINFO_FUNCTION(win32service)
 	php_info_print_table_row(2, "Version", PHP_WIN32SERVICE_VERSION);
 	php_info_print_table_row(2, "Current SAPI", sapi_module.name);
 	if (strcmp(sapi_module.name, "cli") != 0) {
-		php_info_print_table_row(2, "NOTE", "The Win32Service extension does work when using the CLI SAPI with administrator right level. On other SAPI, please check security consideration.");
+	    if (!sapi_module.phpinfo_as_text) {
+		    php_info_print_table_row(2, "Security advisor", "The Win32Service extension does work when using the CLI SAPI with administrator right level. On other SAPI, please <a href=\"https://www.php.net/manual/en/win32service.security.php\">check security consideration</a>.");
+		} else {
+		    php_info_print_table_row(2, "Security advisor", "The Win32Service extension does work when using the CLI SAPI with administrator right level. On other SAPI, please check security consideration: https://www.php.net/manual/en/win32service.security.php");
+		}
 	}
 	php_info_print_table_end();
 
