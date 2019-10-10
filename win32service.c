@@ -1101,9 +1101,9 @@ static PHP_MINFO_FUNCTION(win32service)
 	php_info_print_table_row(2, "Current SAPI", sapi_module.name);
 	if (strcmp(sapi_module.name, "cli") != 0) {
 	    if (!sapi_module.phpinfo_as_text) {
-		    php_info_print_table_row(2, "Security advisor", "The Win32Service extension does work when using the CLI SAPI with administrator right level. On other SAPI, please <a href=\"https://www.php.net/manual/en/win32service.security.php\">check security consideration</a>.");
+		    php_info_print_table_row(2, "Security information", "The Win32Service extension does work when using the CLI SAPI with administrator right level. On other SAPI, please <a href=\"https://www.php.net/manual/en/win32service.security.php\">check security consideration</a>.");
 		} else {
-		    php_info_print_table_row(2, "Security advisor", "The Win32Service extension does work when using the CLI SAPI with administrator right level. On other SAPI, please check security consideration: https://www.php.net/manual/en/win32service.security.php");
+		    php_info_print_table_row(2, "Security information", "The Win32Service extension does work when using the CLI SAPI with administrator right level. On other SAPI, please check security consideration: https://www.php.net/manual/en/win32service.security.php");
 		}
 	}
 	php_info_print_table_end();
