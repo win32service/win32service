@@ -1100,10 +1100,10 @@ static PHP_MINFO_FUNCTION(win32service)
 {
 	php_info_print_table_start();
     if (!sapi_module.phpinfo_as_text) {
-        win32service_info_printf("<tr><td>%s</td></tr>\n", "The maintainer needs your feedback (good or bad), please send it to: <a href=\"mailto:win32service@mactronique.fr\">win32service@mactronique.fr</a>");
-        win32service_info_printf("<tr><td>%s</td></tr>\n", "Please report your bugs with this extension here : <a href=\"https://bugs.php.net/report.php\">Win32Service PHP extension issue tracker</a>");
-        win32service_info_printf("<tr><td>%s</td></tr>\n", "Home page: <a href=\"http://win32service.mactronique.fr/\" target=\"mactronique\">http://win32service.mactronique.fr/</a>");
-        win32service_info_printf("<tr><td>%s</td></tr>\n", "Library for help you to use this extension: <a href=\"https://github.com/win32service/service-library\">service-library</a> and <a href=\"https://github.com/win32service/Win32ServiceBundle\">Win32ServiceBundle</a> for Symfony");
+        win32service_info_printf("<tr><td class=\"v\">%s</td></tr>\n", "The maintainer needs your feedback (good or bad), please send it to: <a href=\"mailto:win32service@mactronique.fr\">win32service@mactronique.fr</a>");
+        win32service_info_printf("<tr><td class=\"v\">%s</td></tr>\n", "Please report your bugs with this extension here : <a href=\"https://bugs.php.net/report.php\"  target=\"bugreport\">Win32Service PHP extension issue tracker</a>");
+        win32service_info_printf("<tr><td class=\"v\">%s</td></tr>\n", "Home page: <a href=\"http://win32service.mactronique.fr/\" target=\"mactronique\">http://win32service.mactronique.fr/</a>");
+        win32service_info_printf("<tr><td class=\"v\">%s</td></tr>\n", "Library for help you to use this extension: <a href=\"https://github.com/win32service/service-library\" target=\"libraire\">service-library</a> and <a href=\"https://github.com/win32service/Win32ServiceBundle\" target=\"bundle\">Win32ServiceBundle</a> for Symfony");
 	} else {
         php_info_print_table_row(1, "The maintainer needs your feedback (good or bad), please send it to: win32service@mactronique.fr");
     	php_info_print_table_row(1, "Please report your bugs with this extension here : https://bugs.php.net/");
