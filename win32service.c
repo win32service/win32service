@@ -115,7 +115,7 @@ static void WINAPI service_main(DWORD argc, char **argv)
 		g->st.dwControlsAccepted |= SERVICE_ACCEPT_TIMECHANGE | SERVICE_ACCEPT_TRIGGEREVENT;
 	}
 	g->sh = RegisterServiceCtrlHandlerEx(g->service_name, service_handler, g);
-	
+
 	if (g->sh == (SERVICE_STATUS_HANDLE)0) {
 		g->code = GetLastError();
 		SetEvent(g->event);
@@ -156,11 +156,11 @@ static PHP_FUNCTION(win32_start_service_ctrl_dispatcher)
 	zend_bool gracefulExitParam=SVCG(gracefulExit);
 
 	if (SVCG(svc_thread)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "service ctrl dispatcher already running");
+		php_error_docref(NULL, E_WARNING, "service ctrl dispatcher already running");
 		RETURN_FALSE;
 	}
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &name, &name_len, &gracefulExitParam)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() "s|b", &name, &name_len, &gracefulExitParam)) {
 		RETURN_FALSE;
 	}
 
@@ -175,7 +175,7 @@ static PHP_FUNCTION(win32_start_service_ctrl_dispatcher)
 	SVCG(svc_thread) = CreateThread(NULL, 0, svc_thread_proc, &SVCG(svc_thread), 0, &SVCG(svc_thread_id));
 
 	if (SVCG(svc_thread) == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to start dispatcher thread");
+		php_error_docref(NULL, E_WARNING, "failed to start dispatcher thread");
 		RETURN_FALSE;
 	}
 
@@ -194,8 +194,8 @@ static PHP_FUNCTION(win32_start_service_ctrl_dispatcher)
 /* {{{ proto bool win32_set_service_exit_mode([bool gracefulExit])
    Set (and get) the exit mode of the service, when set to true the service
    will shut down gracefuly when PHP exits, when set to false it will not shut
-   down gracefuly, this will mean that the service will count as having failed 
-   and the recovery action will be run */ 
+   down gracefuly, this will mean that the service will count as having failed
+   and the recovery action will be run */
 static PHP_FUNCTION(win32_set_service_exit_mode)
 {
 	if (strcmp(sapi_module.name, "cli") != 0) {
@@ -205,7 +205,7 @@ static PHP_FUNCTION(win32_set_service_exit_mode)
 	zend_bool gracefulExitParam=SVCG(gracefulExit);
 	zend_bool old_gracefulExitParam=SVCG(gracefulExit);
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &gracefulExitParam)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() "|b", &gracefulExitParam)) {
 		RETURN_FALSE;
 	}
 
@@ -216,10 +216,10 @@ static PHP_FUNCTION(win32_set_service_exit_mode)
 /* }}} */
 
 /* {{{ proto bool win32_set_service_exit_code([int exitCode])
-   Set (and get) the exit code of the service, when the service will shut down 
-   gracefuly when PHP exits it's not used, when the service will shut down not 
-   gracefuly the int is used for exitCode and the recovery action will be run 
-   if exit code is not zero */ 
+   Set (and get) the exit code of the service, when the service will shut down
+   gracefuly when PHP exits it's not used, when the service will shut down not
+   gracefuly the int is used for exitCode and the recovery action will be run
+   if exit code is not zero */
 static PHP_FUNCTION(win32_set_service_exit_code)
 {
 	if (strcmp(sapi_module.name, "cli") != 0) {
@@ -229,7 +229,7 @@ static PHP_FUNCTION(win32_set_service_exit_code)
 	zend_long exitCodeParam=SVCG(gracefulExit);
 	zend_long old_exitCodeParam=SVCG(gracefulExit);
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &exitCodeParam)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() "|l", &exitCodeParam)) {
 		RETURN_FALSE;
 	}
 
@@ -251,7 +251,7 @@ static PHP_FUNCTION(win32_set_service_status)
 	long status;
 	long checkpoint = 0;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &status, &checkpoint)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() "l|l", &status, &checkpoint)) {
 		RETURN_FALSE;
 	}
 
@@ -311,7 +311,7 @@ static PHP_FUNCTION(win32_create_service)
 	char *service_key;
 	long registry_result;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|s!", &details, &machine, &machine_len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() "a|s!", &details, &machine, &machine_len)) {
 		RETURN_FALSE;
 	}
 
@@ -323,7 +323,7 @@ static PHP_FUNCTION(win32_create_service)
 			convert_to_null_ex(tmp); \
 		} \
 		if (strlen(Z_STRVAL_P(tmp)) != Z_STRLEN_P(tmp)) { \
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "malformed " name); \
+			php_error_docref(NULL, E_WARNING, "malformed " name); \
 			RETURN_FALSE; \
 		} \
 		var = Z_STRVAL_P(tmp); \
@@ -346,7 +346,7 @@ static PHP_FUNCTION(win32_create_service)
 	} else { \
 		var = def; \
 	}
-	
+
 #define ARRAY_TO_STR_DETAIL(name, var, def) \
 	if ((tmp = zend_hash_find(Z_ARRVAL_P(details), zend_string_init(name, strlen(name), 0))) != NULL) { \
 		if (Z_TYPE_P(tmp) == IS_STRING) { \
@@ -385,7 +385,7 @@ static PHP_FUNCTION(win32_create_service)
 	} else { \
 		var = def; \
 	}
-	
+
 
 
 	STR_DETAIL(INFO_SERVICE, service, NULL);
@@ -413,32 +413,32 @@ static PHP_FUNCTION(win32_create_service)
 
 
 	if (service == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "missing vital parameters");
+		php_error_docref(NULL, E_WARNING, "missing vital parameters");
 		RETURN_FALSE;
 	}
 
 	if (recovery_action1 != SC_ACTION_NONE && recovery_action1 != SC_ACTION_REBOOT && recovery_action1 != SC_ACTION_RESTART && recovery_action1 != SC_ACTION_RUN_COMMAND) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for recovery_action_1 parameters");
+		php_error_docref(NULL, E_WARNING, "invalid value for recovery_action_1 parameters");
 		RETURN_FALSE;
 	}
 
 	if (recovery_action2 != SC_ACTION_NONE && recovery_action2 != SC_ACTION_REBOOT && recovery_action2 != SC_ACTION_RESTART && recovery_action2 != SC_ACTION_RUN_COMMAND) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for recovery_action_2 parameters");
+		php_error_docref(NULL, E_WARNING, "invalid value for recovery_action_2 parameters");
 		RETURN_FALSE;
 	}
 
 	if (recovery_action3 != SC_ACTION_NONE && recovery_action3 != SC_ACTION_REBOOT && recovery_action3 != SC_ACTION_RESTART && recovery_action3 != SC_ACTION_RUN_COMMAND) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for recovery_action_3 parameters");
+		php_error_docref(NULL, E_WARNING, "invalid value for recovery_action_3 parameters");
 		RETURN_FALSE;
 	}
 
 	srvc_desc.lpDescription = desc;
 	srvc_delayed_start.fDelayedAutostart = delayed_start;
-	
+
 	srvc_failure_infos.dwResetPeriod = recovery_reset_period;
 	srvc_failure_infos.lpRebootMsg = recovery_reboot_msg;
 	srvc_failure_infos.lpCommand = recovery_command;
-	
+
 	srvc_failure_infos.cActions = 3;
 	SC_ACTION recovery_actions[3];
 	recovery_actions[0].Delay = recovery_delay;
@@ -511,7 +511,7 @@ static PHP_FUNCTION(win32_create_service)
 	if (	!hsvc ||
 		!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, &srvc_desc) ||
 		(start_type & SERVICE_AUTO_START && osvi.dwMajorVersion >= 6 && !ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, &srvc_delayed_start)) ||
-		!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, &srvc_failure_action) || 
+		!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, &srvc_failure_action) ||
 		!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, &srvc_failure_infos)
 		) {
 		RETVAL_LONG(GetLastError());
@@ -547,7 +547,7 @@ static PHP_FUNCTION(win32_delete_service)
 	SC_HANDLE hsvc;
 	SC_HANDLE hmgr;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!", &service, &service_len, &machine, &machine_len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() "s|s!", &service, &service_len, &machine, &machine_len)) {
 		RETURN_FALSE;
 	}
 
@@ -597,7 +597,7 @@ static PHP_FUNCTION(win32_query_service_status)
 	SERVICE_STATUS_PROCESS *st;
 	DWORD size;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!", &service, &service_len, &machine, &machine_len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() "s|s!", &service, &service_len, &machine, &machine_len)) {
 		RETURN_FALSE;
 	}
 
@@ -655,7 +655,7 @@ static PHP_FUNCTION(win32_start_service)
 	SC_HANDLE hsvc;
 	SC_HANDLE hmgr;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!", &service, &service_len, &machine, &machine_len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() "s|s!", &service, &service_len, &machine, &machine_len)) {
 		RETURN_FALSE;
 	}
 
@@ -689,7 +689,7 @@ static void win32_handle_service_controls(INTERNAL_FUNCTION_PARAMETERS, long acc
 	SC_HANDLE hmgr;
 	SERVICE_STATUS st;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!", &service, &service_len, &machine, &machine_len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() "s|s!", &service, &service_len, &machine, &machine_len)) {
 		RETURN_FALSE;
 	}
 
@@ -750,7 +750,7 @@ static PHP_FUNCTION(win32_send_custom_control)
 	SC_HANDLE hmgr;
 	SERVICE_STATUS st;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|s!", &service, &service_len, &control, &machine, &machine_len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() "sl|s!", &service, &service_len, &control, &machine, &machine_len)) {
 		RETURN_FALSE;
 	}
 
@@ -1051,7 +1051,7 @@ static PHP_RSHUTDOWN_FUNCTION(win32service)
 		zend_bool graceful = SVCG(gracefulExit);
 		/* Log the mode and code used for exit in PHP log */
 		char *str = emalloc(sizeof(char) * 150);
-		
+
 		if (graceful == 0) {
 			SVCG(st).dwWin32ExitCode = ERROR_SERVICE_SPECIFIC_ERROR;
 			SVCG(st).dwServiceSpecificExitCode = SVCG(exitCode);
@@ -1060,7 +1060,7 @@ static PHP_RSHUTDOWN_FUNCTION(win32service)
 			sprintf(str, "Info: Win32Service exit gracefuly");
 		}
 
-		php_log_err(str TSRMLS_CC);
+		php_log_err(str);
 		efree(str);
 
 		SVCG(st).dwCurrentState = SERVICE_STOPPED;
@@ -1083,7 +1083,7 @@ static PHP_RSHUTDOWN_FUNCTION(win32service)
 static PHP_MINFO_FUNCTION(win32service)
 {
 	php_info_print_table_start();
-	
+
 	php_info_print_table_row(2, "Win32 Service support", "enabled");
 	php_info_print_table_row(2, "Version", PHP_WIN32SERVICE_VERSION);
 	php_info_print_table_row(2, "Current SAPI", sapi_module.name);

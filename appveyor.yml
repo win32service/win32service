@@ -18,10 +18,10 @@ environment:
 #      PHP_REL: 7.0
 #      ZTS_STATES: enable disable
 #      PHP_BUILD_CRT: vc14
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      PHP_REL: 7.1
-      ZTS_STATES: enable disable
-      PHP_BUILD_CRT: vc14
+#    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+#      PHP_REL: 7.1
+#      ZTS_STATES: enable disable
+#      PHP_BUILD_CRT: vc14
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       PHP_REL: 7.2
       ZTS_STATES: enable disable
@@ -34,11 +34,11 @@ environment:
       PHP_REL: 7.4
       ZTS_STATES: enable disable
       PHP_BUILD_CRT: vc15
-#    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-#      PHP_REL: master
-#      ZTS_STATES: enable disable
-#      PHP_BUILD_CRT: vs16
-      
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      PHP_REL: master
+      ZTS_STATES: enable disable
+      PHP_BUILD_CRT: vs16
+
 platform:
         - x86
         - x64

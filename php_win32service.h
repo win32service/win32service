@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
+  | PHP Version 8                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2011 The PHP Group                                |
+  | Copyright (c) 1997-2020 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -25,14 +25,14 @@
 extern zend_module_entry win32service_module_entry;
 #define phpext_win32service_ptr	&win32service_module_entry
 
-#define PHP_WIN32SERVICE_VERSION "0.4.1"
+#define PHP_WIN32SERVICE_VERSION "1.0.0-dev"
 
 #ifndef PHP_WIN32
 # error This extension is for win32 only
 #endif
 
-#if PHP_MAJOR_VERSION < 7
-# error This extension is for PHP 7+ only
+#if PHP_MAJOR_VERSION < 8
+# error This extension is for PHP 8+ only
 #endif
 
 #ifndef SERVICE_WIN32_OWN_PROCESS_INTERACTIVE
