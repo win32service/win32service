@@ -160,7 +160,7 @@ static PHP_FUNCTION(win32_start_service_ctrl_dispatcher)
 		RETURN_FALSE;
 	}
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() "s|b", &name, &name_len, &gracefulExitParam)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &name, &name_len, &gracefulExitParam)) {
 		RETURN_FALSE;
 	}
 
@@ -205,7 +205,7 @@ static PHP_FUNCTION(win32_set_service_exit_mode)
 	zend_bool gracefulExitParam=SVCG(gracefulExit);
 	zend_bool old_gracefulExitParam=SVCG(gracefulExit);
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() "|b", &gracefulExitParam)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &gracefulExitParam)) {
 		RETURN_FALSE;
 	}
 
@@ -229,7 +229,7 @@ static PHP_FUNCTION(win32_set_service_exit_code)
 	zend_long exitCodeParam=SVCG(gracefulExit);
 	zend_long old_exitCodeParam=SVCG(gracefulExit);
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() "|l", &exitCodeParam)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &exitCodeParam)) {
 		RETURN_FALSE;
 	}
 
@@ -251,7 +251,7 @@ static PHP_FUNCTION(win32_set_service_status)
 	long status;
 	long checkpoint = 0;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() "l|l", &status, &checkpoint)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &status, &checkpoint)) {
 		RETURN_FALSE;
 	}
 
@@ -311,7 +311,7 @@ static PHP_FUNCTION(win32_create_service)
 	char *service_key;
 	long registry_result;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() "a|s!", &details, &machine, &machine_len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "a|s!", &details, &machine, &machine_len)) {
 		RETURN_FALSE;
 	}
 
@@ -547,7 +547,7 @@ static PHP_FUNCTION(win32_delete_service)
 	SC_HANDLE hsvc;
 	SC_HANDLE hmgr;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() "s|s!", &service, &service_len, &machine, &machine_len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!", &service, &service_len, &machine, &machine_len)) {
 		RETURN_FALSE;
 	}
 
@@ -597,7 +597,7 @@ static PHP_FUNCTION(win32_query_service_status)
 	SERVICE_STATUS_PROCESS *st;
 	DWORD size;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() "s|s!", &service, &service_len, &machine, &machine_len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!", &service, &service_len, &machine, &machine_len)) {
 		RETURN_FALSE;
 	}
 
@@ -655,7 +655,7 @@ static PHP_FUNCTION(win32_start_service)
 	SC_HANDLE hsvc;
 	SC_HANDLE hmgr;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() "s|s!", &service, &service_len, &machine, &machine_len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!", &service, &service_len, &machine, &machine_len)) {
 		RETURN_FALSE;
 	}
 
@@ -689,7 +689,7 @@ static void win32_handle_service_controls(INTERNAL_FUNCTION_PARAMETERS, long acc
 	SC_HANDLE hmgr;
 	SERVICE_STATUS st;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() "s|s!", &service, &service_len, &machine, &machine_len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!", &service, &service_len, &machine, &machine_len)) {
 		RETURN_FALSE;
 	}
 
@@ -750,7 +750,7 @@ static PHP_FUNCTION(win32_send_custom_control)
 	SC_HANDLE hmgr;
 	SERVICE_STATUS st;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() "sl|s!", &service, &service_len, &control, &machine, &machine_len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "sl|s!", &service, &service_len, &control, &machine, &machine_len)) {
 		RETURN_FALSE;
 	}
 
