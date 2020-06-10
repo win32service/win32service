@@ -262,7 +262,7 @@ static PHP_FUNCTION(win32_set_service_status)
 	}
 
 	if (!SetServiceStatus(SVCG(sh), &SVCG(st))) {
-		RETURN_LONG(GetLastError())
+		RETURN_LONG(GetLastError());
 	} else {
 		RETURN_TRUE;
 	}
