@@ -1055,7 +1055,7 @@ static PHP_RSHUTDOWN_FUNCTION(win32service)
 		if (graceful == 0) {
 			SVCG(st).dwWin32ExitCode = ERROR_SERVICE_SPECIFIC_ERROR;
 			SVCG(st).dwServiceSpecificExitCode = SVCG(exitCode);
-			sprintf(str, "Info: Win32Service exit with error and exit code %d", SVCG(exitCode));
+			sprintf(str, "Info: Win32Service exit with error and exit code %l", Z_LVAL(SVCG(exitCode)));
  		} else {
 			sprintf(str, "Info: Win32Service exit gracefuly");
 		}
