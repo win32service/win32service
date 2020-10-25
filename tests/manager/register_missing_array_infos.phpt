@@ -28,17 +28,26 @@ $service['params'] = '"' . __FILE__ . '" run';
 
 var_dump(win32_create_service($service));
 $service['start_type'] = 0x00000008;
-
+$service['recovery_action_1'] = 0x00000004;
 var_dump(win32_create_service($service));
-var_dump(win32_delete_service($service['service']));
+$service['recovery_action_1'] = 0x00000000;
+$service['recovery_action_2'] = 0x00000004;
+var_dump(win32_create_service($service));
+$service['recovery_action_2'] = 0x00000000;
+$service['recovery_action_3'] = 0x00000004;
+var_dump(win32_create_service($service));
 ?>
 --EXPECTF--
 Warning: win32_create_service(): missing vital parameters in %s on line %d
-bool(false)
+int(0)
 int(1073)
 int(1073)
 int(1073)
 int(1073)
 int(87)
+Warning: win32_create_service(): invalid value for recovery_action_1 parameters in %s on line %d
 int(0)
+Warning: win32_create_service(): invalid value for recovery_action_2 parameters in %s on line %d
+int(0)
+Warning: win32_create_service(): invalid value for recovery_action_3 parameters in %s on line %d
 int(0)
