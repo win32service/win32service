@@ -32,7 +32,7 @@ $service['start_type'] = 0x00000008;
 var_dump(win32_create_service($service));
 var_dump(win32_delete_service($service['service']));
 ?>
---EXPECT--
+--EXPECTF--
 Warning: win32_create_service(): missing vital parameters in %s on line %d
 bool(false)
 int(1073)
