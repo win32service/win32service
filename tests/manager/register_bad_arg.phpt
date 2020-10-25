@@ -1,5 +1,5 @@
 --TEST--
-Test service registration and unregistration
+Test service registration with object
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') die('skip only windows test.');
@@ -13,3 +13,4 @@ Fatal error: Uncaught TypeError: win32_create_service(): Argument #1 ($details) 
 Stack trace:
 #0 C:\projects\php-src\ext\win32service\tests\manager\register_bad_arg.php(2): win32_create_service(Object(stdClass))
 #1 {main}
+  thrown in C:\projects\php-src\ext\win32service\tests\manager\register_bad_arg.php on line 2
