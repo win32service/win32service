@@ -33,5 +33,12 @@ var_dump(win32_create_service($service));
 var_dump(win32_delete_service($service['service']));
 ?>
 --EXPECT--
+Warning: win32_create_service(): missing vital parameters in %s on line %d
+bool(false)
+int(1073)
+int(1073)
+int(1073)
+int(1073)
+int(87)
 int(0)
 int(0)
