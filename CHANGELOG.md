@@ -4,6 +4,34 @@ This version is only for PHP 8+
 
 * Upgrade to PHP 8.0.
 * Remove code for older Windows version (issue [#57](https://github.com/win32service/win32service/issues/57))
+* Add `Win32ServiceException` (extends Exception)
+* The return value is no longer `false` when call method with wrong parameters
+    * win32_start_service_ctrl_dispatcher
+    * win32_set_service_exit_mode
+    * win32_set_service_exit_code
+    * win32_set_service_status
+    * win32_create_service
+    * win32_delete_service
+    * win32_get_last_control_message
+    * win32_query_service_status
+    * win32_start_service
+    * win32_stop_service
+    * win32_pause_service
+    * win32_continue_service
+    * win32_send_custom_control
+* Add check in array information provided to `win32_create_service`. On error, this method throw a ValueError.
+* For function `win32_send_custom_control`, the PHP error `The control argument value is not between 128 and 255.` is now throw on ValueError.
+* For all function needed the service name, a ValueError is throw if the string is empty.
+* The PHP Error `This function work only when using the CLI SAPI and called into the service code.` has been converted to `Win32ServiceException` for this method
+    * win32_start_service_ctrl_dispatcher
+    * win32_set_service_exit_mode
+    * win32_set_service_exit_code
+    * win32_set_service_status
+    * win32_get_last_control_message
+* The PHP Warning `Service ctrl dispatcher already running` has been converted to `Win32ServiceException`.
+  This exception is throw if function `win32_start_service_ctrl_dispatcher` is called when the control dispatcher is already started.
+* The PHP Warning `Failed to start dispatcher thread` has been converted to `Win32ServiceException`.
+
 
 # Version 0.4.2 (2020-10-29)
 

@@ -23,6 +23,7 @@
 #define PHP_WIN32SERVICE_H
 
 extern zend_module_entry win32service_module_entry;
+extern PHPAPI zend_class_entry *win32service_Win32ServiceException;
 #define phpext_win32service_ptr	&win32service_module_entry
 
 #define PHP_WIN32SERVICE_VERSION "1.0.0-alpha1"

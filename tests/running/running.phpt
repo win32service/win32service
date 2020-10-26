@@ -6,6 +6,9 @@ if (substr(PHP_OS, 0, 3) != 'WIN') die('skip only windows test.');
 ?>
 --FILE--
 <?php
+function displayException(Throwable $e){
+    printf("%s: (%d) %s\n", get_class($e), $e->getCode(), $e->getMessage());
+}
 
 $service = [
 		'service' => 'WindowsServicePhpTestRun',
@@ -15,7 +18,7 @@ $service = [
 		'params' => '"' . __DIR__ . '\\run.php"',
 		'start_type' => WIN32_SERVICE_AUTO_START,
 ];
-
+try {
 var_dump(win32_create_service($service));
 var_dump(win32_start_service($service['service']));
 sleep(15);
@@ -23,6 +26,12 @@ var_dump(win32_query_service_status($service['service']));
 var_dump(win32_stop_service($service['service']));
 sleep(30);
 var_dump(win32_delete_service($service['service']));
+} catch (Throwable $e) {
+  displayException($e);
+}
+if (is_readable(__DIR__.'/run.log')) {
+echo file_get_contents(__DIR__.'/run.log');
+}
 ?>
 --EXPECTF--
 int(0)
@@ -49,3 +58,4 @@ array(9) {
 }
 int(0)
 int(0)
+Win32ServiceException: (0) Service ctrl dispatcher already running in %s on line %d

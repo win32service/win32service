@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
+  | PHP Version 8                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2011 The PHP Group                                |
+  | Copyright (c) 1997-2020 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -24,6 +24,7 @@
 #endif
 
 #include "php.h"
+#include "zend_exceptions.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_win32service.h"
@@ -35,6 +36,8 @@
 
 /* gargh! service_main run from a new thread that we don't spawn, so we can't do this nicely */
 static void *tmp_service_g = NULL;
+
+zend_class_entry *Win32ServiceException_ce_ptr;
 
 static DWORD WINAPI service_handler(DWORD dwControl, DWORD dwEventType, LPVOID lpEventData, LPVOID lpContext)
 {
@@ -125,13 +128,141 @@ static DWORD WINAPI svc_thread_proc(LPVOID _globals)
 	return 0;
 }
 
+static void convert_error_to_exception(DWORD code)
+{
+    if (code == ERROR_ACCESS_DENIED) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error access denied");
+        return;
+    }
+    if (code == ERROR_CIRCULAR_DEPENDENCY) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error circular dependency");
+        return;
+    }
+    if (code == ERROR_DATABASE_DOES_NOT_EXIST) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error database does not exist");
+        return;
+    }
+    if (code == ERROR_DEPENDENT_SERVICES_RUNNING) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error dependent services running");
+        return;
+    }
+    if (code == ERROR_DUPLICATE_SERVICE_NAME) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error duplicate service name");
+        return;
+    }
+    if (code == ERROR_FAILED_SERVICE_CONTROLLER_CONNECT) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error failed service controller connect");
+        return;
+    }
+    if (code == ERROR_INSUFFICIENT_BUFFER) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error insufficient buffer");
+        return;
+    }
+    if (code == ERROR_INVALID_DATA) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid data");
+        return;
+    }
+    if (code == ERROR_INVALID_HANDLE) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid handle");
+        return;
+    }
+    if (code == ERROR_INVALID_LEVEL) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid level");
+        return;
+    }
+    if (code == ERROR_INVALID_NAME) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid name");
+        return;
+    }
+    if (code == ERROR_INVALID_PARAMETER) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid parameter");
+        return;
+    }
+    if (code == ERROR_INVALID_SERVICE_ACCOUNT) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid service account");
+        return;
+    }
+    if (code == ERROR_INVALID_SERVICE_CONTROL) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid service control");
+        return;
+    }
+    if (code == ERROR_PATH_NOT_FOUND) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error path not found");
+        return;
+    }
+    if (code == ERROR_SERVICE_ALREADY_RUNNING) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service already running");
+        return;
+    }
+    if (code == ERROR_SERVICE_CANNOT_ACCEPT_CTRL) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service cannot accept ctrl");
+        return;
+    }
+    if (code == ERROR_SERVICE_DATABASE_LOCKED) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service database locked");
+        return;
+    }
+    if (code == ERROR_SERVICE_DEPENDENCY_DELETED) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service dependency deleted");
+        return;
+    }
+    if (code == ERROR_SERVICE_DEPENDENCY_FAIL) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service dependency fail");
+        return;
+    }
+    if (code == ERROR_SERVICE_DISABLED) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service disabled");
+        return;
+    }
+    if (code == ERROR_SERVICE_DOES_NOT_EXIST) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service does not exist");
+        return;
+    }
+    if (code == ERROR_SERVICE_EXISTS) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service exists");
+        return;
+    }
+    if (code == ERROR_SERVICE_LOGON_FAILED) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service logon failed");
+        return;
+    }
+    if (code == ERROR_SERVICE_MARKED_FOR_DELETE) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service marked for delete");
+        return;
+    }
+    if (code == ERROR_SERVICE_NO_THREAD) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service no thread");
+        return;
+    }
+    if (code == ERROR_SERVICE_NOT_ACTIVE) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service not active");
+        return;
+    }
+    if (code == ERROR_SERVICE_REQUEST_TIMEOUT) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service request timeout");
+        return;
+    }
+    if (code == ERROR_SHUTDOWN_IN_PROGRESS) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error shutdown in progress");
+        return;
+    }
+    if (code == ERROR_SERVICE_SPECIFIC_ERROR) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service specific error");
+        return;
+    }
+    if (code != NO_ERROR) {
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Unknow error no %d", code);
+        return;
+    }
+}
+
 /* {{{ proto bool win32_start_service_ctrl_dispatcher(string $name, [bool gracefulExit])
    Registers the script with the SCM, so that it can act as the service with the given name */
 static PHP_FUNCTION(win32_start_service_ctrl_dispatcher)
 {
 	if (strcmp(sapi_module.name, "cli") != 0) {
-		zend_error(E_ERROR, "This function work only when using the CLI SAPI and called into the service code.");
-		RETURN_FALSE;
+		zend_throw_exception_ex(Win32ServiceException_ce_ptr, 0, "This function work only when using the CLI SAPI and called into the service code.");
+		RETURN_THROWS();
 	}
 
 	char *name;
@@ -139,13 +270,18 @@ static PHP_FUNCTION(win32_start_service_ctrl_dispatcher)
 	zend_bool gracefulExitParam=SVCG(gracefulExit);
 
 	if (SVCG(svc_thread)) {
-		php_error_docref(NULL, E_WARNING, "service ctrl dispatcher already running");
-		RETURN_FALSE;
+	    zend_throw_exception_ex(Win32ServiceException_ce_ptr, 0, "Service ctrl dispatcher already running");
+	    RETURN_THROWS();
 	}
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &name, &name_len, &gracefulExitParam)) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
+
+    if (name_len == 0) {
+	    zend_argument_value_error(1, "the value cannot be empty");
+        RETURN_THROWS();
+    }
 
 	SVCG(service_name) = estrdup(name);
 
@@ -158,15 +294,18 @@ static PHP_FUNCTION(win32_start_service_ctrl_dispatcher)
 	SVCG(svc_thread) = CreateThread(NULL, 0, svc_thread_proc, &SVCG(svc_thread), 0, &SVCG(svc_thread_id));
 
 	if (SVCG(svc_thread) == NULL) {
-		php_error_docref(NULL, E_WARNING, "failed to start dispatcher thread");
-		RETURN_FALSE;
+	    zend_throw_exception_ex(Win32ServiceException_ce_ptr, 0, "Failed to start dispatcher thread");
+		RETURN_THROWS();
 	}
 
 	if (WAIT_OBJECT_0 == WaitForSingleObject(SVCG(event), 30000)) {
 		if (SVCG(code) == NO_ERROR) {
 			RETURN_TRUE;
 		} else {
-			RETURN_LONG(SVCG(code));
+		    CloseHandle(SVCG(svc_thread));
+		    SVCG(svc_thread) = NULL;
+			convert_error_to_exception(SVCG(code));
+			RETURN_THROWS();
 		}
 	}
 
@@ -182,14 +321,14 @@ static PHP_FUNCTION(win32_start_service_ctrl_dispatcher)
 static PHP_FUNCTION(win32_set_service_exit_mode)
 {
 	if (strcmp(sapi_module.name, "cli") != 0) {
-		zend_error(E_ERROR, "This function work only when using the CLI SAPI and called into the service code.");
-		RETURN_FALSE;
+		zend_throw_exception_ex(Win32ServiceException_ce_ptr, 0, "This function work only when using the CLI SAPI and called into the service code.");
+		RETURN_THROWS();
 	}
 	zend_bool gracefulExitParam=SVCG(gracefulExit);
 	zend_bool old_gracefulExitParam=SVCG(gracefulExit);
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &gracefulExitParam)) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	SVCG(gracefulExit)=gracefulExitParam;
@@ -206,14 +345,14 @@ static PHP_FUNCTION(win32_set_service_exit_mode)
 static PHP_FUNCTION(win32_set_service_exit_code)
 {
 	if (strcmp(sapi_module.name, "cli") != 0) {
-		zend_error(E_ERROR, "This function work only when using the CLI SAPI and called into the service code.");
-		RETURN_FALSE;
+		zend_throw_exception_ex(Win32ServiceException_ce_ptr, 0, "This function work only when using the CLI SAPI and called into the service code.");
+		RETURN_THROWS();
 	}
 	zend_long exitCodeParam=SVCG(gracefulExit);
 	zend_long old_exitCodeParam=SVCG(gracefulExit);
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &exitCodeParam)) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	SVCG(exitCode)=exitCodeParam;
@@ -227,15 +366,15 @@ static PHP_FUNCTION(win32_set_service_exit_code)
 static PHP_FUNCTION(win32_set_service_status)
 {
 	if (strcmp(sapi_module.name, "cli") != 0) {
-		zend_error(E_ERROR, "This function work only when using the CLI SAPI and called into the service code.");
-		RETURN_FALSE;
+		zend_throw_exception_ex(Win32ServiceException_ce_ptr, 0, "This function work only when using the CLI SAPI and called into the service code.");
+		RETURN_THROWS();
 	}
 
 	long status;
 	long checkpoint = 0;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &status, &checkpoint)) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	SVCG(st.dwCurrentState) = status;
@@ -245,7 +384,8 @@ static PHP_FUNCTION(win32_set_service_status)
 	}
 
 	if (!SetServiceStatus(SVCG(sh), &SVCG(st))) {
-		RETURN_LONG(GetLastError());
+		convert_error_to_exception(GetLastError());
+		RETURN_THROWS();
 	} else {
 		RETURN_TRUE;
 	}
@@ -294,7 +434,7 @@ static PHP_FUNCTION(win32_create_service)
 	long registry_result;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "a|s!", &details, &machine, &machine_len)) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 #define STR_DETAIL(name, var, def) \
@@ -395,24 +535,106 @@ static PHP_FUNCTION(win32_create_service)
 
 
 	if (service == NULL) {
-		php_error_docref(NULL, E_WARNING, "missing vital parameters");
-		RETURN_FALSE;
+	    zend_argument_value_error(1, "the value for key '%s' is wrong", INFO_SERVICE);
+        RETURN_THROWS();
 	}
 
+    if (strlen(service) < 2) {
+	    zend_argument_value_error(1, "the value for key '%s' cannot be empty", INFO_SERVICE);
+        RETURN_THROWS();
+    }
+
+	if (path == NULL) {
+	    zend_argument_value_error(1, "the value for key '%s' is wrong", INFO_PATH);
+        RETURN_THROWS();
+	}
+
+	if (svc_type != SERVICE_WIN32_OWN_PROCESS &&
+        svc_type != SERVICE_INTERACTIVE_PROCESS &&
+        svc_type != SERVICE_WIN32_OWN_PROCESS_INTERACTIVE) {
+        zend_argument_value_error(1,
+        "the value %d for '%s' key is wrong, Use WIN32_SERVICE_WIN32_OWN_PROCESS, WIN32_SERVICE_INTERACTIVE_PROCESS or WIN32_SERVICE_WIN32_OWN_PROCESS_INTERACTIVE constants",
+        svc_type,
+        INFO_SVC_TYPE);
+        RETURN_THROWS();
+    }
+	if (start_type != SERVICE_BOOT_START &&
+        start_type != SERVICE_SYSTEM_START &&
+        start_type != SERVICE_AUTO_START &&
+        start_type != SERVICE_DEMAND_START &&
+        start_type != SERVICE_DISABLED) {
+        zend_argument_value_error(1,
+        "the value %d for '%s' key is wrong, Use WIN32_SERVICE_BOOT_START, WIN32_SERVICE_SYSTEM_START, WIN32_SERVICE_AUTO_START, WIN32_SERVICE_DEMAND_START or WIN32_SERVICE_DISABLED constants",
+        start_type,
+        INFO_START_TYPE);
+        RETURN_THROWS();
+    }
+
+	if (error_control != SERVICE_ERROR_IGNORE &&
+        error_control != SERVICE_ERROR_NORMAL &&
+        error_control != SERVICE_ERROR_SEVERE &&
+        error_control != SERVICE_ERROR_CRITICAL) {
+        zend_argument_value_error(1,
+        "the value %d for '%s' key is wrong, Use WIN32_SERVICE_ERROR_IGNORE, WIN32_SERVICE_ERROR_NORMAL, WIN32_SERVICE_ERROR_SEVERE or WIN32_SERVICE_ERROR_CRITICAL constants",
+        error_control,
+        INFO_ERROR_CONTROL);
+        RETURN_THROWS();
+    }
+	if (base_priority != ABOVE_NORMAL_PRIORITY_CLASS &&
+        base_priority != BELOW_NORMAL_PRIORITY_CLASS &&
+        base_priority != HIGH_PRIORITY_CLASS &&
+        base_priority != IDLE_PRIORITY_CLASS &&
+        base_priority != NORMAL_PRIORITY_CLASS &&
+        base_priority != REALTIME_PRIORITY_CLASS) {
+        zend_argument_value_error(1,
+        "the value %d for '%s' key is wrong, Use WIN32_ABOVE_NORMAL_PRIORITY_CLASS, WIN32_BELOW_NORMAL_PRIORITY_CLASS, WIN32_HIGH_PRIORITY_CLASS, WIN32_IDLE_PRIORITY_CLASS, WIN32_NORMAL_PRIORITY_CLASS or WIN32_REALTIME_PRIORITY_CLASS constants",
+        base_priority,
+        INFO_BASE_PRIORITY);
+        RETURN_THROWS();
+    }
+
+    if (recovery_delay < 0 || recovery_delay > ZEND_LONG_MAX) {
+       zend_argument_value_error(1,
+       "the value for key '%s' must between 0 and " ZEND_LONG_FMT ". Got %d.",
+       INFO_RECOVERY_DELAY,
+       ZEND_LONG_MAX,
+       recovery_delay);
+       RETURN_THROWS();
+    }
+
+
 	if (recovery_action1 != SC_ACTION_NONE && recovery_action1 != SC_ACTION_REBOOT && recovery_action1 != SC_ACTION_RESTART && recovery_action1 != SC_ACTION_RUN_COMMAND) {
-		php_error_docref(NULL, E_WARNING, "invalid value for recovery_action_1 parameters");
-		RETURN_FALSE;
+	    zend_argument_value_error(1,
+	    "the value %d for '%s' key is wrong. Use WIN32_SC_ACTION_NONE, WIN32_SC_ACTION_REBOOT, WIN32_SC_ACTION_RESTART or WIN32_SC_ACTION_RUN_COMMAND constants",
+	    recovery_action1,
+	    INFO_RECOVERY_ACTION_1);
+        RETURN_THROWS();
 	}
 
 	if (recovery_action2 != SC_ACTION_NONE && recovery_action2 != SC_ACTION_REBOOT && recovery_action2 != SC_ACTION_RESTART && recovery_action2 != SC_ACTION_RUN_COMMAND) {
-		php_error_docref(NULL, E_WARNING, "invalid value for recovery_action_2 parameters");
-		RETURN_FALSE;
+	    zend_argument_value_error(1,
+	    "the value %d for '%s' key is wrong. Use WIN32_SC_ACTION_NONE, WIN32_SC_ACTION_REBOOT, WIN32_SC_ACTION_RESTART or WIN32_SC_ACTION_RUN_COMMAND constants",
+	    recovery_action2,
+	    INFO_RECOVERY_ACTION_2);
+        RETURN_THROWS();
 	}
 
 	if (recovery_action3 != SC_ACTION_NONE && recovery_action3 != SC_ACTION_REBOOT && recovery_action3 != SC_ACTION_RESTART && recovery_action3 != SC_ACTION_RUN_COMMAND) {
-		php_error_docref(NULL, E_WARNING, "invalid value for recovery_action_3 parameters");
-		RETURN_FALSE;
+	    zend_argument_value_error(1,
+	    "the value %d for '%s' key is wrong. Use WIN32_SC_ACTION_NONE, WIN32_SC_ACTION_REBOOT, WIN32_SC_ACTION_RESTART or WIN32_SC_ACTION_RUN_COMMAND constants",
+	    recovery_action3,
+	    INFO_RECOVERY_ACTION_3);
+        RETURN_THROWS();
 	}
+    if (recovery_reset_period < 0 || recovery_reset_period > ZEND_LONG_MAX) {
+       zend_argument_value_error(1,
+       "the value for key '%s' must between 0 and " ZEND_LONG_FMT ". Got %d.",
+        INFO_RECOVERY_RESET_PERIOD,
+       ZEND_LONG_MAX,
+       recovery_reset_period);
+       RETURN_THROWS();
+    }
+
 
 	srvc_desc.lpDescription = desc;
 	srvc_delayed_start.fDelayedAutostart = delayed_start;
@@ -493,7 +715,8 @@ static PHP_FUNCTION(win32_create_service)
 		!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, &srvc_failure_action) ||
 		!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, &srvc_failure_infos)
 		) {
-		RETVAL_LONG(GetLastError());
+		convert_error_to_exception(GetLastError());
+		RETURN_THROWS();
 	} else {
 		RETVAL_LONG(NO_ERROR);
 	}
@@ -504,9 +727,11 @@ static PHP_FUNCTION(win32_create_service)
 	/* Store the base_priority in the registry. */
 	spprintf(&service_key, 0, "%s%s", SERVICES_REG_KEY_ROOT, service);
 	if (ERROR_SUCCESS != (registry_result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, service_key, 0, KEY_ALL_ACCESS, &hKey))) {
-		RETVAL_LONG(registry_result);
+		convert_error_to_exception(registry_result);
+		RETURN_THROWS();
 	} else if (ERROR_SUCCESS != (registry_result = RegSetValueEx(hKey, SERVICES_REG_BASE_PRIORITY, 0, REG_DWORD, (CONST BYTE*)&base_priority, sizeof(REG_DWORD)))) {
-		RETVAL_LONG(registry_result);
+		convert_error_to_exception(registry_result);
+		RETURN_THROWS();
 	} else {
 		RegCloseKey(hKey);
 	}
@@ -527,8 +752,13 @@ static PHP_FUNCTION(win32_delete_service)
 	SC_HANDLE hmgr;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!", &service, &service_len, &machine, &machine_len)) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
+
+    if (service_len == 0) {
+	    zend_argument_value_error(1, "the value cannot be empty");
+        RETURN_THROWS();
+    }
 
 	hmgr = OpenSCManager(machine, NULL, SC_MANAGER_ALL_ACCESS);
 	if (hmgr) {
@@ -537,15 +767,18 @@ static PHP_FUNCTION(win32_delete_service)
 			if (DeleteService(hsvc)) {
 				RETVAL_LONG(NO_ERROR);
 			} else {
-				RETVAL_LONG(GetLastError());
+				convert_error_to_exception(GetLastError());
+				RETURN_THROWS();
 			}
 			CloseServiceHandle(hsvc);
 		} else {
-			RETVAL_LONG(GetLastError());
+			convert_error_to_exception(GetLastError());
+			RETURN_THROWS();
 		}
 		CloseServiceHandle(hmgr);
 	} else {
-		RETVAL_LONG(GetLastError());
+		convert_error_to_exception(GetLastError());
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -555,9 +788,11 @@ static PHP_FUNCTION(win32_delete_service)
 static PHP_FUNCTION(win32_get_last_control_message)
 {
 	if (strcmp(sapi_module.name, "cli") != 0) {
-		zend_error(E_ERROR, "This function work only when using the CLI SAPI and called into the service code.");
-		RETURN_FALSE;
+		zend_throw_exception_ex(Win32ServiceException_ce_ptr, 0, "This function work only when using the CLI SAPI and called into the service code.");
+		RETURN_THROWS();
 	}
+
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(SVCG(args.dwControl));
 }
@@ -577,8 +812,13 @@ static PHP_FUNCTION(win32_query_service_status)
 	DWORD size;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!", &service, &service_len, &machine, &machine_len)) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
+
+    if (service_len == 0) {
+	    zend_argument_value_error(1, "the value cannot be empty");
+        RETURN_THROWS();
+    }
 
 	hmgr = OpenSCManager(machine, NULL, GENERIC_READ);
 	if (hmgr) {
@@ -589,14 +829,20 @@ static PHP_FUNCTION(win32_query_service_status)
 			if (!QueryServiceStatusEx(hsvc, SC_STATUS_PROCESS_INFO,
 					(LPBYTE)st, size, &size)) {
 				if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
-					RETVAL_LONG(GetLastError());
-					goto out_fail;
+					efree(st);
+                    CloseServiceHandle(hsvc);
+                    CloseServiceHandle(hmgr);
+					convert_error_to_exception(GetLastError());
+                    RETURN_THROWS();
 				}
 				st = erealloc(st, size);
 				if (!QueryServiceStatusEx(hsvc, SC_STATUS_PROCESS_INFO,
 						(LPBYTE)st, size, &size)) {
-					RETVAL_LONG(GetLastError());
-					goto out_fail;
+					efree(st);
+                    CloseServiceHandle(hsvc);
+                    CloseServiceHandle(hmgr);
+                    convert_error_to_exception(GetLastError());
+                    RETURN_THROWS();
 				}
 			}
 			/* map the struct to an array */
@@ -610,15 +856,17 @@ static PHP_FUNCTION(win32_query_service_status)
 			add_assoc_long(return_value, "WaitHint", st->dwWaitHint);
 			add_assoc_long(return_value, "ProcessId", st->dwProcessId);
 			add_assoc_long(return_value, "ServiceFlags", st->dwServiceFlags);
-out_fail:
+
 			efree(st);
 			CloseServiceHandle(hsvc);
 		} else {
-			RETVAL_LONG(GetLastError());
+			convert_error_to_exception(GetLastError());
+			RETURN_THROWS();
 		}
 		CloseServiceHandle(hmgr);
 	} else {
-		RETVAL_LONG(GetLastError());
+		convert_error_to_exception(GetLastError());
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -635,8 +883,13 @@ static PHP_FUNCTION(win32_start_service)
 	SC_HANDLE hmgr;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!", &service, &service_len, &machine, &machine_len)) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
+
+    if (service_len == 0) {
+	    zend_argument_value_error(1, "the value cannot be empty");
+        RETURN_THROWS();
+    }
 
 	hmgr = OpenSCManager(machine, NULL, SC_MANAGER_CONNECT);
 	if (hmgr) {
@@ -645,15 +898,18 @@ static PHP_FUNCTION(win32_start_service)
 			if (StartService(hsvc, 0, NULL)) {
 				RETVAL_LONG(NO_ERROR);
 			} else {
-				RETVAL_LONG(GetLastError());
+				convert_error_to_exception(GetLastError());
+				RETURN_THROWS();
 			}
 			CloseServiceHandle(hsvc);
 		} else {
-			RETVAL_LONG(GetLastError());
+			convert_error_to_exception(GetLastError());
+			RETURN_THROWS();
 		}
 		CloseServiceHandle(hmgr);
 	} else {
-		RETVAL_LONG(GetLastError());
+		convert_error_to_exception(GetLastError());
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -669,8 +925,13 @@ static void win32_handle_service_controls(INTERNAL_FUNCTION_PARAMETERS, long acc
 	SERVICE_STATUS st;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!", &service, &service_len, &machine, &machine_len)) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
+
+    if (service_len == 0) {
+	    zend_argument_value_error(1, "the value cannot be empty");
+        RETURN_THROWS();
+    }
 
 	hmgr = OpenSCManager(machine, NULL, SC_MANAGER_CONNECT);
 	if (hmgr) {
@@ -679,15 +940,18 @@ static void win32_handle_service_controls(INTERNAL_FUNCTION_PARAMETERS, long acc
 			if (ControlService(hsvc, status, &st)) {
 				RETVAL_LONG(NO_ERROR);
 			} else {
-				RETVAL_LONG(GetLastError());
+				convert_error_to_exception(GetLastError());
+				RETURN_THROWS();
 			}
 			CloseServiceHandle(hsvc);
 		} else {
-			RETVAL_LONG(GetLastError());
+			convert_error_to_exception(GetLastError());
+			RETURN_THROWS();
 		}
 		CloseServiceHandle(hmgr);
 	} else {
-		RETVAL_LONG(GetLastError());
+		convert_error_to_exception(GetLastError());
+		RETURN_THROWS();
 	}
 }
 
@@ -730,12 +994,19 @@ static PHP_FUNCTION(win32_send_custom_control)
 	SERVICE_STATUS st;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "sl|s!", &service, &service_len, &control, &machine, &machine_len)) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
+    if (service_len == 0) {
+	    zend_argument_value_error(1, "the value cannot be empty");
+        RETURN_THROWS();
+    }
+
 	if (control < 128 || control > 255) {
-		zend_error(E_ERROR, "The control argument value is not between 128 and 255.");
-		RETURN_FALSE;
+	    zend_argument_value_error(2, "the value must be between 128 and 255. Got %d", control);
+        RETURN_THROWS();
+//		zend_error(E_ERROR, "The control argument value is not between 128 and 255.");
+//		RETURN_FALSE;
 	}
 
 	hmgr = OpenSCManager(machine, NULL, SC_MANAGER_CONNECT);
@@ -745,15 +1016,18 @@ static PHP_FUNCTION(win32_send_custom_control)
 			if (ControlService(hsvc, control, &st)) {
 				RETVAL_LONG(NO_ERROR);
 			} else {
-				RETVAL_LONG(GetLastError());
+				convert_error_to_exception(GetLastError());
+				RETURN_THROWS();
 			}
 			CloseServiceHandle(hsvc);
 		} else {
-			RETVAL_LONG(GetLastError());
+			convert_error_to_exception(GetLastError());
+			RETURN_THROWS();
 		}
 		CloseServiceHandle(hmgr);
 	} else {
-		RETVAL_LONG(GetLastError());
+		convert_error_to_exception(GetLastError());
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -863,11 +1137,22 @@ static void init_globals(zend_win32service_globals *g)
 	g->exitCode = 1;
 }
 
+void win32service_register_Win32ServiceException_class( void )
+{
+	zend_class_entry ce;
+
+	/* Create and register 'Win32ServiceException' class. */
+	INIT_CLASS_ENTRY_EX( ce, "Win32ServiceException", sizeof( "Win32ServiceException" ) - 1, NULL );
+	Win32ServiceException_ce_ptr = zend_register_internal_class_ex( &ce,
+		zend_ce_exception );
+	Win32ServiceException_ce_ptr->create_object = zend_ce_exception->create_object;
+}
+
 static PHP_MINIT_FUNCTION(win32service)
 {
 
 	ZEND_INIT_MODULE_GLOBALS(win32service, init_globals, NULL);
-
+	win32service_register_Win32ServiceException_class();
 #define MKCONST(x)	REGISTER_LONG_CONSTANT("WIN32_" # x, x, CONST_CS|CONST_PERSISTENT)
 #define MKSCONST(x)	REGISTER_STRING_CONSTANT("WIN32_" # x, x, CONST_CS|CONST_PERSISTENT)
 
