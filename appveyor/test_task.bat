@@ -38,7 +38,12 @@ if /i "%PHP_REL%" equ "7.2" (
 if /i "%PHP_REL%" equ "7.3" (
 	set ADDOPT=--show-slow 1000
 )
-
+if /i "%PHP_REL%" equ "7.4" (
+	set ADDOPT=--show-slow 1000
+)
+if /i "%PHP_REL%" equ "8.0" (
+	set ADDOPT=--show-slow 1000
+)
 rem cd "%APPVEYOR_BUILD_FOLDER%"
 nmake test TESTS="-q --offline --show-diff %ADDOPT% --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp"
 
