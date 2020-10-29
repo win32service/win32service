@@ -25,7 +25,7 @@
 extern zend_module_entry win32service_module_entry;
 #define phpext_win32service_ptr	&win32service_module_entry
 
-#define PHP_WIN32SERVICE_VERSION "0.4.2-dev"
+#define PHP_WIN32SERVICE_VERSION "0.4.2"
 
 #ifndef PHP_WIN32
 # error This extension is for win32 only

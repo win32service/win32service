@@ -1,6 +1,6 @@
-# Version 0.4.2 (in-dev)
+# Version 0.4.2 (2020-10-29)
 
-* Add email address for send feedback
+* Add contact information for send feedback
 
 # Version 0.4.1 (2019-06-26)
 

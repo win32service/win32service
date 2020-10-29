@@ -22,10 +22,10 @@
         <email>jbnahan@php.net</email>
         <active>yes</active>
     </lead>
-    <date>2019-06-26</date>
-    <time>21:00:00</time>
+    <date>2020-10-29</date>
+    <time>22:45:00</time>
     <version>
-        <release>0.4.1</release>
+        <release>0.4.2</release>
         <api>0.3.0</api>
     </version>
     <stability>
@@ -34,9 +34,8 @@
     </stability>
     <license uri="http://www.php.net/license">PHP License</license>
     <notes><![CDATA[
-     * Remove the PHP version check. For fix the PHP crashes when `phpinfo` is called by CGI SAPI. (issue [#45](https://github.com/win32service/win32service/issues/45))
-     * Fix PHP 7.4 errors in object example (issue [#46](https://github.com/win32service/win32service/issues/46))
-     The binary is also available here: https://github.com/win32service/win32service/releases/tag/v0.4.1
+     * Add contact information for send feedback
+     The binary is also available here: https://github.com/win32service/win32service/releases/tag/v0.4.2
  ]]></notes>
     <contents>
         <dir name="/">
@@ -69,6 +68,20 @@
     <providesextension>win32service</providesextension>
     <extsrcrelease/>
     <changelog>
+        <release>
+            <version>
+                <release>0.4.2</release>
+                <api>0.3.0</api>
+            </version>
+            <stability>
+                <release>stable</release>
+                <api>stable</api>
+            </stability>
+            <license uri="http://www.php.net/license">PHP License</license>
+            <notes><![CDATA[
+     * Add contact information for send feedback
+ ]]></notes>
+        </release>
         <release>
             <version>
                 <release>0.4.1</release>
