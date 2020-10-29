@@ -9,7 +9,7 @@ Please download the pre-build version on [Release page](https://github.com/win32
 
 ## Prerequisites
 
-* Install an build environment for PHP 7+. [See for help](https://wiki.php.net/internals/windows/stepbystepbuild)
+* Install a build environment for PHP 7+. [See for help](https://wiki.php.net/internals/windows/stepbystepbuild)
 * Clone this repository on `<path to php source>\..\pecl\win32service`
 
 ## Build
