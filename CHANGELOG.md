@@ -3,6 +3,7 @@
 This version is only for PHP 8+
 
 * Upgrade to PHP 8.0.
+* Remove code for older Windows version (issue [#57](https://github.com/win32service/win32service/issues/57))
 
 # Version 0.4.2 (2020-10-29)
 

@@ -57,17 +57,12 @@ static DWORD WINAPI service_handler(DWORD dwControl, DWORD dwEventType, LPVOID l
 static void WINAPI service_main(DWORD argc, char **argv)
 {
 	zend_win32service_globals *g = (zend_win32service_globals*)tmp_service_g;
-	OSVERSIONINFO osvi;
 	DWORD base_priority;
 	HKEY hKey;
 	char *service_key;
 	long registry_result = ERROR_SUCCESS;
 	DWORD dwType = REG_DWORD;
 	DWORD dwSize = sizeof(DWORD);
-
-	/* Get the current OS version. */
-	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-	GetVersionEx(&osvi);
 
 	// Set the base priority for this service.
 	/*spprintf(&service_key, 0, "%s%s", SERVICES_REG_KEY_ROOT, g->service_name);
@@ -97,23 +92,11 @@ static void WINAPI service_main(DWORD argc, char **argv)
 
 	g->st.dwServiceType = SERVICE_WIN32;
 	g->st.dwCurrentState = SERVICE_START_PENDING;
-	//g->st.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN | SERVICE_ACCEPT_PAUSE_CONTINUE | (osvi.dwMajorVersion >= 6 ? SERVICE_ACCEPT_PRESHUTDOWN : 0); /* Allow the service to be paused and handle Vista-style pre-shutdown notifications. */
 	g->st.dwControlsAccepted =  SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN | SERVICE_ACCEPT_PAUSE_CONTINUE |
 						        SERVICE_ACCEPT_HARDWAREPROFILECHANGE | SERVICE_ACCEPT_NETBINDCHANGE |
-								SERVICE_ACCEPT_PARAMCHANGE | SERVICE_ACCEPT_POWEREVENT;
+								SERVICE_ACCEPT_PARAMCHANGE | SERVICE_ACCEPT_POWEREVENT | SERVICE_ACCEPT_SESSIONCHANGE |
+								SERVICE_ACCEPT_PRESHUTDOWN | SERVICE_ACCEPT_TIMECHANGE | SERVICE_ACCEPT_TRIGGEREVENT;
 
-	//XP and newer Accepts
-	if ( !(osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 0 ) ) {
-	        g->st.dwControlsAccepted |= SERVICE_ACCEPT_SESSIONCHANGE;
-    	}
-	//Vista and newer Accepts
-	if (osvi.dwMajorVersion >= 6) {
-		g->st.dwControlsAccepted |= SERVICE_ACCEPT_PRESHUTDOWN;
-	}
-	//Windows Server 2008, Windows Vista, Windows Server 2003, and Windows XP/2000: This control code is not supported.
-	if ( !(osvi.dwMajorVersion == 5) && !(osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0 ) ) {
-		g->st.dwControlsAccepted |= SERVICE_ACCEPT_TIMECHANGE | SERVICE_ACCEPT_TRIGGEREVENT;
-	}
 	g->sh = RegisterServiceCtrlHandlerEx(g->service_name, service_handler, g);
 
 	if (g->sh == (SERVICE_STATUS_HANDLE)0) {
@@ -305,7 +288,6 @@ static PHP_FUNCTION(win32_create_service)
 	SERVICE_DELAYED_AUTO_START_INFO srvc_delayed_start;
 	SERVICE_FAILURE_ACTIONS srvc_failure_infos;
 	SERVICE_FAILURE_ACTIONS_FLAG srvc_failure_action;
-	OSVERSIONINFO osvi;
 	DWORD base_priority;
 	HKEY hKey;
 	char *service_key;
@@ -499,18 +481,15 @@ static PHP_FUNCTION(win32_create_service)
 
 	efree(path_and_params);
 
-	/* Get the current OS version. */
-	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-	GetVersionEx(&osvi);
 
 	/* If there was an error :
 	   - Creating the service
 	   - Setting the service description
-	   - Setting the delayed start - only on Windows Vista and greater and if the service start type is auto start.
+	   - Setting the delayed start
 	   then track the error. */
 	if (	!hsvc ||
 		!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, &srvc_desc) ||
-		(start_type & SERVICE_AUTO_START && osvi.dwMajorVersion >= 6 && !ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, &srvc_delayed_start)) ||
+		(start_type & SERVICE_AUTO_START && !ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, &srvc_delayed_start)) ||
 		!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, &srvc_failure_action) ||
 		!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, &srvc_failure_infos)
 		) {
