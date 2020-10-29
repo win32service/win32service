@@ -39,15 +39,18 @@ var_dump(win32_create_service($service));
 ?>
 --EXPECTF--
 Warning: win32_create_service(): missing vital parameters in %s on line %d
+bool(false)
 int(0)
 int(1073)
 int(1073)
 int(1073)
 int(1073)
-int(87)
+
 Warning: win32_create_service(): invalid value for recovery_action_1 parameters in %s on line %d
-int(0)
+bool(false)
+
 Warning: win32_create_service(): invalid value for recovery_action_2 parameters in %s on line %d
-int(0)
+bool(false)
+
 Warning: win32_create_service(): invalid value for recovery_action_3 parameters in %s on line %d
-int(0)
+bool(false)
