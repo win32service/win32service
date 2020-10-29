@@ -779,6 +779,22 @@ static PHP_FUNCTION(win32_send_custom_control)
 }
 /* }}} */
 
+static int win32service_info_printf(const char *fmt, ...) /* {{{ */
+{
+	char *buf;
+	size_t len, written;
+	va_list argv;
+
+	va_start(argv, fmt);
+	len = vspprintf(&buf, 0, fmt, argv);
+	va_end(argv);
+
+	written = php_output_write(buf, len);
+	efree(buf);
+	return written;
+}
+/* }}} */
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_start_service_ctrl_dispatcher, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
@@ -1084,11 +1100,30 @@ static PHP_MINFO_FUNCTION(win32service)
 {
 	php_info_print_table_start();
 
+    if (!sapi_module.phpinfo_as_text) {
+        win32service_info_printf("<tr><td class=\"v\">%s</td></tr>\n", "The maintainer needs your feedback (good or bad), please send it to: <a href=\"mailto:win32service@mactronique.fr\">win32service@mactronique.fr</a>");
+        win32service_info_printf("<tr><td class=\"v\">%s</td></tr>\n", "Please report your bugs with this extension here : <a href=\"https://bugs.php.net/report.php\"  target=\"bugreport\">Win32Service PHP extension issue tracker</a>");
+        win32service_info_printf("<tr><td class=\"v\">%s</td></tr>\n", "Home page: <a href=\"http://win32service.mactronique.fr/\" target=\"mactronique\">http://win32service.mactronique.fr/</a>");
+        win32service_info_printf("<tr><td class=\"v\">%s</td></tr>\n", "Library for help you to use this extension: <a href=\"https://github.com/win32service/service-library\" target=\"libraire\">service-library</a> and <a href=\"https://github.com/win32service/Win32ServiceBundle\" target=\"bundle\">Win32ServiceBundle</a> for Symfony");
+	} else {
+        php_info_print_table_row(1, "The maintainer needs your feedback (good or bad), please send it to: win32service@mactronique.fr");
+    	php_info_print_table_row(1, "Please report your bugs with this extension here : https://bugs.php.net/");
+        php_info_print_table_row(1, "Home page: http://win32service.mactronique.fr/");
+    	php_info_print_table_row(1, "Library for help you to use this extension: https://github.com/win32service/service-library and https://github.com/win32service/Win32ServiceBundle for Symfony");
+	}
+	php_info_print_table_end();
+
+	php_info_print_table_start();
+
 	php_info_print_table_row(2, "Win32 Service support", "enabled");
 	php_info_print_table_row(2, "Version", PHP_WIN32SERVICE_VERSION);
 	php_info_print_table_row(2, "Current SAPI", sapi_module.name);
 	if (strcmp(sapi_module.name, "cli") != 0) {
-		php_info_print_table_row(2, "NOTE", "The Win32Service extension does work when using the CLI SAPI with administrator right level. On other SAPI, please check security consideration.");
+	    if (!sapi_module.phpinfo_as_text) {
+		    php_info_print_table_row(2, "Security information", "The Win32Service extension does work when using the CLI SAPI with administrator right level. On other SAPI, please <a href=\"https://www.php.net/manual/en/win32service.security.php\">check security consideration</a>.");
+		} else {
+		    php_info_print_table_row(2, "Security information", "The Win32Service extension does work when using the CLI SAPI with administrator right level. On other SAPI, please check security consideration: https://www.php.net/manual/en/win32service.security.php");
+		}
 	}
 	php_info_print_table_end();
 

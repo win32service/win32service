@@ -4,6 +4,11 @@ This version is only for PHP 8+
 
 * Upgrade to PHP 8.0.
 
+# Version 0.4.2 (in-dev)
+
+* Add email address for send feedback
+
+
 # Version 0.4.1 (2019-06-26)
 
 * Remove the PHP version check. For fix the PHP crashes when `phpinfo` is called by CGI SAPI. (issue [#45](https://github.com/win32service/win32service/issues/45))
