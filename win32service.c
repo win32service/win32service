@@ -337,7 +337,7 @@ static PHP_FUNCTION(win32_set_service_exit_mode)
 }
 /* }}} */
 
-/* {{{ proto bool win32_set_service_exit_code([int exitCode])
+/* {{{ proto long win32_set_service_exit_code([int exitCode])
    Set (and get) the exit code of the service, when the service will shut down
    gracefuly when PHP exits it's not used, when the service will shut down not
    gracefuly the int is used for exitCode and the recovery action will be run
@@ -392,7 +392,7 @@ static PHP_FUNCTION(win32_set_service_status)
 }
 /* }}} */
 
-/* {{{ proto long win32_create_service(array details [, string machine])
+/* {{{ proto void win32_create_service(array details [, string machine])
    Creates a new service entry in the SCM database */
 static PHP_FUNCTION(win32_create_service)
 {
@@ -659,7 +659,8 @@ static PHP_FUNCTION(win32_create_service)
 
 	/* Quit if no connection. */
 	if (!hmgr) {
-		RETURN_LONG(GetLastError());
+		convert_error_to_exception(GetLastError());
+        RETURN_THROWS();
 	}
 
 	/* Build service path and parameters. */
@@ -718,7 +719,7 @@ static PHP_FUNCTION(win32_create_service)
 		convert_error_to_exception(GetLastError());
 		RETURN_THROWS();
 	} else {
-		RETVAL_LONG(NO_ERROR);
+		return;
 	}
 
 	CloseServiceHandle(hsvc);
@@ -740,7 +741,7 @@ static PHP_FUNCTION(win32_create_service)
 }
 /* }}} */
 
-/* {{{ proto long win32_delete_service(string servicename [, string machine])
+/* {{{ proto void win32_delete_service(string servicename [, string machine])
    Deletes a service entry from the SCM database */
 static PHP_FUNCTION(win32_delete_service)
 {
@@ -765,7 +766,7 @@ static PHP_FUNCTION(win32_delete_service)
 		hsvc = OpenService(hmgr, service, DELETE);
 		if (hsvc) {
 			if (DeleteService(hsvc)) {
-				RETVAL_LONG(NO_ERROR);
+				return;
 			} else {
 				convert_error_to_exception(GetLastError());
 				RETURN_THROWS();
@@ -798,7 +799,7 @@ static PHP_FUNCTION(win32_get_last_control_message)
 }
 /* }}} */
 
-/* {{{ proto mixed win32_query_service_status(string servicename [, string machine])
+/* {{{ proto array win32_query_service_status(string servicename [, string machine])
    Queries the status of a service */
 static PHP_FUNCTION(win32_query_service_status)
 {
@@ -871,7 +872,7 @@ static PHP_FUNCTION(win32_query_service_status)
 }
 /* }}} */
 
-/* {{{ proto long win32_start_service(string servicename [, string machine])
+/* {{{ proto void win32_start_service(string servicename [, string machine])
    Starts a service */
 static PHP_FUNCTION(win32_start_service)
 {
@@ -896,7 +897,7 @@ static PHP_FUNCTION(win32_start_service)
 		hsvc = OpenService(hmgr, service, SERVICE_START);
 		if (hsvc) {
 			if (StartService(hsvc, 0, NULL)) {
-				RETVAL_LONG(NO_ERROR);
+				return;
 			} else {
 				convert_error_to_exception(GetLastError());
 				RETURN_THROWS();
@@ -938,7 +939,7 @@ static void win32_handle_service_controls(INTERNAL_FUNCTION_PARAMETERS, long acc
 		hsvc = OpenService(hmgr, service, access);
 		if (hsvc) {
 			if (ControlService(hsvc, status, &st)) {
-				RETVAL_LONG(NO_ERROR);
+				return;
 			} else {
 				convert_error_to_exception(GetLastError());
 				RETURN_THROWS();
@@ -955,7 +956,7 @@ static void win32_handle_service_controls(INTERNAL_FUNCTION_PARAMETERS, long acc
 	}
 }
 
-/* {{{ proto long win32_stop_service(string servicename [, string machine])
+/* {{{ proto void win32_stop_service(string servicename [, string machine])
    Stops a service */
 static PHP_FUNCTION(win32_stop_service)
 {
@@ -963,7 +964,7 @@ static PHP_FUNCTION(win32_stop_service)
 }
 /* }}} */
 
-/* {{{ proto long win32_pause_service(string servicename [, string machine])
+/* {{{ proto void win32_pause_service(string servicename [, string machine])
    Pauses a service */
 static PHP_FUNCTION(win32_pause_service)
 {
@@ -971,7 +972,7 @@ static PHP_FUNCTION(win32_pause_service)
 }
 /* }}} */
 
-/* {{{ proto long win32_continue_service(string servicename [, string machine])
+/* {{{ proto void win32_continue_service(string servicename [, string machine])
    Resumes a service */
 static PHP_FUNCTION(win32_continue_service)
 {
@@ -980,7 +981,7 @@ static PHP_FUNCTION(win32_continue_service)
 /* }}} */
 
 
-/* {{{ proto long win32_service_send_custom_control(string servicename, int control [, string machine])
+/* {{{ proto void win32_service_send_custom_control(string servicename, int control [, string machine])
    Stops a service */
 static PHP_FUNCTION(win32_send_custom_control)
 {
@@ -1014,7 +1015,7 @@ static PHP_FUNCTION(win32_send_custom_control)
 		hsvc = OpenService(hmgr, service, SERVICE_USER_DEFINED_CONTROL);
 		if (hsvc) {
 			if (ControlService(hsvc, control, &st)) {
-				RETVAL_LONG(NO_ERROR);
+				return;
 			} else {
 				convert_error_to_exception(GetLastError());
 				RETURN_THROWS();
