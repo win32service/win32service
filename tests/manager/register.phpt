@@ -32,7 +32,7 @@ try {
 }
 ?>
 --EXPECT--
-int(0)
+NULL
 Win32ServiceException: (1073) Error service exists
-int(0)
+NULL
 Win32ServiceException: (1060) Error service does not exist

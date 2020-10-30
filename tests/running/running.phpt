@@ -34,8 +34,8 @@ echo file_get_contents(__DIR__.'/run.log');
 }
 ?>
 --EXPECTF--
-int(0)
-int(0)
+NULL
+NULL
 array(9) {
   ["ServiceType"]=>
   int(16)
@@ -56,6 +56,6 @@ array(9) {
   ["ServiceFlags"]=>
   int(0)
 }
-int(0)
-int(0)
+NULL
+NULL
 Win32ServiceException: (0) Service ctrl dispatcher already running in %s on line %d
