@@ -25,8 +25,8 @@
     <date>2020-10-29</date>
     <time>22:45:00</time>
     <version>
-        <release>0.4.2</release>
-        <api>0.3.0</api>
+        <release>1.0.0</release>
+        <api>0.4.0</api>
     </version>
     <stability>
         <release>stable</release>
@@ -34,8 +34,12 @@
     </stability>
     <license uri="http://www.php.net/license">PHP License</license>
     <notes><![CDATA[
-     * Add contact information for send feedback
-     The binary is also available here: https://github.com/win32service/win32service/releases/tag/v0.4.2
+     * Upgrade to PHP 8
+     * Add Win32ServiceException.
+     * Use ValueError if argument value is wrong.
+     * Use Win32ServiceException instead of return value.
+     * Convert some PHP Error and PHP Warning in Win32ServiceException.
+     The binary is also available here: https://github.com/win32service/win32service/releases/tag/v1.0.0
  ]]></notes>
     <contents>
         <dir name="/">
@@ -68,6 +72,24 @@
     <providesextension>win32service</providesextension>
     <extsrcrelease/>
     <changelog>
+        <release>
+            <version>
+                <release>1.0.0</release>
+                <api>0.4.0</api>
+            </version>
+            <stability>
+                <release>stable</release>
+                <api>stable</api>
+            </stability>
+            <license uri="http://www.php.net/license">PHP License</license>
+            <notes><![CDATA[
+     * Upgrade to PHP 8
+     * Add Win32ServiceException.
+     * Use ValueError if argument value is wrong.
+     * Use Win32ServiceException instead of return value.
+     * Convert some PHP Error and PHP Warning in Win32ServiceException.
+ ]]></notes>
+        </release>
         <release>
             <version>
                 <release>0.4.2</release>

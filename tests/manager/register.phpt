@@ -6,7 +6,9 @@ if (substr(PHP_OS, 0, 3) != 'WIN') die('skip only windows test.');
 ?>
 --FILE--
 <?php
-
+function displayException(Throwable $e){
+    printf("%s: (%d) %s\n", get_class($e), $e->getCode(), $e->getMessage());
+}
 $service = [
 		'service' => 'WindowsServicePhpTest',
 		'display' => 'Windows service PHP test',
@@ -17,12 +19,22 @@ $service = [
 ];
 
 var_dump(win32_create_service($service));
-var_dump(win32_create_service($service));
+try {
+    var_dump(win32_create_service($service));
+} catch (Throwable $e) {
+    displayException($e);
+}
+sleep(5);
 var_dump(win32_delete_service($service['service']));
-var_dump(win32_delete_service($service['service']));
+sleep(5);
+try {
+    var_dump(win32_delete_service($service['service']));
+} catch (Throwable $e) {
+    displayException($e);
+}
 ?>
 --EXPECT--
-int(0)
-int(1073)
-int(0)
-int(1060)
+NULL
+Win32ServiceException: (1073) Error service exists
+NULL
+Win32ServiceException: (1072) Error service marked for delete
