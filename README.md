@@ -9,6 +9,8 @@ The [win32service](https://pecl.php.net/package/win32service) extension is a Win
 
 > CAUTION : this extension version work only with PHP 8.x.
 
+**The version 0.4.x work with PHP 7.x.x branch. The version 1.0.x work with PHP 8.0.**
+
 # Documentation
 
 See: [https://win32service.github.io/](https://win32service.github.io/)
