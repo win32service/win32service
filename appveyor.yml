@@ -34,7 +34,7 @@ test_script:
 
 artifacts:
   - path: artifacts
-    name: php_win32service-%APPVEYOR_REPO_TAG_NAME%-%PHP_REL%
+    name: php_win32service-%APPVEYOR_REPO_TAG_NAME%-%PLATFORM%-%PHP_REL%
     type: zip
 deploy:
 
