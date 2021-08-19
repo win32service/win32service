@@ -37,19 +37,19 @@ class WinService extends WinServiceAbstract {
 	private function set_service_running()
 	{
 		$this->write_log('WARNING: Sending running signal');
-		return $this->win32_op_service('win32_set_service_status', WIN32_SERVICE_RUNNING, true, 'OK: Service started');
+		return $this->win32_op_service('win32_set_service_status', WIN32_SERVICE_RUNNING, WIN32_NO_ERROR, 'OK: Service started');
 	}
 
 	private function set_service_stopped()
 	{
 		$this->write_log('WARNING: Sending stopped signal');
-		return $this->win32_op_service('win32_set_service_status', WIN32_SERVICE_STOPPED, true, 'OK: Service stopped');
+		return $this->win32_op_service('win32_set_service_status', WIN32_SERVICE_STOPPED, WIN32_NO_ERROR, 'OK: Service stopped');
 	}
 
 	private function set_service_paused()
 	{
 		$this->write_log('WARNING: Sending stopped signal');
-		return $this->win32_op_service('win32_set_service_status', WIN32_SERVICE_PAUSED, true, 'OK: Service paused');
+		return $this->win32_op_service('win32_set_service_status', WIN32_SERVICE_PAUSED, WIN32_NO_ERROR, 'OK: Service paused');
 	}
 
 	protected function main_loop($debug = false)

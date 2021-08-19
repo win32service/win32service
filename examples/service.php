@@ -81,7 +81,7 @@ class WinServiceManager
         }
     }
 
-    private function win32_op_service($win32_op_service, $param, $cond = true, $msg = null, $debug = false)
+    private function win32_op_service($win32_op_service, $param, $cond = WIN32_NO_ERROR, $msg = null, $debug = false)
     {
         $err_code = WIN32_NO_ERROR;
         $err_message = '';
@@ -218,7 +218,7 @@ class WinServiceManager
     {
         $this->write_log('INFO: Connecting with the service');
         if (!$this->win32_op_service('win32_start_service_ctrl_dispatcher', $this->service['service']['service'])) {
-            return (false);
+            return false;
         }
         return $this->set_service_running();
     }
@@ -226,19 +226,19 @@ class WinServiceManager
     private function set_service_running()
     {
         $this->write_log('WARNING: Sending running signal');
-        return $this->win32_op_service('win32_set_service_status', WIN32_SERVICE_RUNNING, true, 'OK: Service started');
+        return $this->win32_op_service('win32_set_service_status', WIN32_SERVICE_RUNNING, WIN32_NO_ERROR, 'OK: Service started');
     }
 
     private function set_service_paused()
     {
         $this->write_log('WARNING: Sending stopped signal');
-        return $this->win32_op_service('win32_set_service_status', WIN32_SERVICE_PAUSED, true, 'OK: Service paused');
+        return $this->win32_op_service('win32_set_service_status', WIN32_SERVICE_PAUSED, WIN32_NO_ERROR, 'OK: Service paused');
     }
 
     private function set_service_stopped()
     {
         $this->write_log('WARNING: Sending stopped signal');
-        return $this->win32_op_service('win32_set_service_status', WIN32_SERVICE_STOPPED, true, 'OK: Service stopped');
+        return $this->win32_op_service('win32_set_service_status', WIN32_SERVICE_STOPPED, WIN32_NO_ERROR, 'OK: Service stopped');
     }
 }
 
