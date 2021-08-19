@@ -1,4 +1,8 @@
-# Version 1.0.0 (work in progress)
+# Version 1.1.0 (work in progress)
+
+* Allow all function reserved for cli SAPI on embed SAPI. (@EionRobb) (issue [#63](https://github.com/win32service/win32service/issues/63))
+
+# Version 1.0.0 (2020-11-30)
 
 This version is only for PHP 8+
 
