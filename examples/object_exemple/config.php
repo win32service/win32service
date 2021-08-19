@@ -11,6 +11,7 @@ namespace win32service;
 
 // Extension loading check
 
+
 if (!extension_loaded('win32service')) {
     throw new \Exception('The php_win32service.dll extension is not loaded ! Please configure it into your php configuration file.');
 }
@@ -112,7 +113,11 @@ abstract class WinServiceAbstract
      */
     private function update_service_status()
     {
-        $this->status = win32_query_service_status($this->service['service']['service']);
+        try {
+            $this->status = win32_query_service_status($this->service['service']['service']);
+        } catch (\Win32ServiceException $e) {
+            $this->status = $e->getCode();
+        }
     }
 
     /**
@@ -123,20 +128,25 @@ abstract class WinServiceAbstract
      * @param bool $debug If true the log is sent to the trandard output
      * @return bool
      */
-    protected function win32_op_service($win32_op_service, $param, $cond = true, $msg = null, $debug = false)
+    protected function win32_op_service($win32_op_service, $param, $cond = WIN32_NO_ERROR, $msg = null, $debug = false)
     {
-        $err_code = $win32_op_service($param);
+        $err_code = WIN32_NO_ERROR;
+        $err_msg = '';
+        try {
+            $win32_op_service($param);
+        } catch (\Win32ServiceException $e) {
+            $err_code = $e->getCode();
+            $err_msg = $e->getMessage();
+        }
         if ($cond === $err_code) {
             if (isset($msg)) {
                 $this->write_log($msg, $debug);
             }
             return true;
-        } elseif (false === $err_code) {
-            $this->write_log('ERROR: Problem with the parameters', $debug);
         } elseif (WIN32_ERROR_ACCESS_DENIED === $err_code) {
             $this->write_log('ERROR: Access denied', $debug);
         } else {
-            $this->write_log('ERROR: Win32 Error Code ' . $err_code, $debug);
+            $this->write_log('ERROR: Win32 Error Code ' . $err_code . ' ' . $err_msg, $debug);
         }
         return false;
     }
