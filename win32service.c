@@ -260,7 +260,7 @@ static void convert_error_to_exception(DWORD code)
    Registers the script with the SCM, so that it can act as the service with the given name */
 static PHP_FUNCTION(win32_start_service_ctrl_dispatcher)
 {
-	if (strcmp(sapi_module.name, "cli") != 0) {
+	if (strcmp(sapi_module.name, "cli") != 0 && strcmp(sapi_module.name, "embed") != 0) {
 		zend_throw_exception_ex(Win32ServiceException_ce_ptr, 0, "This function work only when using the CLI SAPI and called into the service code.");
 		RETURN_THROWS();
 	}
@@ -320,7 +320,7 @@ static PHP_FUNCTION(win32_start_service_ctrl_dispatcher)
    and the recovery action will be run */
 static PHP_FUNCTION(win32_set_service_exit_mode)
 {
-	if (strcmp(sapi_module.name, "cli") != 0) {
+	if (strcmp(sapi_module.name, "cli") != 0 && strcmp(sapi_module.name, "embed") != 0) {
 		zend_throw_exception_ex(Win32ServiceException_ce_ptr, 0, "This function work only when using the CLI SAPI and called into the service code.");
 		RETURN_THROWS();
 	}
@@ -344,7 +344,7 @@ static PHP_FUNCTION(win32_set_service_exit_mode)
    if exit code is not zero */
 static PHP_FUNCTION(win32_set_service_exit_code)
 {
-	if (strcmp(sapi_module.name, "cli") != 0) {
+	if (strcmp(sapi_module.name, "cli") != 0 && strcmp(sapi_module.name, "embed") != 0) {
 		zend_throw_exception_ex(Win32ServiceException_ce_ptr, 0, "This function work only when using the CLI SAPI and called into the service code.");
 		RETURN_THROWS();
 	}
@@ -365,7 +365,7 @@ static PHP_FUNCTION(win32_set_service_exit_code)
    Update the service status */
 static PHP_FUNCTION(win32_set_service_status)
 {
-	if (strcmp(sapi_module.name, "cli") != 0) {
+	if (strcmp(sapi_module.name, "cli") != 0 && strcmp(sapi_module.name, "embed") != 0) {
 		zend_throw_exception_ex(Win32ServiceException_ce_ptr, 0, "This function work only when using the CLI SAPI and called into the service code.");
 		RETURN_THROWS();
 	}
@@ -788,7 +788,7 @@ static PHP_FUNCTION(win32_delete_service)
    Returns the last control message that was sent to this service process */
 static PHP_FUNCTION(win32_get_last_control_message)
 {
-	if (strcmp(sapi_module.name, "cli") != 0) {
+	if (strcmp(sapi_module.name, "cli") != 0 && strcmp(sapi_module.name, "embed") != 0) {
 		zend_throw_exception_ex(Win32ServiceException_ce_ptr, 0, "This function work only when using the CLI SAPI and called into the service code.");
 		RETURN_THROWS();
 	}
@@ -1383,7 +1383,7 @@ static PHP_MINFO_FUNCTION(win32service)
 	php_info_print_table_row(2, "Win32 Service support", "enabled");
 	php_info_print_table_row(2, "Version", PHP_WIN32SERVICE_VERSION);
 	php_info_print_table_row(2, "Current SAPI", sapi_module.name);
-	if (strcmp(sapi_module.name, "cli") != 0) {
+	if (strcmp(sapi_module.name, "cli") != 0 && strcmp(sapi_module.name, "embed") != 0) {
 	    if (!sapi_module.phpinfo_as_text) {
 		    php_info_print_table_row(2, "Security information", "The Win32Service extension does work when using the CLI SAPI with administrator right level. On other SAPI, please <a href=\"https://www.php.net/manual/en/win32service.security.php\">check security consideration</a>.");
 		} else {
@@ -1394,7 +1394,7 @@ static PHP_MINFO_FUNCTION(win32service)
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Function", "State for the current SAPI");
-	if (!strcmp(sapi_module.name, "cli")) {
+	if (!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "embed")) {
 		php_info_print_table_row(2, "win32_start_service_ctrl_dispatcher", "enabled");
 		php_info_print_table_row(2, "win32_set_service_status", "enabled");
 		php_info_print_table_row(2, "win32_get_last_control_message", "enabled");
