@@ -24,8 +24,8 @@ environment:
       PHP_BUILD_CRT: vs16
 
 platform:
-        - x86
-        - x64
+  - x86
+  - x64
 
 install:
   - appveyor\install.cmd

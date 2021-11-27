@@ -1,4 +1,7 @@
 @echo off
+
+set
+
 setlocal enableextensions enabledelayedexpansion
 	cinst wget
 
