@@ -1,7 +1,7 @@
 @echo off
 setlocal enableextensions enabledelayedexpansion
 	cinst wget
-	
+
 	if not exist "%PHP_BUILD_CACHE_BASE_DIR%" (
 		echo Creating %PHP_BUILD_CACHE_BASE_DIR%
 		mkdir "%PHP_BUILD_CACHE_BASE_DIR%"
@@ -23,13 +23,13 @@ setlocal enableextensions enabledelayedexpansion
 		git --git-dir="%PHP_BUILD_CACHE_SDK_DIR%\.git" --work-tree="%PHP_BUILD_CACHE_SDK_DIR%" checkout --force %SDK_BRANCH%
 	)
 
-	
+
 	if "%PHP_REL%"=="master" (
 		echo git clone -q --depth=1 --branch=%PHP_REL% https://github.com/php/php-src C:\projects\php-src
-		git clone -q --depth=1 --branch=%PHP_REL% https://github.com/php/php-src C:\projects\php-src
+		git clone --depth=1 --branch=%PHP_REL% https://github.com/php/php-src C:\projects\php-src
 	) else (
 		echo git clone -q --depth=1 --branch=PHP-%PHP_REL% https://github.com/php/php-src C:\projects\php-src
-		git clone -q --depth=1 --branch=PHP-%PHP_REL% https://github.com/php/php-src C:\projects\php-src
+		git clone --depth=1 --branch=PHP-%PHP_REL% https://github.com/php/php-src C:\projects\php-src
 	)
 
 	xcopy %APPVEYOR_BUILD_FOLDER% C:\projects\php-src\ext\win32service\ /s /e /y /f

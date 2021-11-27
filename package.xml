@@ -22,10 +22,10 @@
         <email>jbnahan@php.net</email>
         <active>yes</active>
     </lead>
-    <date>2020-11-30</date>
+    <date>2021-11-30</date>
     <time>21:30:00</time>
     <version>
-        <release>1.0.0</release>
+        <release>1.0.1</release>
         <api>0.4.0</api>
     </version>
     <stability>
@@ -34,12 +34,9 @@
     </stability>
     <license uri="http://www.php.net/license">PHP License</license>
     <notes><![CDATA[
-     * Upgrade to PHP 8
-     * Add Win32ServiceException.
-     * Use ValueError if argument value is wrong.
-     * Use Win32ServiceException instead of return value.
-     * Convert some PHP Error and PHP Warning in Win32ServiceException.
-     The binary is also available here: https://github.com/win32service/win32service/releases/tag/v1.0.0
+    * Allow all function reserved for cli SAPI on embed SAPI. (@EionRobb) (issue [#63](https://github.com/win32service/win32service/issues/63))
+    * Update for PHP 8.1
+     The binary is also available here: https://github.com/win32service/win32service/releases/tag/v1.0.1
  ]]></notes>
     <contents>
         <dir name="/">
@@ -72,6 +69,21 @@
     <providesextension>win32service</providesextension>
     <extsrcrelease/>
     <changelog>
+        <release>
+            <version>
+                <release>1.0.1</release>
+                <api>0.4.0</api>
+            </version>
+            <stability>
+                <release>stable</release>
+                <api>stable</api>
+            </stability>
+            <license uri="http://www.php.net/license">PHP License</license>
+            <notes><![CDATA[
+    * Allow all function reserved for cli SAPI on embed SAPI. (@EionRobb) (issue [#63](https://github.com/win32service/win32service/issues/63))
+    * Update for PHP 8.1
+ ]]></notes>
+        </release>
         <release>
             <version>
                 <release>1.0.0</release>
