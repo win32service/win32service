@@ -59,4 +59,12 @@ setlocal enableextensions enabledelayedexpansion
 
 		appveyor SetVariable -Name APPVEYOR_REPO_TAG_NAME -Value !APPVEYOR_REPO_TAG_NAME!
 	)
+    if "%Platform%"=="x86" (
+    echo vcvars32.bat
+    call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars32.bat"
+    ) else (
+    echo vcvars64.bat
+	call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+    )
+    set
 endlocal
