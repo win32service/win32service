@@ -24,7 +24,7 @@ environment:
       PHP_BUILD_CRT: vs16
 
 platform:
-  - x86
+#  - x86
   - x64
 
 install:
