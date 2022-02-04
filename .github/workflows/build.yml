@@ -25,4 +25,4 @@ jobs:
           
       - name: Build Binary
         shell: cmd
-        run: call .\appveyor\install.cmd
+        run: call .\.github\install.cmd
