@@ -47,7 +47,7 @@ setlocal enableextensions enabledelayedexpansion
 	@REM if %errorlevel% neq 0 exit /b 3
 
 	if "%APPVEYOR_REPO_TAG_NAME%"=="" (
-		set APPVEYOR_REPO_TAG_NAME=%GITHUB_REF_NAME%-%APPVEYOR_REPO_COMMIT:~0,8%
+		set APPVEYOR_REPO_TAG_NAME=%GITHUB_REF_NAME%-%GITHUB_SHA:~0,8%
 		for /f "delims=" %%l in (php_win32service.h) do (
 			if not "%%l"=="" (
 				set line=%%l
@@ -56,7 +56,7 @@ setlocal enableextensions enabledelayedexpansion
 				)
 			)
 		)
-
+		echo "::set-output name=repo_tag_name::!APPVEYOR_REPO_TAG_NAME!"
 		@REM appveyor SetVariable -Name APPVEYOR_REPO_TAG_NAME -Value !APPVEYOR_REPO_TAG_NAME!
 	)
     if "%Platform%"=="x86" (
