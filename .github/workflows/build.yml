@@ -20,9 +20,32 @@ jobs:
       PHP_REL: 8.0
       ZTS_STATES: enable
       PHP_BUILD_CRT: vs16
+
+      CFLAGS: /W1 /WX
     steps:
       - uses: actions/checkout@v2
-          
+      
+      - name: ls
+        shell: cmd
+        run: dir "C:\Program Files (x86)"
+
       - name: Build Binary
         shell: cmd
         run: call .\.github\install.cmd
+
+      - name: change folder
+        shell: cmd
+        run: cd /d C:\projects\php-src
+		
+      - name: config
+        shell: cmd
+        run: cmd /c buildconf.bat --force
+		
+      - name: config
+        shell: cmd
+        run: cmd /c configure.bat --disable-all --with-mp=auto --enable-cli --!ZTS_STATE!-zts --enable-win32service=shared --enable-object-out-dir=%PHP_BUILD_OBJ_DIR% --with-config-file-scan-dir=%APPVEYOR_BUILD_FOLDER%\build\modules.d --with-prefix=%APPVEYOR_BUILD_FOLDER%\build --with-php-build=%DEPS_DIR%
+
+
+      - name: make
+        shell: cmd
+        run: nmake /NOLOGO
