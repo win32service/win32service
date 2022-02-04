@@ -1,4 +1,4 @@
-name: Win32Sample GitHub Release
+name: Win32Service build
 on:
   push:
     branches: [ v1.0.x ]
@@ -48,6 +48,10 @@ jobs:
           APPVEYOR_REPO_TAG_NAME: ${{ needs.build.outputs.repo_tag_name }}
         shell: cmd
         run: call .\.github\build.cmd
+
+      - name: Run tests
+        shell: cmd
+        run: call .\.github\test.cmd
 
       - name: Upload
         uses: actions/upload-artifact@v1
