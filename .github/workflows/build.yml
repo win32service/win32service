@@ -1,0 +1,59 @@
+name: Win32Service build
+on:
+  push:
+    branches: [ v1.0.x ]
+    tags:        
+      - v1.**
+  pull_request:
+    branches: [ v1.0.x ]
+
+jobs:
+  build:
+    name: Build
+    runs-on: windows-2019
+    outputs:
+      repo_tag_name: ${{ steps.install.outputs.repo_tag_name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        php-rel: ['8.0', '8.1']
+        platform: [x64, x86]
+    env:
+      PHP_BUILD_CACHE_BASE_DIR: c:\build-cache
+      PHP_BUILD_OBJ_DIR: c:\obj
+      PHP_BUILD_CACHE_SDK_DIR: c:\build-cache\sdk
+      PHP_BUILD_SDK_BRANCH: 'php-sdk-2.2.0'
+      SDK_REMOTE: https://github.com/Microsoft/php-sdk-binary-tools.git
+      SDK_BRANCH: 'php-sdk-2.2.0'
+      
+      PHP_REL: ${{ matrix.php-rel }}
+      ZTS_STATES: enable disable
+      PHP_BUILD_CRT: vs16
+
+      PLATFORM: ${{ matrix.platform }}
+
+      CFLAGS: /W1 /WX
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - id: install
+        name: Install
+        shell: cmd
+        run: call .\.github\install.cmd
+
+      - name: Build Binary
+        env:
+          APPVEYOR_REPO_TAG_NAME: ${{ needs.build.outputs.repo_tag_name }}
+        shell: cmd
+        run: call .\.github\build.cmd
+
+      - name: Run tests
+        shell: cmd
+        run: call .\.github\test.bat
+
+      - name: Upload
+        uses: actions/upload-artifact@v1
+        with:
+          path: ./artifacts
+          name: php_win32service-${{ needs.build.outputs.repo_tag_name }}-${{ matrix.platform }}-${{ matrix.php-rel }}
