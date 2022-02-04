@@ -1,4 +1,4 @@
-@rem echo off
+@echo off
 setlocal enableextensions enabledelayedexpansion
 	cinst wget
 
@@ -66,5 +66,4 @@ setlocal enableextensions enabledelayedexpansion
     echo vcvars64.bat
 	call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
     )
-    set
 endlocal
