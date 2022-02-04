@@ -27,7 +27,7 @@ jobs:
       
       - name: ls
         shell: cmd
-        run: dir "C:\Program Files (x86)"
+        run: dir "C:\Program Files (x86)\Microsoft Visual Studio\"
 
       - name: Build Binary
         shell: cmd
@@ -39,7 +39,7 @@ jobs:
 
       - name: config
         shell: cmd
-        run: cmd /c buildconf.bat --force
+        run: pwd ; cmd /c buildconf.bat --force
 
       - name: config
         shell: cmd

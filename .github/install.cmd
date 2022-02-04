@@ -1,6 +1,6 @@
 @rem echo off
 setlocal enableextensions enabledelayedexpansion
-	cinst --trace avoid wget
+	cinst wget
 
 	if not exist "%PHP_BUILD_CACHE_BASE_DIR%" (
 		echo Creating %PHP_BUILD_CACHE_BASE_DIR%
