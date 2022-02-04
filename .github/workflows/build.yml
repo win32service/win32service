@@ -8,12 +8,11 @@ on:
 jobs:
   build:
     name: Build
-    strategy:
-      fail-fast: false
     runs-on: windows-2019
     outputs:
       repo_tag_name: ${{ steps.install.outputs.repo_tag_name }}
     strategy:
+      fail-fast: false
       matrix:
         php-rel: ['8.0', '8.1']
         platform: [x64, x86]
