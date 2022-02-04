@@ -52,7 +52,7 @@ jobs:
 
       - name: Run tests
         shell: cmd
-        run: call .\.github\test.cmd
+        run: call .\.github\test.bat
 
       - name: Upload
         uses: actions/upload-artifact@v1
