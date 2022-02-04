@@ -58,5 +58,5 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v1
         with:
-          path: ./artifact
+          path: ./artifacts
           name: php_win32service-${{ needs.build.outputs.repo_tag_name }}-${{ matrix.platform }}-${{ matrix.php-rel }}
