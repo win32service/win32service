@@ -31,7 +31,7 @@ setlocal enableextensions enabledelayedexpansion
 
 		if %errorlevel% neq 0 exit /b 3
 
-        set CFLAGS=/W1 /WX
+        set CFLAGS=/W1 /WX /WD4293
 
 		cmd /c configure.bat --disable-all --with-mp=auto --enable-cli --!ZTS_STATE!-zts --enable-win32service=shared --enable-object-out-dir=%PHP_BUILD_OBJ_DIR% --with-config-file-scan-dir=%GITHUB_WORKSPACE%\build\modules.d --with-prefix=%GITHUB_WORKSPACE%\build --with-php-build=%DEPS_DIR%
 
