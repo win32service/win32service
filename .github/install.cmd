@@ -46,18 +46,23 @@ setlocal enableextensions enabledelayedexpansion
 	@REM if "%APPVEYOR%" equ "True" rmdir /s /q C:\mingw-w64 >NUL 2>NUL
 	@REM if %errorlevel% neq 0 exit /b 3
 
+	if "%GITHUB_REF_TYPE%"=="branch" (
+		set REF_NAME=%GITHUB_HEAD_REF:/=-%
+	) else (
+		set REF_NAME=%GITHUB_REF_NAME:/=-%
+	)
+
 	if "%APPVEYOR_REPO_TAG_NAME%"=="" (
-		set APPVEYOR_REPO_TAG_NAME=%GITHUB_REF_NAME%-%GITHUB_SHA:~0,8%
+		set APPVEYOR_REPO_TAG_NAME=%REF_NAME%-%GITHUB_SHA:~0,8%
 		for /f "delims=" %%l in (php_win32service.h) do (
 			if not "%%l"=="" (
 				set line=%%l
 				if "!line:~8,24!"=="PHP_WIN32SERVICE_VERSION" (
-					set APPVEYOR_REPO_TAG_NAME=!line:~34,-1!-%GITHUB_REF_NAME%-%GITHUB_SHA:~0,8%
+					set APPVEYOR_REPO_TAG_NAME=!line:~34,-1!-%REF_NAME%-%GITHUB_SHA:~0,8%
 				)
 			)
 		)
 		echo "::set-output name=repo_tag_name::!APPVEYOR_REPO_TAG_NAME!"
-		@REM appveyor SetVariable -Name APPVEYOR_REPO_TAG_NAME -Value !APPVEYOR_REPO_TAG_NAME!
 	)
     if "%Platform%"=="x86" (
     echo vcvars32.bat
