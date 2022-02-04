@@ -39,7 +39,7 @@ jobs:
 
       - name: config
         shell: cmd
-        run: pwd ; cmd /c buildconf.bat --force
+        run: pwd && cmd /c buildconf.bat --force
 
       - name: config
         shell: cmd
