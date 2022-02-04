@@ -11,6 +11,10 @@ jobs:
     runs-on: windows-2019
     outputs:
       repo_tag_name: ${{ steps.install.outputs.repo_tag_name }}
+    strategy:
+      matrix:
+        php-rel: ['8.0', '8.1']
+        platform: [x64, x86]
     env:
       PHP_BUILD_CACHE_BASE_DIR: c:\build-cache
       PHP_BUILD_OBJ_DIR: c:\obj
@@ -19,11 +23,11 @@ jobs:
       SDK_REMOTE: https://github.com/Microsoft/php-sdk-binary-tools.git
       SDK_BRANCH: 'php-sdk-2.2.0'
       
-      PHP_REL: '8.0'
+      PHP_REL: ${{ matrix.php-rel }}
       ZTS_STATES: enable disable
       PHP_BUILD_CRT: vs16
 
-      PLATFORM: x64
+      PLATFORM: ${{ matrix.platform }}
 
       CFLAGS: /W1 /WX
 
@@ -44,16 +48,3 @@ jobs:
           APPVEYOR_REPO_TAG_NAME: ${{ needs.build.outputs.repo_tag_name }}
         shell: cmd
         run: call .\.github\build.cmd
-
-      - name: config
-        shell: cmd
-        run: cd /d C:\projects\php-src && cmd /c buildconf.bat --force
-
-      - name: config
-        shell: cmd
-        run: cd /d C:\projects\php-src && cmd /c configure.bat --disable-all --with-mp=auto --enable-cli --!ZTS_STATE!-zts --enable-win32service=shared --enable-object-out-dir=%PHP_BUILD_OBJ_DIR% --with-config-file-scan-dir=%APPVEYOR_BUILD_FOLDER%\build\modules.d --with-prefix=%APPVEYOR_BUILD_FOLDER%\build --with-php-build=%DEPS_DIR%
-
-
-      - name: make
-        shell: cmd
-        run: cd /d C:\projects\php-src && nmake /NOLOGO
