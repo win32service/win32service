@@ -48,3 +48,9 @@ jobs:
           APPVEYOR_REPO_TAG_NAME: ${{ needs.build.outputs.repo_tag_name }}
         shell: cmd
         run: call .\.github\build.cmd
+
+      - name: Upload
+        uses: actions/upload-artifact@v1
+        with:
+          path: ./artifact
+          name: php_win32service-${{ needs.build.outputs.repo_tag_name }}-${{ matrix.platform }}-${{ matrix.php-rel }}
