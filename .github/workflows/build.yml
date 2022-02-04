@@ -33,19 +33,15 @@ jobs:
         shell: cmd
         run: call .\.github\install.cmd
 
-      - name: change folder
+      - name: config
         shell: cmd
-        run: cd /d C:\projects\php-src
+        run: cd /d C:\projects\php-src && cmd /c buildconf.bat --force
 
       - name: config
         shell: cmd
-        run: pwd && cmd /c buildconf.bat --force
-
-      - name: config
-        shell: cmd
-        run: cmd /c configure.bat --disable-all --with-mp=auto --enable-cli --!ZTS_STATE!-zts --enable-win32service=shared --enable-object-out-dir=%PHP_BUILD_OBJ_DIR% --with-config-file-scan-dir=%APPVEYOR_BUILD_FOLDER%\build\modules.d --with-prefix=%APPVEYOR_BUILD_FOLDER%\build --with-php-build=%DEPS_DIR%
+        run: cd /d C:\projects\php-src && cmd /c configure.bat --disable-all --with-mp=auto --enable-cli --!ZTS_STATE!-zts --enable-win32service=shared --enable-object-out-dir=%PHP_BUILD_OBJ_DIR% --with-config-file-scan-dir=%APPVEYOR_BUILD_FOLDER%\build\modules.d --with-prefix=%APPVEYOR_BUILD_FOLDER%\build --with-php-build=%DEPS_DIR%
 
 
       - name: make
         shell: cmd
-        run: nmake /NOLOGO
+        run: cd /d C:\projects\php-src && nmake /NOLOGO
