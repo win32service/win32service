@@ -15,9 +15,9 @@ jobs:
       PHP_BUILD_CACHE_BASE_DIR: c:\build-cache
       PHP_BUILD_OBJ_DIR: c:\obj
       PHP_BUILD_CACHE_SDK_DIR: c:\build-cache\sdk
-      PHP_BUILD_SDK_BRANCH: php-sdk-2.2.0
+      PHP_BUILD_SDK_BRANCH: 'php-sdk-2.2.0'
       SDK_REMOTE: https://github.com/Microsoft/php-sdk-binary-tools.git
-      SDK_BRANCH: php-sdk-2.2.0
+      SDK_BRANCH: 'php-sdk-2.2.0'
       
       PHP_REL: '8.0'
       ZTS_STATES: enable disable
@@ -26,6 +26,7 @@ jobs:
       PLATFORM: x64
 
       CFLAGS: /W1 /WX
+
     steps:
       - uses: actions/checkout@v2
       
@@ -40,7 +41,7 @@ jobs:
 
       - name: Build Binary
         env:
-          APPVEYOR_REPO_TAG_NAME: ${{ outputs.repo_tag_name }}
+          APPVEYOR_REPO_TAG_NAME: ${{ needs.build.outputs.repo_tag_name }}
         shell: cmd
         run: call .\.github\build.cmd
 
