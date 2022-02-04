@@ -46,7 +46,7 @@ setlocal enableextensions enabledelayedexpansion
 	@REM if "%APPVEYOR%" equ "True" rmdir /s /q C:\mingw-w64 >NUL 2>NUL
 	@REM if %errorlevel% neq 0 exit /b 3
 
-	if "%GITHUB_REF_TYPE%"=="branch" (
+	if "%GITHUB_REF_TYPE%%GITHUB_HEAD_REF%"=="branch%GITHUB_HEAD_REF%" (
 		set REF_NAME=%GITHUB_HEAD_REF:/=-%
 	) else (
 		set REF_NAME=%GITHUB_REF_NAME:/=-%

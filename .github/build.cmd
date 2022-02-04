@@ -1,4 +1,5 @@
 @echo off
+echo APPVEYOR_REPO_TAG_NAME="%APPVEYOR_REPO_TAG_NAME%"
 setlocal enableextensions enabledelayedexpansion
 rem	for %%a in (%ARCHITECTURES%) do (
 		set ARCH=%PLATFORM%
