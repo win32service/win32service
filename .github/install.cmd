@@ -64,7 +64,7 @@ setlocal enableextensions enabledelayedexpansion
 				)
 			)
 		)
-		echo "::set-output name=repo_tag_name::!APPVEYOR_REPO_TAG_NAME!"
+		echo "::set-output name=repotagname::!APPVEYOR_REPO_TAG_NAME!"
 	)
     if "%Platform%"=="x86" (
     echo vcvars32.bat

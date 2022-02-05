@@ -44,7 +44,7 @@ jobs:
 
       - name: Build Binary
         env:
-          APPVEYOR_REPO_TAG_NAME: ${{ steps.install.outputs.repo_tag_name }}
+          APPVEYOR_REPO_TAG_NAME: ${{ steps.install.outputs.repotagname }}
         shell: cmd
         run: call .\.github\build.cmd
 
@@ -56,7 +56,7 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           path: ./artifacts
-          name: php_win32service-${{ steps.install.outputs.repo_tag_name }}-${{ matrix.platform }}-${{ matrix.php-rel }}
+          name: php_win32service-${{ steps.install.outputs.repotagname }}-${{ matrix.platform }}-${{ matrix.php-rel }}
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
@@ -64,6 +64,6 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ./artifacts/*
-          asset_name: php_win32service-${{ steps.install.outputs.repo_tag_name }}-${{ matrix.platform }}-${{ matrix.php-rel }}
+          asset_name: php_win32service-${{ steps.install.outputs.repotagname }}-${{ matrix.platform }}-${{ matrix.php-rel }}
           tag: ${{ github.ref }}
           file_glob: true
