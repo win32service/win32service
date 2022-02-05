@@ -65,6 +65,7 @@ setlocal enableextensions enabledelayedexpansion
 			)
 		)
 		echo "::set-output name=repotagname::!APPVEYOR_REPO_TAG_NAME!"
+		echo repotagname=!APPVEYOR_REPO_TAG_NAME!> %GITHUB_ENV%
 	)
     if "%Platform%"=="x86" (
     echo vcvars32.bat
@@ -73,5 +74,5 @@ setlocal enableextensions enabledelayedexpansion
     echo vcvars64.bat
 	call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
     )
-	set
+    set
 endlocal
