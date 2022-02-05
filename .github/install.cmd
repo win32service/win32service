@@ -47,8 +47,10 @@ setlocal enableextensions enabledelayedexpansion
 	@REM if %errorlevel% neq 0 exit /b 3
 
 	if "%GITHUB_REF_TYPE%"=="branch" if NOT "%GITHUB_HEAD_REF%"=="" (
+	    echo use head ref %GITHUB_HEAD_REF%
 		set REF_NAME=%GITHUB_HEAD_REF:/=-%
 	) else (
+	    echo use ref name %GITHUB_REF_NAME%
 		set REF_NAME=%GITHUB_REF_NAME:/=-%
 	)
 
