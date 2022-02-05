@@ -42,6 +42,11 @@ jobs:
         shell: cmd
         run: call .\.github\install.cmd
 
+      - name : machine echo steps
+        env:
+          CONTENT: "${{ toJson(steps) }}"
+        run: echo %CONTENT%
+
       - name: Build Binary
         env:
           APPVEYOR_REPO_TAG_NAME: ${{ steps.install.outputs.repotagname }}
