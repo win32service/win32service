@@ -54,15 +54,15 @@ jobs:
         shell: cmd
         run: call .\.github\build.cmd
 
-      - name: Run tests
-        shell: cmd
-        run: call .\.github\test.bat
-
       - name: Upload
         uses: actions/upload-artifact@v1
         with:
           path: ./artifacts
           name: php_win32service-${{ env.repotagname }}-${{ matrix.platform }}-${{ matrix.php-rel }}
+
+      - name: Run tests
+        shell: cmd
+        run: call .\.github\test.bat
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
