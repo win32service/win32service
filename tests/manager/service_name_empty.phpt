@@ -72,15 +72,15 @@ Win32ServiceException: (1060) Error service does not exist ()
 win32_stop_service
 TypeError: (0) win32_stop_service(): Argument #1 ($servicename) must be of type string, stdClass given
 ValueError: (0) win32_stop_service(): Argument #1 ($servicename) the value cannot be empty
-Win32ServiceException: (1060) Error service does not exist ()
+Win32ServiceException: (1060) Error service does not exist (on openning service)
 win32_pause_service
 TypeError: (0) win32_pause_service(): Argument #1 ($servicename) must be of type string, stdClass given
 ValueError: (0) win32_pause_service(): Argument #1 ($servicename) the value cannot be empty
-Win32ServiceException: (1060) Error service does not exist ()
+Win32ServiceException: (1060) Error service does not exist (on openning service)
 win32_continue_service
 TypeError: (0) win32_continue_service(): Argument #1 ($servicename) must be of type string, stdClass given
 ValueError: (0) win32_continue_service(): Argument #1 ($servicename) the value cannot be empty
-Win32ServiceException: (1060) Error service does not exist ()
+Win32ServiceException: (1060) Error service does not exist (on openning service)
 win32_send_custom_control
 TypeError: (0) win32_send_custom_control(): Argument #1 ($servicename) must be of type string, stdClass given
 ValueError: (0) win32_send_custom_control(): Argument #1 ($servicename) the value cannot be empty
