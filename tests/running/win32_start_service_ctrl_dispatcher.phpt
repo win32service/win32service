@@ -32,4 +32,4 @@ try {
 --EXPECTF--
 TypeError: (0) win32_start_service_ctrl_dispatcher(): Argument #1 ($name) must be of type string, stdClass given
 ValueError: (0) win32_start_service_ctrl_dispatcher(): Argument #1 ($name) the value cannot be empty
-Win32ServiceException: (1063) Error failed service controller connect
+Win32ServiceException: (1063) Error failed service controller connect ()

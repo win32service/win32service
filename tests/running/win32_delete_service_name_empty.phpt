@@ -32,4 +32,4 @@ try {
 win32_delete_service
 TypeError: (0) win32_delete_service(): Argument #1 ($servicename) must be of type string, stdClass given
 ValueError: (0) win32_delete_service(): Argument #1 ($servicename) the value cannot be empty
-Win32ServiceException: (1060) Error service does not exist
+Win32ServiceException: (1060) Error service does not exist ()
