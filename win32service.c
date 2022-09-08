@@ -641,8 +641,12 @@ static PHP_FUNCTION(win32_create_service)
 	srvc_delayed_start.fDelayedAutostart = delayed_start;
 
 	srvc_failure_infos.dwResetPeriod = recovery_reset_period;
-	srvc_failure_infos.lpRebootMsg = recovery_reboot_msg;
-	srvc_failure_infos.lpCommand = recovery_command;
+	if (recovery_reboot_msg != NULL) {
+	    srvc_failure_infos.lpRebootMsg = recovery_reboot_msg;
+	}
+	if (recovery_command != NULL) {
+	    srvc_failure_infos.lpCommand = recovery_command;
+	}
 
 	srvc_failure_infos.cActions = 3;
 	SC_ACTION recovery_actions[3];
