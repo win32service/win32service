@@ -128,130 +128,130 @@ static DWORD WINAPI svc_thread_proc(LPVOID _globals)
 	return 0;
 }
 
-static void convert_error_to_exception(DWORD code)
+static void convert_error_to_exception(DWORD code, const char *message)
 {
     if (code == ERROR_ACCESS_DENIED) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error access denied");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code,  "Error access denied (%s)", message);
         return;
     }
     if (code == ERROR_CIRCULAR_DEPENDENCY) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error circular dependency");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error circular dependency (%s)", message);
         return;
     }
     if (code == ERROR_DATABASE_DOES_NOT_EXIST) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error database does not exist");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error database does not exist (%s)", message);
         return;
     }
     if (code == ERROR_DEPENDENT_SERVICES_RUNNING) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error dependent services running");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error dependent services running (%s)", message);
         return;
     }
     if (code == ERROR_DUPLICATE_SERVICE_NAME) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error duplicate service name");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error duplicate service name (%s)", message);
         return;
     }
     if (code == ERROR_FAILED_SERVICE_CONTROLLER_CONNECT) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error failed service controller connect");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error failed service controller connect (%s)", message);
         return;
     }
     if (code == ERROR_INSUFFICIENT_BUFFER) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error insufficient buffer");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error insufficient buffer (%s)", message);
         return;
     }
     if (code == ERROR_INVALID_DATA) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid data");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid data (%s)", message);
         return;
     }
     if (code == ERROR_INVALID_HANDLE) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid handle");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid handle (%s)", message);
         return;
     }
     if (code == ERROR_INVALID_LEVEL) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid level");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid level (%s)", message);
         return;
     }
     if (code == ERROR_INVALID_NAME) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid name");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid name (%s)", message);
         return;
     }
     if (code == ERROR_INVALID_PARAMETER) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid parameter");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid parameter (%s)", message);
         return;
     }
     if (code == ERROR_INVALID_SERVICE_ACCOUNT) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid service account");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid service account (%s)", message);
         return;
     }
     if (code == ERROR_INVALID_SERVICE_CONTROL) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid service control");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid service control (%s)", message);
         return;
     }
     if (code == ERROR_PATH_NOT_FOUND) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error path not found");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error path not found (%s)", message);
         return;
     }
     if (code == ERROR_SERVICE_ALREADY_RUNNING) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service already running");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service already running (%s)", message);
         return;
     }
     if (code == ERROR_SERVICE_CANNOT_ACCEPT_CTRL) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service cannot accept ctrl");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service cannot accept ctrl (%s)", message);
         return;
     }
     if (code == ERROR_SERVICE_DATABASE_LOCKED) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service database locked");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service database locked (%s)", message);
         return;
     }
     if (code == ERROR_SERVICE_DEPENDENCY_DELETED) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service dependency deleted");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service dependency deleted (%s)", message);
         return;
     }
     if (code == ERROR_SERVICE_DEPENDENCY_FAIL) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service dependency fail");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service dependency fail (%s)", message);
         return;
     }
     if (code == ERROR_SERVICE_DISABLED) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service disabled");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service disabled (%s)", message);
         return;
     }
     if (code == ERROR_SERVICE_DOES_NOT_EXIST) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service does not exist");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service does not exist (%s)", message);
         return;
     }
     if (code == ERROR_SERVICE_EXISTS) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service exists");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service exists (%s)", message);
         return;
     }
     if (code == ERROR_SERVICE_LOGON_FAILED) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service logon failed");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service logon failed (%s)", message);
         return;
     }
     if (code == ERROR_SERVICE_MARKED_FOR_DELETE) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service marked for delete");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service marked for delete (%s)", message);
         return;
     }
     if (code == ERROR_SERVICE_NO_THREAD) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service no thread");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service no thread (%s)", message);
         return;
     }
     if (code == ERROR_SERVICE_NOT_ACTIVE) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service not active");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service not active (%s)", message);
         return;
     }
     if (code == ERROR_SERVICE_REQUEST_TIMEOUT) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service request timeout");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service request timeout (%s)", message);
         return;
     }
     if (code == ERROR_SHUTDOWN_IN_PROGRESS) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error shutdown in progress");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error shutdown in progress (%s)", message);
         return;
     }
     if (code == ERROR_SERVICE_SPECIFIC_ERROR) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service specific error");
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service specific error (%s)", message);
         return;
     }
     if (code != NO_ERROR) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Unknow error no %d", code);
+        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Unknow error no %d (%s)", code, message);
         return;
     }
 }
@@ -304,7 +304,7 @@ static PHP_FUNCTION(win32_start_service_ctrl_dispatcher)
 		} else {
 		    CloseHandle(SVCG(svc_thread));
 		    SVCG(svc_thread) = NULL;
-			convert_error_to_exception(SVCG(code));
+			convert_error_to_exception(SVCG(code), "");
 			RETURN_THROWS();
 		}
 	}
@@ -384,7 +384,7 @@ static PHP_FUNCTION(win32_set_service_status)
 	}
 
 	if (!SetServiceStatus(SVCG(sh), &SVCG(st))) {
-		convert_error_to_exception(GetLastError());
+		convert_error_to_exception(GetLastError(), "");
 		RETURN_THROWS();
 	} else {
 		RETURN_TRUE;
@@ -659,7 +659,7 @@ static PHP_FUNCTION(win32_create_service)
 
 	/* Quit if no connection. */
 	if (!hmgr) {
-		convert_error_to_exception(GetLastError());
+		convert_error_to_exception(GetLastError(), "");
         RETURN_THROWS();
 	}
 
@@ -710,32 +710,54 @@ static PHP_FUNCTION(win32_create_service)
 	   - Setting the service description
 	   - Setting the delayed start
 	   then track the error. */
-	if (	!hsvc ||
-		!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, &srvc_desc) ||
-		(start_type & SERVICE_AUTO_START && !ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, &srvc_delayed_start)) ||
-		!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, &srvc_failure_action) ||
-		!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, &srvc_failure_infos)
-		) {
-		convert_error_to_exception(GetLastError());
+	if (!hsvc) {
+	    CloseServiceHandle(hmgr);
+		convert_error_to_exception(GetLastError(), "on create service");
 		RETURN_THROWS();
-	} else {
-		return;
 	}
 
-	CloseServiceHandle(hsvc);
-	CloseServiceHandle(hmgr);
+    if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, &srvc_desc)) {
+        CloseServiceHandle(hsvc);
+        CloseServiceHandle(hmgr);
+        convert_error_to_exception(GetLastError(), "when defining the description");
+        RETURN_THROWS();
+    }
+    if ((start_type & SERVICE_AUTO_START && !ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, &srvc_delayed_start))) {
+        CloseServiceHandle(hsvc);
+        CloseServiceHandle(hmgr);
+        convert_error_to_exception(GetLastError(), "on change the start type");
+        RETURN_THROWS();
+    }
+    if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, &srvc_failure_action)) {
+        CloseServiceHandle(hsvc);
+        CloseServiceHandle(hmgr);
+        convert_error_to_exception(GetLastError(), "on change the failure action flag");
+        RETURN_THROWS();
+    }
+    if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, &srvc_failure_infos)) {
+        CloseServiceHandle(hsvc);
+        CloseServiceHandle(hmgr);
+        convert_error_to_exception(GetLastError(), "on change the failure action");
+        RETURN_THROWS();
+    }
+
+    CloseServiceHandle(hsvc);
+    CloseServiceHandle(hmgr);
+
+    return;
 
 	/* Store the base_priority in the registry. */
 	spprintf(&service_key, 0, "%s%s", SERVICES_REG_KEY_ROOT, service);
 	if (ERROR_SUCCESS != (registry_result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, service_key, 0, KEY_ALL_ACCESS, &hKey))) {
-		convert_error_to_exception(registry_result);
+		convert_error_to_exception(registry_result, "On openning registry key to set base_priority");
 		RETURN_THROWS();
-	} else if (ERROR_SUCCESS != (registry_result = RegSetValueEx(hKey, SERVICES_REG_BASE_PRIORITY, 0, REG_DWORD, (CONST BYTE*)&base_priority, sizeof(REG_DWORD)))) {
-		convert_error_to_exception(registry_result);
-		RETURN_THROWS();
-	} else {
-		RegCloseKey(hKey);
 	}
+	if (ERROR_SUCCESS != (registry_result = RegSetValueEx(hKey, SERVICES_REG_BASE_PRIORITY, 0, REG_DWORD, (CONST BYTE*)&base_priority, sizeof(REG_DWORD)))) {
+		convert_error_to_exception(registry_result, "On change the registry key value of base_priority");
+		RETURN_THROWS();
+	}
+
+    RegCloseKey(hKey);
 	efree(service_key);
 
 }
@@ -768,17 +790,17 @@ static PHP_FUNCTION(win32_delete_service)
 			if (DeleteService(hsvc)) {
 				return;
 			} else {
-				convert_error_to_exception(GetLastError());
+				convert_error_to_exception(GetLastError(), "");
 				RETURN_THROWS();
 			}
 			CloseServiceHandle(hsvc);
 		} else {
-			convert_error_to_exception(GetLastError());
+			convert_error_to_exception(GetLastError(), "");
 			RETURN_THROWS();
 		}
 		CloseServiceHandle(hmgr);
 	} else {
-		convert_error_to_exception(GetLastError());
+		convert_error_to_exception(GetLastError(), "");
 		RETURN_THROWS();
 	}
 }
@@ -833,7 +855,7 @@ static PHP_FUNCTION(win32_query_service_status)
 					efree(st);
                     CloseServiceHandle(hsvc);
                     CloseServiceHandle(hmgr);
-					convert_error_to_exception(GetLastError());
+					convert_error_to_exception(GetLastError(), "");
                     RETURN_THROWS();
 				}
 				st = erealloc(st, size);
@@ -842,7 +864,7 @@ static PHP_FUNCTION(win32_query_service_status)
 					efree(st);
                     CloseServiceHandle(hsvc);
                     CloseServiceHandle(hmgr);
-                    convert_error_to_exception(GetLastError());
+                    convert_error_to_exception(GetLastError(), "");
                     RETURN_THROWS();
 				}
 			}
@@ -861,12 +883,12 @@ static PHP_FUNCTION(win32_query_service_status)
 			efree(st);
 			CloseServiceHandle(hsvc);
 		} else {
-			convert_error_to_exception(GetLastError());
+			convert_error_to_exception(GetLastError(), "");
 			RETURN_THROWS();
 		}
 		CloseServiceHandle(hmgr);
 	} else {
-		convert_error_to_exception(GetLastError());
+		convert_error_to_exception(GetLastError(), "");
 		RETURN_THROWS();
 	}
 }
@@ -899,17 +921,17 @@ static PHP_FUNCTION(win32_start_service)
 			if (StartService(hsvc, 0, NULL)) {
 				return;
 			} else {
-				convert_error_to_exception(GetLastError());
+				convert_error_to_exception(GetLastError(), "");
 				RETURN_THROWS();
 			}
 			CloseServiceHandle(hsvc);
 		} else {
-			convert_error_to_exception(GetLastError());
+			convert_error_to_exception(GetLastError(), "");
 			RETURN_THROWS();
 		}
 		CloseServiceHandle(hmgr);
 	} else {
-		convert_error_to_exception(GetLastError());
+		convert_error_to_exception(GetLastError(), "");
 		RETURN_THROWS();
 	}
 }
@@ -941,17 +963,20 @@ static void win32_handle_service_controls(INTERNAL_FUNCTION_PARAMETERS, long acc
 			if (ControlService(hsvc, status, &st)) {
 				return;
 			} else {
-				convert_error_to_exception(GetLastError());
+			    CloseServiceHandle(hsvc);
+		        CloseServiceHandle(hmgr);
+				convert_error_to_exception(GetLastError(), "on send control");
 				RETURN_THROWS();
 			}
 			CloseServiceHandle(hsvc);
 		} else {
-			convert_error_to_exception(GetLastError());
+		    CloseServiceHandle(hmgr);
+			convert_error_to_exception(GetLastError(), "on openning service");
 			RETURN_THROWS();
 		}
 		CloseServiceHandle(hmgr);
 	} else {
-		convert_error_to_exception(GetLastError());
+		convert_error_to_exception(GetLastError(), "on openning manager");
 		RETURN_THROWS();
 	}
 }
@@ -1017,17 +1042,20 @@ static PHP_FUNCTION(win32_send_custom_control)
 			if (ControlService(hsvc, control, &st)) {
 				return;
 			} else {
-				convert_error_to_exception(GetLastError());
+			    CloseServiceHandle(hsvc);
+		        CloseServiceHandle(hmgr);
+				convert_error_to_exception(GetLastError(), "");
 				RETURN_THROWS();
 			}
 			CloseServiceHandle(hsvc);
 		} else {
-			convert_error_to_exception(GetLastError());
+		    CloseServiceHandle(hmgr);
+			convert_error_to_exception(GetLastError(), "");
 			RETURN_THROWS();
 		}
 		CloseServiceHandle(hmgr);
 	} else {
-		convert_error_to_exception(GetLastError());
+		convert_error_to_exception(GetLastError(), "");
 		RETURN_THROWS();
 	}
 }
