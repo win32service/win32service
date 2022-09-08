@@ -301,12 +301,12 @@ static PHP_FUNCTION(win32_start_service_ctrl_dispatcher)
 	if (WAIT_OBJECT_0 == WaitForSingleObject(SVCG(event), 30000)) {
 		if (SVCG(code) == NO_ERROR) {
 			RETURN_TRUE;
-		} else {
-		    CloseHandle(SVCG(svc_thread));
-		    SVCG(svc_thread) = NULL;
-			convert_error_to_exception(SVCG(code), "");
-			RETURN_THROWS();
 		}
+
+        CloseHandle(SVCG(svc_thread));
+        SVCG(svc_thread) = NULL;
+        convert_error_to_exception(SVCG(code), "");
+        RETURN_THROWS();
 	}
 
 	RETURN_FALSE;
@@ -784,25 +784,26 @@ static PHP_FUNCTION(win32_delete_service)
     }
 
 	hmgr = OpenSCManager(machine, NULL, SC_MANAGER_ALL_ACCESS);
-	if (hmgr) {
-		hsvc = OpenService(hmgr, service, DELETE);
-		if (hsvc) {
-			if (DeleteService(hsvc)) {
-				return;
-			} else {
-				convert_error_to_exception(GetLastError(), "");
-				RETURN_THROWS();
-			}
-			CloseServiceHandle(hsvc);
-		} else {
-			convert_error_to_exception(GetLastError(), "");
-			RETURN_THROWS();
-		}
-		CloseServiceHandle(hmgr);
-	} else {
+	if (!hmgr) {
 		convert_error_to_exception(GetLastError(), "");
 		RETURN_THROWS();
 	}
+    hsvc = OpenService(hmgr, service, DELETE);
+    if (!hsvc) {
+        CloseServiceHandle(hmgr);
+        convert_error_to_exception(GetLastError(), "");
+        RETURN_THROWS();
+    }
+
+    if (!DeleteService(hsvc)) {
+        CloseServiceHandle(hmgr);
+        CloseServiceHandle(hsvc);
+        convert_error_to_exception(GetLastError(), "");
+        RETURN_THROWS();
+    }
+
+    CloseServiceHandle(hsvc);
+    CloseServiceHandle(hmgr);
 }
 /* }}} */
 
@@ -844,53 +845,52 @@ static PHP_FUNCTION(win32_query_service_status)
     }
 
 	hmgr = OpenSCManager(machine, NULL, GENERIC_READ);
-	if (hmgr) {
-		hsvc = OpenService(hmgr, service, SERVICE_QUERY_STATUS);
-		if (hsvc) {
-			size = sizeof(*st);
-			st = emalloc(size);
-			if (!QueryServiceStatusEx(hsvc, SC_STATUS_PROCESS_INFO,
-					(LPBYTE)st, size, &size)) {
-				if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
-					efree(st);
-                    CloseServiceHandle(hsvc);
-                    CloseServiceHandle(hmgr);
-					convert_error_to_exception(GetLastError(), "");
-                    RETURN_THROWS();
-				}
-				st = erealloc(st, size);
-				if (!QueryServiceStatusEx(hsvc, SC_STATUS_PROCESS_INFO,
-						(LPBYTE)st, size, &size)) {
-					efree(st);
-                    CloseServiceHandle(hsvc);
-                    CloseServiceHandle(hmgr);
-                    convert_error_to_exception(GetLastError(), "");
-                    RETURN_THROWS();
-				}
-			}
-			/* map the struct to an array */
-			array_init(return_value);
-			add_assoc_long(return_value, "ServiceType", st->dwServiceType);
-			add_assoc_long(return_value, "CurrentState", st->dwCurrentState);
-			add_assoc_long(return_value, "ControlsAccepted", st->dwControlsAccepted);
-			add_assoc_long(return_value, "Win32ExitCode", st->dwWin32ExitCode);
-			add_assoc_long(return_value, "ServiceSpecificExitCode", st->dwServiceSpecificExitCode);
-			add_assoc_long(return_value, "CheckPoint", st->dwCheckPoint);
-			add_assoc_long(return_value, "WaitHint", st->dwWaitHint);
-			add_assoc_long(return_value, "ProcessId", st->dwProcessId);
-			add_assoc_long(return_value, "ServiceFlags", st->dwServiceFlags);
-
-			efree(st);
-			CloseServiceHandle(hsvc);
-		} else {
-			convert_error_to_exception(GetLastError(), "");
-			RETURN_THROWS();
-		}
-		CloseServiceHandle(hmgr);
-	} else {
+	if (!hmgr) {
 		convert_error_to_exception(GetLastError(), "");
 		RETURN_THROWS();
 	}
+    hsvc = OpenService(hmgr, service, SERVICE_QUERY_STATUS);
+    if (!hsvc) {
+        CloseServiceHandle(hmgr);
+        convert_error_to_exception(GetLastError(), "");
+        RETURN_THROWS();
+    }
+    size = sizeof(*st);
+    st = emalloc(size);
+    if (!QueryServiceStatusEx(hsvc, SC_STATUS_PROCESS_INFO,
+            (LPBYTE)st, size, &size)) {
+        if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
+            efree(st);
+            CloseServiceHandle(hsvc);
+            CloseServiceHandle(hmgr);
+            convert_error_to_exception(GetLastError(), "");
+            RETURN_THROWS();
+        }
+        st = erealloc(st, size);
+        if (!QueryServiceStatusEx(hsvc, SC_STATUS_PROCESS_INFO,
+                (LPBYTE)st, size, &size)) {
+            efree(st);
+            CloseServiceHandle(hsvc);
+            CloseServiceHandle(hmgr);
+            convert_error_to_exception(GetLastError(), "");
+            RETURN_THROWS();
+        }
+    }
+    /* map the struct to an array */
+    array_init(return_value);
+    add_assoc_long(return_value, "ServiceType", st->dwServiceType);
+    add_assoc_long(return_value, "CurrentState", st->dwCurrentState);
+    add_assoc_long(return_value, "ControlsAccepted", st->dwControlsAccepted);
+    add_assoc_long(return_value, "Win32ExitCode", st->dwWin32ExitCode);
+    add_assoc_long(return_value, "ServiceSpecificExitCode", st->dwServiceSpecificExitCode);
+    add_assoc_long(return_value, "CheckPoint", st->dwCheckPoint);
+    add_assoc_long(return_value, "WaitHint", st->dwWaitHint);
+    add_assoc_long(return_value, "ProcessId", st->dwProcessId);
+    add_assoc_long(return_value, "ServiceFlags", st->dwServiceFlags);
+
+    efree(st);
+    CloseServiceHandle(hsvc);
+    CloseServiceHandle(hmgr);
 }
 /* }}} */
 
@@ -915,25 +915,24 @@ static PHP_FUNCTION(win32_start_service)
     }
 
 	hmgr = OpenSCManager(machine, NULL, SC_MANAGER_CONNECT);
-	if (hmgr) {
-		hsvc = OpenService(hmgr, service, SERVICE_START);
-		if (hsvc) {
-			if (StartService(hsvc, 0, NULL)) {
-				return;
-			} else {
-				convert_error_to_exception(GetLastError(), "");
-				RETURN_THROWS();
-			}
-			CloseServiceHandle(hsvc);
-		} else {
-			convert_error_to_exception(GetLastError(), "");
-			RETURN_THROWS();
-		}
-		CloseServiceHandle(hmgr);
-	} else {
+	if (!hmgr) {
 		convert_error_to_exception(GetLastError(), "");
 		RETURN_THROWS();
 	}
+    hsvc = OpenService(hmgr, service, SERVICE_START);
+    if (!hsvc) {
+        CloseServiceHandle(hmgr);
+        convert_error_to_exception(GetLastError(), "");
+        RETURN_THROWS();
+    }
+    if (!StartService(hsvc, 0, NULL)) {
+        CloseServiceHandle(hsvc);
+        CloseServiceHandle(hmgr);
+        convert_error_to_exception(GetLastError(), "");
+        RETURN_THROWS();
+    }
+    CloseServiceHandle(hsvc);
+    CloseServiceHandle(hmgr);
 }
 /* }}} */
 
@@ -957,28 +956,24 @@ static void win32_handle_service_controls(INTERNAL_FUNCTION_PARAMETERS, long acc
     }
 
 	hmgr = OpenSCManager(machine, NULL, SC_MANAGER_CONNECT);
-	if (hmgr) {
-		hsvc = OpenService(hmgr, service, access);
-		if (hsvc) {
-			if (ControlService(hsvc, status, &st)) {
-				return;
-			} else {
-			    CloseServiceHandle(hsvc);
-		        CloseServiceHandle(hmgr);
-				convert_error_to_exception(GetLastError(), "on send control");
-				RETURN_THROWS();
-			}
-			CloseServiceHandle(hsvc);
-		} else {
-		    CloseServiceHandle(hmgr);
-			convert_error_to_exception(GetLastError(), "on openning service");
-			RETURN_THROWS();
-		}
-		CloseServiceHandle(hmgr);
-	} else {
+	if (!hmgr) {
 		convert_error_to_exception(GetLastError(), "on openning manager");
 		RETURN_THROWS();
-	}
+    }
+    hsvc = OpenService(hmgr, service, access);
+    if (!hsvc) {
+        CloseServiceHandle(hmgr);
+        convert_error_to_exception(GetLastError(), "on openning service");
+        RETURN_THROWS();
+    }
+    if (!ControlService(hsvc, status, &st)) {
+        CloseServiceHandle(hsvc);
+        CloseServiceHandle(hmgr);
+        convert_error_to_exception(GetLastError(), "on send control");
+        RETURN_THROWS();
+    }
+    CloseServiceHandle(hsvc);
+    CloseServiceHandle(hmgr);
 }
 
 /* {{{ proto void win32_stop_service(string servicename [, string machine])
@@ -1036,28 +1031,27 @@ static PHP_FUNCTION(win32_send_custom_control)
 	}
 
 	hmgr = OpenSCManager(machine, NULL, SC_MANAGER_CONNECT);
-	if (hmgr) {
-		hsvc = OpenService(hmgr, service, SERVICE_USER_DEFINED_CONTROL);
-		if (hsvc) {
-			if (ControlService(hsvc, control, &st)) {
-				return;
-			} else {
-			    CloseServiceHandle(hsvc);
-		        CloseServiceHandle(hmgr);
-				convert_error_to_exception(GetLastError(), "");
-				RETURN_THROWS();
-			}
-			CloseServiceHandle(hsvc);
-		} else {
-		    CloseServiceHandle(hmgr);
-			convert_error_to_exception(GetLastError(), "");
-			RETURN_THROWS();
-		}
-		CloseServiceHandle(hmgr);
-	} else {
+	if (!hmgr) {
 		convert_error_to_exception(GetLastError(), "");
 		RETURN_THROWS();
 	}
+
+    hsvc = OpenService(hmgr, service, SERVICE_USER_DEFINED_CONTROL);
+    if (!hsvc) {
+        CloseServiceHandle(hmgr);
+        convert_error_to_exception(GetLastError(), "");
+        RETURN_THROWS();
+    }
+
+    if (!ControlService(hsvc, control, &st)) {
+        CloseServiceHandle(hsvc);
+        CloseServiceHandle(hmgr);
+        convert_error_to_exception(GetLastError(), "");
+        RETURN_THROWS();
+    }
+
+    CloseServiceHandle(hsvc);
+    CloseServiceHandle(hmgr);
 }
 /* }}} */
 
