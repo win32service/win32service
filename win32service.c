@@ -749,7 +749,7 @@ static PHP_FUNCTION(win32_create_service)
     }
 	LUID lpLuid;
 	if (!LookupPrivilegeValue(NULL, SE_SHUTDOWN_NAME, &lpLuid)) {
-		php_log_err('Error on read right');
+		php_log_err("Error on read right");
 	}
     if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, &srvc_failure_infos)) {
         CloseServiceHandle(hsvc);
