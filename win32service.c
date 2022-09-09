@@ -753,12 +753,14 @@ static PHP_FUNCTION(win32_create_service)
         convert_error_to_exception(GetLastError(), "on change the failure action flag");
         RETURN_THROWS();
     }
-	LUID lpLuid;
-	LookupPrivilegeValue(NULL, SE_SHUTDOWN_NAME, &lpLuid);
+	LUID lpLuid = null;
+	if (!LookupPrivilegeValue(NULL, SE_SHUTDOWN_NAME, &lpLuid)) {
+		php_log_err('Error on read right');
+	}
     if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, &srvc_failure_infos)) {
         CloseServiceHandle(hsvc);
         CloseServiceHandle(hmgr);
-        convert_error_to_exception(GetLastError(), spprintf("on change the failure action %d-%d", lpLuid.HightPart, lpLuid.LowPart));
+        convert_error_to_exception(GetLastError(), "on change the failure action");
         RETURN_THROWS();
     }
 
