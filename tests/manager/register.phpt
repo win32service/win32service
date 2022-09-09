@@ -26,7 +26,7 @@ try {
 }
 sleep(5);
 var_dump(win32_delete_service($service['service']));
-sleep(5);
+//sleep(5);
 try {
     var_dump(win32_delete_service($service['service']));
 } catch (Throwable $e) {
