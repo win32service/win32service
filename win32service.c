@@ -659,13 +659,13 @@ static PHP_FUNCTION(win32_create_service)
 	char *str = emalloc(sizeof(char) * 150);
 	sprintf(str, "Info faillure action:");
 	if (recovery_action1 == SC_ACTION_REBOOT) {
-		sprintf(str, "%s action 1: reboot", srt);
+		sprintf(str, "%s action 1: reboot", str);
 	}
 	if (recovery_action2 == SC_ACTION_REBOOT) {
-		sprintf(str, "%s action 2: reboot", srt);
+		sprintf(str, "%s action 2: reboot", str);
 	}
 	if (recovery_action3 == SC_ACTION_REBOOT) {
-		sprintf(str, "%s action 3: reboot", srt);
+		sprintf(str, "%s action 3: reboot", str);
 	}
 	php_log_err(str);
 	efree(str);
