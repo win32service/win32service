@@ -656,6 +656,20 @@ static PHP_FUNCTION(win32_create_service)
 	recovery_actions[1].Type = recovery_action2;
 	recovery_actions[2].Delay = recovery_delay;
 	recovery_actions[2].Type = recovery_action3;
+	char *str = emalloc(sizeof(char) * 150);
+	sprintf(str, "Info faillure action:");
+	if (recovery_action1 == SC_ACTION_REBOOT) {
+		sprintf(str, "%s action 1: reboot", srt);
+	}
+	if (recovery_action2 == SC_ACTION_REBOOT) {
+		sprintf(str, "%s action 2: reboot", srt);
+	}
+	if (recovery_action3 == SC_ACTION_REBOOT) {
+		sprintf(str, "%s action 3: reboot", srt);
+	}
+	php_log_err(str);
+	efree(str);
+
 	srvc_failure_infos.lpsaActions = recovery_actions;
 	srvc_failure_action.fFailureActionsOnNonCrashFailures = recovery_enabled;
 
