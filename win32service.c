@@ -30,6 +30,7 @@
 #include "php_win32service.h"
 #include "php_win32service_int.h"
 #include "SAPI.h"
+#include "winbase.h"
 
 #define SERVICES_REG_BASE_PRIORITY "BasePriority"
 #define SERVICES_REG_KEY_ROOT "SYSTEM\\CurrentControlSet\\Services\\"
@@ -738,10 +739,12 @@ static PHP_FUNCTION(win32_create_service)
         convert_error_to_exception(GetLastError(), "on change the failure action flag");
         RETURN_THROWS();
     }
+	LUID lpLuid;
+	LookupPrivilegeValue(NULL, SE_SHUTDOWN_NAME, &lpLuid);
     if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, &srvc_failure_infos)) {
         CloseServiceHandle(hsvc);
         CloseServiceHandle(hmgr);
-        convert_error_to_exception(GetLastError(), "on change the failure action");
+        convert_error_to_exception(GetLastError(), spprintf("on change the failure action %d-%d", lpLuid.HightPart, lpLuid.LowPart));
         RETURN_THROWS();
     }
 
