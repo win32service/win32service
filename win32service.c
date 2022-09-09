@@ -656,19 +656,6 @@ static PHP_FUNCTION(win32_create_service)
 	recovery_actions[1].Type = recovery_action2;
 	recovery_actions[2].Delay = recovery_delay;
 	recovery_actions[2].Type = recovery_action3;
-	char *str = emalloc(sizeof(char) * 150);
-	sprintf(str, "Info faillure action:");
-	if (recovery_action1 == SC_ACTION_REBOOT) {
-		sprintf(str, "%s action 1: reboot", str);
-	}
-	if (recovery_action2 == SC_ACTION_REBOOT) {
-		sprintf(str, "%s action 2: reboot", str);
-	}
-	if (recovery_action3 == SC_ACTION_REBOOT) {
-		sprintf(str, "%s action 3: reboot", str);
-	}
-	php_log_err(str);
-	efree(str);
 
 	srvc_failure_infos.lpsaActions = recovery_actions;
 	srvc_failure_action.fFailureActionsOnNonCrashFailures = recovery_enabled;
@@ -738,29 +725,27 @@ static PHP_FUNCTION(win32_create_service)
     if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, &srvc_desc)) {
         CloseServiceHandle(hsvc);
         CloseServiceHandle(hmgr);
-        convert_error_to_exception(GetLastError(), "when defining the description");
+        convert_error_to_exception(GetLastError(), "service partially configured, error when defining the description");
         RETURN_THROWS();
     }
     if ((start_type & SERVICE_AUTO_START && !ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, &srvc_delayed_start))) {
         CloseServiceHandle(hsvc);
         CloseServiceHandle(hmgr);
-        convert_error_to_exception(GetLastError(), "on change the start type");
+        convert_error_to_exception(GetLastError(), "service partially configured, error on change the start type");
         RETURN_THROWS();
     }
-	LUID lpLuid;
-	if (!LookupPrivilegeValue(NULL, SE_SHUTDOWN_NAME, &lpLuid)) {
-		php_log_err("Error on read right");
-	}
+
     if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, &srvc_failure_infos)) {
         CloseServiceHandle(hsvc);
         CloseServiceHandle(hmgr);
-        convert_error_to_exception(GetLastError(), "on change the failure action");
+        convert_error_to_exception(GetLastError(), "service partially configured, error on change the failure action");
         RETURN_THROWS();
     }
+
     if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, &srvc_failure_action)) {
         CloseServiceHandle(hsvc);
         CloseServiceHandle(hmgr);
-        convert_error_to_exception(GetLastError(), "on change the failure action flag");
+        convert_error_to_exception(GetLastError(), "service partially configured, error on change the failure action flag");
         RETURN_THROWS();
     }
 
@@ -1339,8 +1324,8 @@ static PHP_MINIT_FUNCTION(win32service)
 
 	/* Win32 Recovery Constants */
 	MKCONST(SC_ACTION_NONE);							/* 0x00000000 No Action */
-	MKCONST(SC_ACTION_REBOOT);							/* 0x00000001 Reboot the computer */
-	MKCONST(SC_ACTION_RESTART);							/* 0x00000002 Restart the service */
+	MKCONST(SC_ACTION_RESTART);							/* 0x00000001 Restart the service */
+	MKCONST(SC_ACTION_REBOOT);							/* 0x00000002 Reboot the computer */
 	MKCONST(SC_ACTION_RUN_COMMAND);						/* 0x00000003 Run the command */
 
 
