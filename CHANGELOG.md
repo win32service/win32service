@@ -1,4 +1,9 @@
-# Version 1.1.0 (2021-11-30)
+# Version 1.0.2 (in progress)
+
+* Rewrite some code (espectaly if/else instruction).
+* Add more detail in exception message.
+
+# Version 1.0.1 (2021-11-30)
 
 * Allow all function reserved for cli SAPI on embed SAPI. (@EionRobb) (issue [#63](https://github.com/win32service/win32service/issues/63))
 * Update for PHP 8.1
