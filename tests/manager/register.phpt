@@ -37,4 +37,4 @@ try {
 NULL
 Win32ServiceException: (1073) Error service exists (on create service)
 NULL
-Win32ServiceException: (1072) Error service marked for delete ()
+Win32ServiceException: (1072) Error service does not exist ()
