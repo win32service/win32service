@@ -1,7 +1,8 @@
-# Version 1.0.2 (in progress)
+# Version 1.0.2 (2022-10-13)
 
 * Rewrite some code (espectaly if/else instruction).
 * Add more detail in exception message.
+* Fix recovery settings error (issue [#71](https://github.com/win32service/win32service/issues/71))
 
 # Version 1.0.1 (2021-11-30)
 

@@ -25,7 +25,7 @@
     <date>2021-12-09</date>
     <time>21:30:00</time>
     <version>
-        <release>1.0.1</release>
+        <release>1.0.2</release>
         <api>0.4.0</api>
     </version>
     <stability>
@@ -34,9 +34,10 @@
     </stability>
     <license uri="http://www.php.net/license">PHP License</license>
     <notes><![CDATA[
-    * Allow all function reserved for cli SAPI on embed SAPI. (@EionRobb) (issue [#63](https://github.com/win32service/win32service/issues/63))
-    * Update for PHP 8.1
-     The binary is also available here: https://github.com/win32service/win32service/releases/tag/v1.0.1
+    * Rewrite some code (espectaly if/else instruction).
+    * Add more detail in exception message.
+    * Fix recovery settings error (issue [#71](https://github.com/win32service/win32service/issues/71))
+     The binary is also available here: https://github.com/win32service/win32service/releases/tag/v1.0.2
  ]]></notes>
     <contents>
         <dir name="/">
@@ -69,6 +70,22 @@
     <providesextension>win32service</providesextension>
     <extsrcrelease/>
     <changelog>
+        <release>
+            <version>
+                <release>1.0.2</release>
+                <api>0.4.0</api>
+            </version>
+            <stability>
+                <release>stable</release>
+                <api>stable</api>
+            </stability>
+            <license uri="http://www.php.net/license">PHP License</license>
+            <notes><![CDATA[
+    * Rewrite some code (espectaly if/else instruction).
+    * Add more detail in exception message.
+    * Fix recovery settings error (issue [#71](https://github.com/win32service/win32service/issues/71))
+ ]]></notes>
+        </release>
         <release>
             <version>
                 <release>1.0.1</release>
