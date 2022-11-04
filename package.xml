@@ -34,7 +34,7 @@
     </stability>
     <license uri="http://www.php.net/license">PHP License</license>
     <notes><![CDATA[
-    * Rewrite some code (espectaly if/else instruction).
+    * Rewrite some code (especially if/else instruction).
     * Add more detail in exception message.
     * Fix recovery settings error (issue [#71](https://github.com/win32service/win32service/issues/71))
      The binary is also available here: https://github.com/win32service/win32service/releases/tag/v1.0.2
