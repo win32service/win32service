@@ -25,7 +25,7 @@ $service = [
         'service' => 'WindowsServicePhpObjectTest',
         'display' => 'Windows service PHP Object test',
         'description' => 'This service is an PHP example for test using Object',
-        'path' => '"' . dirname(PHP_BINARY) . '\\php-win.exe"',
+        'path' => dirname(PHP_BINARY) . '\\php-win.exe',
         'params' => '"' . __DIR__ . '\\WinService.php" run',
         'start_type' => WIN32_SERVICE_AUTO_START,
     ],

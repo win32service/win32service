@@ -250,7 +250,7 @@ $service = [
         'service' => 'WindowsServicePhpTest',
         'display' => 'Windows service PHP test',
         'description' => 'This service is an PHP example for test',
-        'path' => '"' . dirname(PHP_BINARY) . '\\php-win.exe"',
+        'path' => dirname(PHP_BINARY) . '\\php-win.exe',
         'params' => '"' . __FILE__ . '" run',
         'start_type' => WIN32_SERVICE_AUTO_START,
     ],
