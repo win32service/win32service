@@ -8,7 +8,7 @@ rmdir /Q /S tests
 
 setlocal enableextensions enabledelayedexpansion
 
-set EXTENSIONTOREMOVE=Zend sapi sapi\phpdbg sapi\fpm sapi\cli sapi\cgi ext\standard ext\date ext\spl ext\reflection ext\pcre ext\spl\examples ext\hash ext\json
+set EXTENSIONTOREMOVE=Zend sapi sapi\phpdbg sapi\fpm sapi\cli sapi\cgi ext\standard ext\date ext\spl ext\reflection ext\pcre ext\spl\examples ext\hash ext\json ext\random
 
 for %%e in (%EXTENSIONTOREMOVE%) do (
 	set EXTNAME=%%e
