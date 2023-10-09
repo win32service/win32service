@@ -52,7 +52,7 @@ class WinServiceManager
     private function write_log($msg = null, $cmd = false)
     {
         if (!$cmd and $this->cmd != 'debug') {
-            file_put_contents(strftime($this->service['log_file']), date('Y-m-d H:i:s') . "\t" . $msg . "\n",
+            file_put_contents(str_replace('<date>', date('Y-m-d'), $this->service['log_file']), date('Y-m-d H:i:s') . "\t" . $msg . "\n",
                 FILE_APPEND);
         } else {
             echo $msg, "\n";
@@ -65,6 +65,7 @@ class WinServiceManager
             $this->status = win32_query_service_status($this->service['service']['service']);
         } catch (\Win32ServiceException $e) {
             $this->status = $e->getCode();
+			$this->write_log('error: '.$e->getMessage());
         }
     }
 
@@ -244,7 +245,7 @@ class WinServiceManager
 
 $service = [
     'run_file' => __DIR__ . '/service_run.log',
-    'log_file' => __DIR__ . '/service_%Y%m%d.log',
+    'log_file' => __DIR__ . '/service_<date>.log',
     'loop_wait' => 10,
     'service' => [
         'service' => 'WindowsServicePhpTest',
