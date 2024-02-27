@@ -98,7 +98,7 @@ jobs:
           sc delete WindowsServicePhpTestRun
           mkdir c:\tests_tmp
           $env:TEST_PHP_JUNIT = "c:\junit.out.xml"
-          nmake test TESTS="-q --offline --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp"
+          nmake test TESTS="-c null -q --offline --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp"
       - name: Publish Binaries to Release
         if: ${{ startsWith(github.ref, 'refs/tags') }}
         uses: svenstaro/upload-release-action@v2
