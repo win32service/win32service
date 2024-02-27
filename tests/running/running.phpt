@@ -10,7 +10,8 @@ function displayException(Throwable $e){
     printf("%s: (%d) %s\n", get_class($e), $e->getCode(), $e->getMessage());
 }
 
-phpinfo();
+var_dump(php_ini_loaded_file());
+
 $service = [
 		'service' => 'WindowsServicePhpTestRun',
 		'display' => 'Windows service PHP test',
