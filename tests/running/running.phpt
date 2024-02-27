@@ -10,7 +10,7 @@ function displayException(Throwable $e){
     printf("%s: (%d) %s\n", get_class($e), $e->getCode(), $e->getMessage());
 }
 
-$extension = getenv(ARTIFACT);
+$extension = getenv('ARTIFACT');
 var_dump($extension);
 
 $service = [
