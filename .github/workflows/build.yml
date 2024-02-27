@@ -58,7 +58,7 @@ jobs:
           chcp 65001
 
           $dir = (Get-Location).Path + '\'
-          if ('x64' -eq '${{matrix.arch}}') { $dir = $dir + 'x64\' }
+          if ('x64' -eq '${{matrix.platform}}') { $dir = $dir + 'x64\' }
           $dir = $dir + 'Release'
           if ('ts' -eq '${{matrix.ts}}') { $dir = $dir + '_TS' }
 
