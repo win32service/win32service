@@ -64,7 +64,7 @@ jobs:
 
           ("[php] `nextension=$dir\php_win32service.dll") | Set-Content $env:SystemRoot\php.ini
 
-          $artifact_name = 'php_ssh2-${{env.EXTENSION_VERSION}}-${{matrix.php-rel}}'
+          $artifact_name = 'php_win32service-${{env.EXTENSION_VERSION}}-${{matrix.php-rel}}'
 
           if ('ts' -eq '${{matrix.ts}}') { $artifact_name = $artifact_name + '-ts' }
           if ('nts' -eq '${{matrix.ts}}') { $artifact_name = $artifact_name + '-nts' }
