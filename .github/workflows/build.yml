@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-rel: ['7.4', '8.3']
+        php-rel: ['8.3']
         platform: [x64]
         ts: [ts]
     steps:
@@ -49,7 +49,7 @@ jobs:
       - name: Generate Build Files
         run: phpize
       - name: Configure Build
-        run: configure --enable-win32service=shared --with-prefix=${{steps.setup-php.outputs.prefix}}
+        run: configure --enable-win32service --with-prefix=${{steps.setup-php.outputs.prefix}}
       - name: Build
         run: nmake
       - name: Define Module Env
