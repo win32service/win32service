@@ -91,7 +91,14 @@ jobs:
             name: ${{env.ARTIFACT_NAME}}
             path: ${{env.ARTIFACT}}
       - name: test
-        run: nmake test TESTS="tests -q --offline --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP"
+        shell: powershell
+        run: |
+          chcp 65001
+          sc delete WindowsServicePhpTest
+          sc delete WindowsServicePhpTestRun
+          mkdir c:\tests_tmp
+          $env:TEST_PHP_JUNIT = "c:\junit.out.xml"
+          nmake test TESTS="-q --offline --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp"
       - name: Publish Binaries to Release
         if: ${{ startsWith(github.ref, 'refs/tags') }}
         uses: svenstaro/upload-release-action@v2

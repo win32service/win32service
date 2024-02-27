@@ -1,7 +1,4 @@
 <?php
-if (!extension_loaded('win32service')) {
-    throw new \Exception('The php_win32service.dll extension is not loaded ! Please configure it into your php configuration file.');
-}
 
 $flog = fopen(__DIR__ . '/run.log', 'w+');
 try {
