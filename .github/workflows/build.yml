@@ -11,6 +11,9 @@ jobs:
   build:
     name: Build
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: cmd
     outputs:
       repo_tag_name: ${{ steps.install.outputs.repo_tag_name }}
     strategy:
