@@ -62,7 +62,7 @@ jobs:
           $dir = $dir + 'Release'
           if ('ts' -eq '${{matrix.ts}}') { $dir = $dir + '_TS' }
 
-          echo "[php] `nextension=$dir\php_win32service.dll" > $env:SystemRoot\php.ini
+          ("[php] `nextension=$dir\php_win32service.dll") | Set-Content $env:SystemRoot\php.ini
 
           $artifact_name = 'php_ssh2-${{env.EXTENSION_VERSION}}-${{matrix.php-rel}}'
 
