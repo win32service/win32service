@@ -52,8 +52,6 @@ jobs:
         run: configure --enable-win32service=shared --with-prefix=${{steps.setup-php.outputs.prefix}}
       - name: Build
         run: nmake
-      - name: test
-        run: nmake test TESTS="tests -q --offline --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP"
       - name: Define Module Env
         shell: powershell
         run: |
@@ -90,6 +88,8 @@ jobs:
         with:
             name: ${{env.ARTIFACT_NAME}}
             path: ${{env.ARTIFACT}}
+      - name: test
+        run: nmake test TESTS="tests -q --offline --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP"
       - name: Publish Binaries to Release
         if: ${{ startsWith(github.ref, 'refs/tags') }}
         uses: svenstaro/upload-release-action@v2
