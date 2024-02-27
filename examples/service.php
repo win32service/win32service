@@ -65,7 +65,7 @@ class WinServiceManager
             $this->status = win32_query_service_status($this->service['service']['service']);
         } catch (\Win32ServiceException $e) {
             $this->status = $e->getCode();
-			$this->write_log('error: '.$e->getMessage());
+            $this->write_log('error: '.$e->getMessage());
         }
     }
 
@@ -260,5 +260,5 @@ $service = [
 if (!isset($argv[1])) {
     $argv[1] = null;
 }
+
 new WinServiceManager($service, $argv[1]);
-?>
