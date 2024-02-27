@@ -62,6 +62,9 @@ jobs:
           $dir = $dir + 'Release'
           if ('ts' -eq '${{matrix.ts}}') { $dir = $dir + '_TS' }
 
+          echo "[php] `nextension=$dir\php_win32service.dll" > $dir\php.ini
+          echo "PHP_INI_SCAN_DIR=$dir" >> $env::GITHUB_ENV
+
           $artifact_name = 'php_ssh2-${{env.EXTENSION_VERSION}}-${{matrix.php-rel}}'
 
           if ('7.2' -eq '${{matrix.php-rel}}') { $artifact_name = $artifact_name + '-vc15' }

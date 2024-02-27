@@ -10,15 +10,12 @@ function displayException(Throwable $e){
     printf("%s: (%d) %s\n", get_class($e), $e->getCode(), $e->getMessage());
 }
 
-$extension = getenv('ARTIFACT');
-var_dump($extension);
-
 $service = [
 		'service' => 'WindowsServicePhpTestRun',
 		'display' => 'Windows service PHP test',
 		'description' => 'This service is an PHP example for test',
 		'path' => '"' . (PHP_BINARY) . '"',
-		'params' => '"' . __DIR__ . '\\run.php" -d ' . $extension,
+		'params' => '"' . __DIR__ . '\\run.php"',
 		'start_type' => WIN32_SERVICE_AUTO_START,
 ];
 try {
