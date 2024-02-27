@@ -53,7 +53,7 @@ jobs:
       - name: Build
         run: nmake
       - name: test
-        run: nmake test TESTS="tests --show-diff"
+        run: nmake test TESTS="tests -q --offline --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP"
       - name: Define Module Env
         shell: powershell
         run: |
