@@ -11,6 +11,7 @@ function displayException(Throwable $e){
 }
 
 var_dump(php_ini_loaded_file());
+var_dump(file_get_contents(php_ini_loaded_file()));
 
 $service = [
 		'service' => 'WindowsServicePhpTestRun',
