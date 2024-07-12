@@ -22,22 +22,24 @@
         <email>jbnahan@php.net</email>
         <active>yes</active>
     </lead>
-    <date>2022-10-13</date>
+    <date>2024-07-24</date>
     <time>21:30:00</time>
     <version>
-        <release>1.0.2</release>
-        <api>0.4.0</api>
+        <release>1.1.0-beta1</release>
+        <api>0.5.0</api>
     </version>
     <stability>
-        <release>stable</release>
-        <api>stable</api>
+        <release>beta</release>
+        <api>beta</api>
     </stability>
     <license uri="http://www.php.net/license">PHP License</license>
     <notes><![CDATA[
-    * Rewrite some code (especially if/else instruction).
-    * Add more detail in exception message.
-    * Fix recovery settings error (issue [#71](https://github.com/win32service/win32service/issues/71))
-     The binary is also available here: https://github.com/win32service/win32service/releases/tag/v1.0.2
+    * Add object \Win32Service\RightInfo
+    * Add function win32_read_right_access_service()
+    * Add function win32_read_all_rights_access_service()
+    * Add function win32_add_right_access_service()
+    * Add function win32_remove_right_access_service()
+     The binary is also available here: https://github.com/win32service/win32service/releases/tag/v1.1.0-beta1
  ]]></notes>
     <contents>
         <dir name="/">
@@ -48,6 +50,10 @@
             <file name="php_win32service.h" role="src"/>
             <file name="php_win32service_int.h" role="src"/>
             <file name="win32service.c" role="src"/>
+            <file name="win32service_right.c" role="src"/>
+            <file name="win32service_right.h" role="src"/>
+            <file name="win32service_right_info.c" role="src"/>
+            <file name="win32service_right_info.h" role="src"/>
             <file name="examples/sample.php" role="php"/>
             <file name="examples/service.php" role="php"/>
             <file name="examples/service_dummy.php" role="php"/>
@@ -70,6 +76,24 @@
     <providesextension>win32service</providesextension>
     <extsrcrelease/>
     <changelog>
+        <release>
+            <version>
+                <release>1.1.0-beta1</release>
+                <api>0.5.0</api>
+            </version>
+            <stability>
+                <release>beta</release>
+                <api>beta</api>
+            </stability>
+            <license uri="http://www.php.net/license">PHP License</license>
+            <notes><![CDATA[
+    * Add object \Win32Service\RightInfo
+    * Add function win32_read_right_access_service()
+    * Add function win32_read_all_rights_access_service()
+    * Add function win32_add_right_access_service()
+    * Add function win32_remove_right_access_service()
+ ]]></notes>
+        </release>
         <release>
             <version>
                 <release>1.0.2</release>

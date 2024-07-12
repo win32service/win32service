@@ -29,9 +29,9 @@ class WinServiceManager
     private $status = null;
     private $config = null;
     private $cmd = null;
-    private $commands = ['run', 'create', 'delete', 'stop', 'start', 'pause', 'continue', 'debug'];
+    private $commands = ['run', 'create', 'delete', 'stop', 'start', 'pause', 'continue', 'debug', 'set_right', 'read_right', 'remove_right'];
 
-    public function __construct($service, $cmd = null)
+    public function __construct($service, $cmd = null, $arguments = [])
     {
         $this->service = $service;
         $this->cmd = $cmd = strtolower($cmd);
@@ -45,8 +45,27 @@ class WinServiceManager
             $this->write_log('INFO: Querying service status', $cmd != 'run');
             $this->update_service_status();
             $this->write_log('INFO: Executing command: ' . $cmd, $cmd != 'run');
-            $this->$cmd();
+            call_user_func_array([$this, $cmd], $arguments);
         }
+    }
+
+    private function set_right($user) {
+        win32_add_right_access_service($this->service['service']['service'], $user, WIN32_SERVICE_START | WIN32_SERVICE_STOP | WIN32_READ_CONTROL);
+    }
+
+
+    private function read_right($user) {
+        var_dump($info = win32_read_right_access_service($this->service['service']['service'], $user));
+        var_dump($info->getFullUsername());
+        var_dump($info->getUsername());
+        var_dump($info->getDomain());
+        var_dump($info->getFullUsername());
+        var_dump((string)$info);
+        echo "END\n";
+    }
+
+    private function remove_right($user) {
+        win32_remove_right_access_service($this->service['service']['service'], $user);
     }
 
     private function write_log($msg = null, $cmd = false)
@@ -260,5 +279,9 @@ $service = [
 if (!isset($argv[1])) {
     $argv[1] = null;
 }
-
-new WinServiceManager($service, $argv[1]);
+$arguments = [];
+if (\count($argv)>2){
+    $arguments=$argv;
+    unset($arguments[0],$arguments[1]);
+}
+new WinServiceManager($service, $argv[1], $arguments);

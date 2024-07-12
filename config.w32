@@ -4,6 +4,9 @@
 ARG_ENABLE("win32service", "Win32 Service", "no");
 
 if (PHP_WIN32SERVICE != "no") {
-	EXTENSION("win32service", "win32service.c");
+	EXTENSION("win32service", "win32service.c" +
+	" win32service_right.c" +
+	" win32service_right_info.c"
+	);
 }
 

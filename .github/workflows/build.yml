@@ -22,6 +22,9 @@ jobs:
         php-rel: ['8.0', '8.1', '8.2', '8.3']
         platform: [x64, x86]
         ts: [ts, nts]
+#        php-rel: ['8.3']
+#        platform: [x64]
+#        ts: [ts]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -90,6 +93,9 @@ jobs:
         with:
             name: ${{env.ARTIFACT_NAME}}
             path: ${{env.ARTIFACT}}
+      - name: Create new user
+        run: |
+          net user subuser p@ssw0rd /add
       - name: test
         shell: powershell
         run: |

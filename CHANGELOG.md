@@ -1,3 +1,11 @@
+# Version 1.1.0 beta 1 (2024-07-24)
+
+* Add object \Win32Service\RightInfo
+* Add function win32_read_right_access_service()
+* Add function win32_read_all_rights_access_service()
+* Add function win32_add_right_access_service()
+* Add function win32_remove_right_access_service()
+
 # Version 1.0.2 (2022-10-13)
 
 * Rewrite some code (espectaly if/else instruction).
