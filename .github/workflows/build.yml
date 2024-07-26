@@ -20,11 +20,11 @@ jobs:
       fail-fast: false
       matrix:
         php-rel: ['8.0', '8.1', '8.2', '8.3']
-        platform: [x64, x86]
-        ts: [ts, nts]
 #        php-rel: ['8.3']
+        platform: [x64, x86]
 #        platform: [x64]
-#        ts: [ts]
+        ts: [ts, nts]
+#        ts: [nts]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

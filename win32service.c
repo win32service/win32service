@@ -36,105 +36,135 @@
 #include <sddl.h>
 #include "win32service_right.h"
 #include "win32service_right_info.h"
+#include "win32service_registry.h"
 
 #define SERVICES_REG_BASE_PRIORITY "BasePriority"
-#define SERVICES_REG_KEY_ROOT "SYSTEM\\CurrentControlSet\\Services\\"
+
 
 /* gargh! service_main run from a new thread that we don't spawn, so we can't do this nicely */
 static void *tmp_service_g = NULL;
 
 
-static DWORD WINAPI service_handler(DWORD dwControl, DWORD dwEventType, LPVOID lpEventData, LPVOID lpContext)
+static DWORD WINAPI
+service_handler(DWORD
+dwControl,
+DWORD dwEventType, LPVOID
+lpEventData,
+LPVOID lpContext
+)
 {
-	zend_win32service_globals *g = (zend_win32service_globals*)lpContext;
-	DWORD code = NO_ERROR;
+zend_win32service_globals *g = (zend_win32service_globals *) lpContext;
+DWORD code = NO_ERROR;
 
-	g->args.dwControl = dwControl;
-	g->args.dwEventType = dwEventType;
-	g->args.lpEventData = lpEventData; /* not safe to touch without copying for later reference */
+g->args.
+dwControl = dwControl;
+g->args.
+dwEventType = dwEventType;
+g->args.
+lpEventData = lpEventData; /* not safe to touch without copying for later reference */
 
-	if (dwControl == SERVICE_CONTROL_STOP) {
-		g->st.dwCurrentState = SERVICE_STOP_PENDING;
-	}
-
-	SetServiceStatus(g->sh, &g->st);
-
-	return code;
+if (dwControl == SERVICE_CONTROL_STOP) {
+g->st.
+dwCurrentState = SERVICE_STOP_PENDING;
 }
 
-static void WINAPI service_main(DWORD argc, char **argv)
-{
-	zend_win32service_globals *g = (zend_win32service_globals*)tmp_service_g;
-	DWORD base_priority;
-	HKEY hKey;
-	char *service_key;
-	long registry_result = ERROR_SUCCESS;
-	DWORD dwType = REG_DWORD;
-	DWORD dwSize = sizeof(DWORD);
+SetServiceStatus(g
+->sh, &g->st);
 
-	// Set the base priority for this service.
-	/*spprintf(&service_key, 0, "%s%s", SERVICES_REG_KEY_ROOT, g->service_name);
-
-	registry_result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, service_key, 0, KEY_ALL_ACCESS, &hKey);
-	if (ERROR_SUCCESS == registry_result) {
-		registry_result = RegQueryValueEx(hKey, SERVICES_REG_BASE_PRIORITY, 0, &dwType, (LPBYTE)&base_priority, &dwSize);
-	}
-
-	efree(service_key);
-
-	if (hKey) {
-		RegCloseKey(hKey);
-	}
-
-	if (ERROR_SUCCESS != registry_result) {
-		g->code = registry_result;
-		SetEvent(g->event);
-		return;
-	}
-
-	if(!SetPriorityClass(GetCurrentProcess(), base_priority)) {
-		g->code = GetLastError();
-		SetEvent(g->event);
-		return;
-	}*/
-
-	g->st.dwServiceType = SERVICE_WIN32;
-	g->st.dwCurrentState = SERVICE_START_PENDING;
-	g->st.dwControlsAccepted =  SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN | SERVICE_ACCEPT_PAUSE_CONTINUE |
-						        SERVICE_ACCEPT_HARDWAREPROFILECHANGE | SERVICE_ACCEPT_NETBINDCHANGE |
-								SERVICE_ACCEPT_PARAMCHANGE | SERVICE_ACCEPT_POWEREVENT | SERVICE_ACCEPT_SESSIONCHANGE |
-								SERVICE_ACCEPT_PRESHUTDOWN | SERVICE_ACCEPT_TIMECHANGE | SERVICE_ACCEPT_TRIGGEREVENT;
-
-	g->sh = RegisterServiceCtrlHandlerEx(g->service_name, service_handler, g);
-
-	if (g->sh == (SERVICE_STATUS_HANDLE)0) {
-		g->code = GetLastError();
-		SetEvent(g->event);
-		return;
-	}
-
-	g->code = NO_ERROR;
-	SetEvent(g->event);
+return
+code;
 }
 
-static DWORD WINAPI svc_thread_proc(LPVOID _globals)
+static void WINAPI
+service_main(DWORD
+argc,
+char **argv
+)
 {
-	zend_win32service_globals *g = (zend_win32service_globals*)_globals;
+zend_win32service_globals *g = (zend_win32service_globals *) tmp_service_g;
+DWORD base_priority;
+HKEY hKey;
+char *service_key;
+long registry_result = ERROR_SUCCESS;
+DWORD dwType = REG_DWORD;
+DWORD dwSize = sizeof(DWORD);
 
-	tmp_service_g = g;
+// Set the base priority for this service.
+/*spprintf(&service_key, 0, "%s%s", SERVICES_REG_KEY_ROOT, g->service_name);
 
-	if (!StartServiceCtrlDispatcher(g->te)) {
-		g->code = GetLastError();
-		SetEvent(g->event);
-		return 1;
-	}
-
-	/* not reached until service_main returns */
-	return 0;
+registry_result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, service_key, 0, KEY_ALL_ACCESS, &hKey);
+if (ERROR_SUCCESS == registry_result) {
+    registry_result = RegQueryValueEx(hKey, SERVICES_REG_BASE_PRIORITY, 0, &dwType, (LPBYTE)&base_priority, &dwSize);
 }
 
-static void convert_error_to_exception(DWORD code, const char *message)
+efree(service_key);
+
+if (hKey) {
+    RegCloseKey(hKey);
+}
+
+if (ERROR_SUCCESS != registry_result) {
+    g->code = registry_result;
+    SetEvent(g->event);
+    return;
+}
+
+if(!SetPriorityClass(GetCurrentProcess(), base_priority)) {
+    g->code = GetLastError();
+    SetEvent(g->event);
+    return;
+}*/
+
+g->st.
+dwServiceType = SERVICE_WIN32;
+g->st.
+dwCurrentState = SERVICE_START_PENDING;
+g->st.
+dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN | SERVICE_ACCEPT_PAUSE_CONTINUE |
+                     SERVICE_ACCEPT_HARDWAREPROFILECHANGE | SERVICE_ACCEPT_NETBINDCHANGE |
+                     SERVICE_ACCEPT_PARAMCHANGE | SERVICE_ACCEPT_POWEREVENT | SERVICE_ACCEPT_SESSIONCHANGE |
+                     SERVICE_ACCEPT_PRESHUTDOWN | SERVICE_ACCEPT_TIMECHANGE | SERVICE_ACCEPT_TRIGGEREVENT;
+
+g->
+sh = RegisterServiceCtrlHandlerEx(g->service_name, service_handler, g);
+
+if (g->sh == (SERVICE_STATUS_HANDLE)0) {
+g->
+code = GetLastError();
+SetEvent(g
+->event);
+return;
+}
+
+g->
+code = NO_ERROR;
+SetEvent(g
+->event);
+}
+
+static DWORD WINAPI
+svc_thread_proc(LPVOID
+_globals)
 {
+zend_win32service_globals *g = (zend_win32service_globals *) _globals;
+
+tmp_service_g = g;
+
+if (!
+StartServiceCtrlDispatcher(g
+->te)) {
+g->
+code = GetLastError();
+SetEvent(g
+->event);
+return 1;
+}
+
+/* not reached until service_main returns */
+return 0;
+}
+
+static void convert_error_to_exception(DWORD code, const char *message) {
     if (code == ERROR_ACCESS_DENIED) {
         zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error access denied (%s)", message);
         return;
@@ -577,8 +607,8 @@ static PHP_FUNCTION(win32_read_all_rights_access_service) {
                 &peUse
         )) {
 //            printf("name: %s domain: %s ", name, domainName);
-            char * domainNamePtr = &domainName[0];
-            char *         namePtr = &name[0];
+            char *domainNamePtr = &domainName[0];
+            char *namePtr = &name[0];
             win32service_create_right_info(&result, domainNamePtr, dwDomaineSize, namePtr, dwSize,
                                            pListOfExplicitEntries[index].grfAccessPermissions,
                                            pListOfExplicitEntries[index].grfAccessMode);
@@ -955,11 +985,11 @@ static PHP_FUNCTION(win32_create_service) {
     /* Connect to the SCManager. */
     hmgr = OpenSCManager(machine, NULL, SC_MANAGER_ALL_ACCESS);
 
-	/* Quit if no connection. */
-	if (!hmgr) {
-		convert_error_to_exception(GetLastError(), "");
+    /* Quit if no connection. */
+    if (!hmgr) {
+        convert_error_to_exception(GetLastError(), "");
         RETURN_THROWS();
-	}
+    }
 
     /* Build service path and parameters. */
     if (path == NULL) {
@@ -1280,6 +1310,248 @@ static PHP_FUNCTION(win32_start_service) {
 
 /* }}} */
 
+/* {{{ proto void win32_get_service_env_vars(string servicename)
+   Read all environment variables for local service. */
+static PHP_FUNCTION(win32_get_service_env_vars) {
+    char *service = NULL;
+    size_t service_len = 0;
+    HKEY hKey;
+    LONG lReturnValue = 0;
+
+    if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s", &service, &service_len)) {
+        RETURN_THROWS();
+    }
+
+    if (service_len == 0) {
+        zend_argument_value_error(1, "the value cannot be empty");
+        RETURN_THROWS();
+    }
+    array_init(return_value);
+    char *pvData = NULL;
+    int pvDataLen = 0;
+    lReturnValue = get_service_environment_vars(service, service_len, &pvData, &pvDataLen);
+
+    if (lReturnValue != ERROR_SUCCESS) {
+        if (lReturnValue == ERROR_FILE_NOT_FOUND) {
+            goto clearAndReturn;
+        }
+
+        convert_error_to_exception(lReturnValue, "Error on read service environment variables");
+        RETURN_THROWS();
+    }
+
+    if (pvDataLen > 0) {
+
+        int offset = 0;
+        while (offset < pvDataLen) {
+            const char *sub_string = pvData + offset;
+
+            // Trouver la longueur de la sous-chaîne actuelle
+            size_t sub_string_len = strlen(sub_string);
+
+            // Si la sous-chaîne est vide, cela signifie que nous avons atteint le double null
+            if (sub_string_len == 0) {
+                break;
+            }
+
+            // Trouver le signe égal dans la sous-chaîne
+            char *equal_sign = strchr(sub_string, '=');
+
+            if (equal_sign != NULL) {
+                // Extraire les deux parties de la sous-chaîne
+                *equal_sign = '\0';  // Remplacer le '=' par un null pour séparer les deux parties
+                const char *part1 = sub_string;
+                const char *part2 = equal_sign + 1;
+
+                add_assoc_string(return_value, part1, part2);
+
+            } else {
+                add_assoc_string(return_value, sub_string, "");
+            }
+
+            // Avancer à la prochaine sous-chaîne
+            offset += sub_string_len + 1;
+        }
+
+    }
+
+    clearAndReturn:
+    efree(pvData);
+}
+/* }}} */
+
+/* {{{ proto void win32_add_service_env_var(string servicename, string varName, string varValue)
+   Add environment variable for local service. */
+static PHP_FUNCTION(win32_add_service_env_var) {
+    char *service = NULL;
+    size_t service_len = 0;
+    char *var_name = NULL;
+    size_t var_name_len = 0;
+    char *var_value = NULL;
+    size_t var_value_len = 0;
+    HKEY hKey, hSubkey;
+    LONG lReturnValue = 0;
+    DWORD dwDisposition;
+
+    if (FAILURE ==
+        zend_parse_parameters(ZEND_NUM_ARGS(), "sss", &service, &service_len, &var_name, &var_name_len, &var_value,
+                              &var_value_len)) {
+        RETURN_THROWS();
+    }
+
+    if (service_len == 0) {
+        zend_argument_value_error(1, "the value cannot be empty");
+        RETURN_THROWS();
+    }
+
+    if (var_name_len == 0) {
+        zend_argument_value_error(2, "the value cannot be empty");
+        RETURN_THROWS();
+    }
+
+    char *data = NULL;
+    int data_len = 0;
+    lReturnValue = get_service_environment_vars(service, service_len, &data, &data_len);
+
+    if (lReturnValue != ERROR_SUCCESS) {
+        if (lReturnValue == ERROR_SERVICE_DOES_NOT_EXIST) {
+            convert_error_to_exception(ERROR_SERVICE_DOES_NOT_EXIST, service);
+            RETURN_THROWS();
+        }
+        //Registry key does not exists now, but will be add after...
+        if (lReturnValue == ERROR_FILE_NOT_FOUND) {
+            goto continueAdd;
+        }
+        convert_error_to_exception(lReturnValue, "Error on read service environment variables");
+        RETURN_THROWS();
+    }
+
+    continueAdd:
+
+    char *new_data = NULL;
+    int new_data_len = 0;
+    add_or_replace_environment_value(data, data_len, var_name, var_value, &new_data, &new_data_len);
+
+
+    if (data != NULL) {
+        efree(data);
+    }
+
+
+    char *keyName = NULL;
+    int keyNameLen = 0;
+    get_service_registry_key(service, service_len, &keyName, &keyNameLen);
+
+    lReturnValue = RegOpenKeyEx(HKEY_LOCAL_MACHINE, keyName, 0, KEY_ALL_ACCESS, &hKey);
+    if (lReturnValue != ERROR_SUCCESS) {
+        efree(keyName);
+        efree(new_data);
+        convert_error_to_exception(lReturnValue, "Error open key");
+        RETURN_THROWS();
+    }
+
+    lReturnValue = RegSetValueEx(hKey, "Environment", 0, REG_MULTI_SZ, new_data, new_data_len);
+    if (lReturnValue != ERROR_SUCCESS) {
+        efree(keyName);
+        efree(new_data);
+        convert_error_to_exception(lReturnValue, "Error create key");
+        RETURN_THROWS();
+    }
+
+    RegCloseKey(hKey);
+    efree(keyName);
+    efree(new_data);
+    RETURN_NULL();
+}
+/* }}} */
+
+
+/* {{{ proto void win32_remove_service_env_var(string servicename, string varName)
+   Remove environment variable for local service. */
+static PHP_FUNCTION(win32_remove_service_env_var) {
+    char *service = NULL;
+    size_t service_len = 0;
+    char *var_name = NULL;
+    size_t var_name_len = 0;
+    HKEY hKey, hSubkey;
+    LONG lReturnValue = 0;
+    DWORD dwDisposition;
+
+    if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &service, &service_len, &var_name, &var_name_len)) {
+        RETURN_THROWS();
+    }
+
+    if (service_len == 0) {
+        zend_argument_value_error(1, "the value cannot be empty");
+        RETURN_THROWS();
+    }
+
+    if (var_name_len == 0) {
+        zend_argument_value_error(2, "the value cannot be empty");
+        RETURN_THROWS();
+    }
+
+    char *data = NULL;
+    int data_len = 0;
+    lReturnValue = get_service_environment_vars(service, service_len, &data, &data_len);
+
+    if (lReturnValue != ERROR_SUCCESS) {
+        if (lReturnValue == ERROR_SERVICE_DOES_NOT_EXIST) {
+            convert_error_to_exception(ERROR_SERVICE_DOES_NOT_EXIST, service);
+            RETURN_THROWS();
+        }
+
+        convert_error_to_exception(lReturnValue, "Error on read service environment variables");
+        RETURN_THROWS();
+    }
+
+    char *new_data = NULL;
+    int new_data_len = 0;
+    remove_environment_value(data, data_len, var_name, &new_data, &new_data_len);
+
+
+    if (data != NULL) {
+        efree(data);
+    }
+
+
+    char *keyName = NULL;
+    int keyNameLen = 0;
+    get_service_registry_key(service, service_len, &keyName, &keyNameLen);
+
+    lReturnValue = RegOpenKeyEx(HKEY_LOCAL_MACHINE, keyName, 0, KEY_ALL_ACCESS, &hKey);
+    if (lReturnValue != ERROR_SUCCESS) {
+        efree(keyName);
+        efree(new_data);
+        convert_error_to_exception(lReturnValue, "Error open key");
+        RETURN_THROWS();
+    }
+    if (new_data_len > 0) {
+        lReturnValue = RegSetValueEx(hKey, "Environment", 0, REG_MULTI_SZ, new_data, new_data_len);
+        if (lReturnValue != ERROR_SUCCESS) {
+            efree(keyName);
+            efree(new_data);
+            convert_error_to_exception(lReturnValue, "Error create key");
+            RETURN_THROWS();
+        }
+    } else {
+        lReturnValue = RegDeleteValue(hKey, "Environment");
+        if (lReturnValue != ERROR_SUCCESS) {
+            efree(keyName);
+            efree(new_data);
+            convert_error_to_exception(lReturnValue, "Error remove key");
+            RETURN_THROWS();
+        }
+    }
+    RegCloseKey(hKey);
+    efree(keyName);
+    efree(new_data);
+    RETURN_NULL();
+}
+
+/* }}} */
+
+
 static void win32_handle_service_controls(INTERNAL_FUNCTION_PARAMETERS, long access, long status) /* {{{ */
 {
     char *machine = NULL;
@@ -1481,6 +1753,21 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_send_custom_control, 0, 0, 1)
                 ZEND_ARG_INFO(0, machine)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_add_service_env_var, 0, 0, 1)
+                ZEND_ARG_INFO(0, servicename)
+                ZEND_ARG_INFO(0, var_name)
+                ZEND_ARG_INFO(0, var_value)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_remove_service_env_var, 0, 0, 1)
+                ZEND_ARG_INFO(0, servicename)
+                ZEND_ARG_INFO(0, var_name)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_get_service_env_vars, 0, 0, 1)
+                ZEND_ARG_INFO(0, servicename)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_win32_add_right_access_service, 0, 0, 1)
                 ZEND_ARG_INFO(0, servicename)
                 ZEND_ARG_INFO(0, username)
@@ -1526,6 +1813,9 @@ static zend_function_entry functions[] = {
         PHP_FE(win32_remove_right_access_service, arginfo_win32_remove_right_access_service)
         PHP_FE(win32_read_right_access_service, arginfo_win32_read_right_access_service)
         PHP_FE(win32_read_all_rights_access_service, arginfo_win32_read_all_rights_access_service)
+        PHP_FE(win32_add_service_env_var, arginfo_win32_add_service_env_var)
+        PHP_FE(win32_remove_service_env_var, arginfo_win32_remove_service_env_var)
+        PHP_FE(win32_get_service_env_vars, arginfo_win32_get_service_env_vars)
         PHP_FE_END
 };
 
@@ -1853,6 +2143,9 @@ static PHP_MINFO_FUNCTION(win32service) {
     php_info_print_table_row(2, "win32_read_all_rights_access_service", "enabled");
     php_info_print_table_row(2, "win32_add_right_access_service", "enabled");
     php_info_print_table_row(2, "win32_remove_right_access_service", "enabled");
+    php_info_print_table_row(2, "win32_add_service_env_var", "enabled");
+    php_info_print_table_row(2, "win32_remove_service_env_var", "enabled");
+    php_info_print_table_row(2, "win32_get_service_env_vars", "enabled");
     php_info_print_table_end();
 }
 

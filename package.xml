@@ -39,6 +39,9 @@
     * Add function win32_read_all_rights_access_service()
     * Add function win32_add_right_access_service()
     * Add function win32_remove_right_access_service()
+    * Add function win32_add_service_env_var()
+    * Add function win32_remove_service_env_var()
+    * Add function win32_get_service_env_vars()
      The binary is also available here: https://github.com/win32service/win32service/releases/tag/v1.1.0-beta1
  ]]></notes>
     <contents>
@@ -50,10 +53,12 @@
             <file name="php_win32service.h" role="src"/>
             <file name="php_win32service_int.h" role="src"/>
             <file name="win32service.c" role="src"/>
-            <file name="win32service_right.c" role="src"/>
             <file name="win32service_right.h" role="src"/>
-            <file name="win32service_right_info.c" role="src"/>
+            <file name="win32service_right.c" role="src"/>
             <file name="win32service_right_info.h" role="src"/>
+            <file name="win32service_right_info.c" role="src"/>
+            <file name="win32service_registry.h" role="src"/>
+            <file name="win32service_registry.c" role="src"/>
             <file name="examples/sample.php" role="php"/>
             <file name="examples/service.php" role="php"/>
             <file name="examples/service_dummy.php" role="php"/>
@@ -92,6 +97,9 @@
     * Add function win32_read_all_rights_access_service()
     * Add function win32_add_right_access_service()
     * Add function win32_remove_right_access_service()
+    * Add function win32_add_service_env_var()
+    * Add function win32_remove_service_env_var()
+    * Add function win32_get_service_env_vars()
  ]]></notes>
         </release>
         <release>
