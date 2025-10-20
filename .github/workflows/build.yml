@@ -78,7 +78,7 @@ jobs:
           if ('8.3' -eq '${{matrix.php-rel}}') { $artifact_name = $artifact_name + '-vs16' }
           if ('8.4' -eq '${{matrix.php-rel}}') { $artifact_name = $artifact_name + '-vs17' }
 
-          if ('x64' -eq '${{matrix.platform}}') { $artifact_name = $artifact_name + '-x64' }
+          if ('x64' -eq '${{matrix.platform}}') { $artifact_name = $artifact_name + '-x86_64' }
           if ('x86' -eq '${{matrix.platform}}') { $artifact_name = $artifact_name + '-x86' }
 
           $extension_artifact_name = "ARTIFACT_NAME=" + $artifact_name
