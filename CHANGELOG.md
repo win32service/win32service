@@ -1,3 +1,7 @@
+# Version 1.1.0 (2025-10-20)
+
+* Add PHP 8.5 compatibility
+
 # Version 1.1.0 beta 1 (2024-08-24)
 
 * Add object \Win32Service\RightInfo (@macintoshplus) (issue [#81](https://github.com/win32service/win32service/issues/81))
