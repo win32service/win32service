@@ -52,8 +52,6 @@ jobs:
       - name: Generate Build Files
         run: phpize
       - name: Configure Build
-        run: configure --help
-      - name: Configure Build
         run: configure --enable-win32service --with-prefix=${{steps.setup-php.outputs.prefix}}
       - name: Build
         run: nmake
