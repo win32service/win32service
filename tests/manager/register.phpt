@@ -113,9 +113,9 @@ array(5) {
   object(Win32Service\RightInfo)#7 (0) {
   }
 }
-string(%d) "fv-az%d-%d\subuser"
+string(%d) "%s\subuser"
 string(7) "subuser"
-string(%d) "fv-az%d-%d"
+string(%d) "%s"
 array(3) {
   [16]=>
   string(13) "SERVICE_START"
@@ -126,7 +126,7 @@ array(3) {
 }
 bool(true)
 bool(false)
-string(%d) "fv-az%d-%d\subuser 131120 1"
+string(%d) "%s\subuser 131120 1"
 string(19) "NT AUTHORITY\SYSTEM"
 string(6) "SYSTEM"
 string(12) "NT AUTHORITY"
