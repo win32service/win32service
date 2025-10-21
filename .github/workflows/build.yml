@@ -85,9 +85,12 @@ jobs:
           echo $extension_artifact_name >> $env:GITHUB_ENV
 
           $from = $dir + '\php_win32service.dll'
+          $fromDll = $dir+'\'+$artifact_name+'.dll'
+          Copy-Item $from $fromDll
+          
           $to = $from + ".zip"
-          Compress-Archive $from $to
-          $extension_artifact = "ARTIFACT=" + $from
+          Compress-Archive $fromDll $to
+          $extension_artifact = "ARTIFACT=" + $fromDll
           echo $extension_artifact >> $env:GITHUB_ENV
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
