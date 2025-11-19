@@ -9,6 +9,7 @@
 		"php": ">=8.0"
 	},
 	"php-ext": {
-		"extension-name": "win32service"
+		"extension-name": "win32service",
+		"os-families": "windows"
 	}
 }
