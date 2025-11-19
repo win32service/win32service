@@ -6,10 +6,12 @@
 
 The [win32service](https://pecl.php.net/package/win32service) extension is a Windows-specific extension that allows PHP to communicate with the Service Control Manager to start, stop, register and unregister the services, and even allows your PHP scripts to run as a service.
 
-
-> CAUTION : this extension version work only with PHP 8.x.
-
-**The version 0.4.x work with PHP 7.x.x branch. The version 1.x.x work with PHP 8.x.**
+| Branch | PHP Version | Support status |
+|--------|-------------|----------------|
+| v0.3.x | 5.x         | Unmaintained   |
+| v0.4.x | 7.X         | Unmaintained   |
+| v1.0.x | 8.0-8.5     | Unmaintained   |
+| v1.1.x | 8.x         | Maintained     |
 
 # Documentation
 
