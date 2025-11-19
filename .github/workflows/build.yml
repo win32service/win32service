@@ -51,8 +51,6 @@ jobs:
           toolset: ${{steps.setup-php.outputs.toolset}}
       - name: Generate Build Files
         run: phpize
-      - name: configure options
-        run: configure --help
       - name: Configure Build
         run: configure --enable-win32service --with-prefix=${{steps.setup-php.outputs.prefix}}
       - name: Build
