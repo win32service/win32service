@@ -92,6 +92,8 @@ jobs:
           Compress-Archive $fromDll $to
           $extension_artifact = "ARTIFACT=" + $fromDll
           echo $extension_artifact >> $env:GITHUB_ENV
+          $extension_artifact_archive = "ARTIFACT_ARCHIVE=" + $to
+          echo $extension_artifact_archive >> $env:GITHUB_ENV
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -114,4 +116,4 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
             asset_name: ${{env.ARTIFACT_NAME}}.zip
-            file: ${{env.ARTIFACT}}
+            file: ${{env.ARTIFACT_ARCHIVE}}
