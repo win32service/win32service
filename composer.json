@@ -10,6 +10,6 @@
 	},
 	"php-ext": {
 		"extension-name": "win32service",
-		"os-families": "windows"
+		"os-families": ["windows"]
 	}
 }
