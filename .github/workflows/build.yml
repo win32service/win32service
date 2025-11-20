@@ -4,6 +4,7 @@ on:
     branches: [ v1.1.x ]
     tags:
       - v1.**
+      - 1.**
   pull_request:
     branches: [ v1.1.x ]
 
@@ -87,7 +88,7 @@ jobs:
           $from = $dir + '\php_win32service.dll'
           $fromDll = $dir+'\'+$artifact_name+'.dll'
           Copy-Item $from $fromDll
-          
+
           $to = $from + ".zip"
           Compress-Archive $fromDll $to
           $extension_artifact = "ARTIFACT=" + $fromDll
