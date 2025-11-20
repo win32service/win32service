@@ -29,7 +29,7 @@ zend_class_entry *Win32ServiceException_ce_ptr;
 
 #define phpext_win32service_ptr    &win32service_module_entry
 
-#define PHP_WIN32SERVICE_VERSION "1.1.0"
+#define PHP_WIN32SERVICE_VERSION "1.1.0beta8"
 
 #ifndef PHP_WIN32
 # error This extension is for win32 only
