@@ -4,7 +4,6 @@ on:
     branches: [ v1.1.x ]
     tags:
       - v1.**
-      - 1.**
   pull_request:
     branches: [ v1.1.x ]
 
@@ -78,6 +77,7 @@ jobs:
           if ('8.2' -eq '${{matrix.php-rel}}') { $artifact_name = $artifact_name + '-vs16' }
           if ('8.3' -eq '${{matrix.php-rel}}') { $artifact_name = $artifact_name + '-vs16' }
           if ('8.4' -eq '${{matrix.php-rel}}') { $artifact_name = $artifact_name + '-vs17' }
+          if ('8.5' -eq '${{matrix.php-rel}}') { $artifact_name = $artifact_name + '-vs17' }
 
           if ('x64' -eq '${{matrix.platform}}') { $artifact_name = $artifact_name + '-x86_64' }
           if ('x86' -eq '${{matrix.platform}}') { $artifact_name = $artifact_name + '-x86' }
@@ -88,7 +88,7 @@ jobs:
           $from = $dir + '\php_win32service.dll'
           $fromDll = $dir+'\'+$artifact_name+'.dll'
           Copy-Item $from $fromDll
-
+          
           $to = $from + ".zip"
           Compress-Archive $fromDll $to
           $extension_artifact = "ARTIFACT=" + $fromDll
