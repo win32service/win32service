@@ -1386,7 +1386,7 @@ static PHP_FUNCTION(win32_query_service_config) {
     }
 
     array_init(return_value);
-    add_assoc_string(return_value, INFO_SERVICE, cfg->lpServiceName);
+    add_assoc_string(return_value, INFO_SERVICE, service);
     add_assoc_long(return_value, INFO_SVC_TYPE, cfg->dwServiceType);
     add_assoc_long(return_value, INFO_START_TYPE, cfg->dwStartType);
     add_assoc_long(return_value, INFO_ERROR_CONTROL, cfg->dwErrorControl);
