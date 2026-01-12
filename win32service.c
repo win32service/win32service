@@ -1330,6 +1330,364 @@ static PHP_FUNCTION(win32_query_service_status) {
 }
 /* }}} */
 
+/* {{{ proto array win32_query_service_config(string servicename [, string machine])
+   Queries the configuration of a service */
+static PHP_FUNCTION(win32_query_service_config) {
+    char *machine = NULL;
+    char *service = NULL;
+    size_t machine_len = 0;
+    size_t service_len = 0;
+    SC_HANDLE hsvc;
+    SC_HANDLE hmgr;
+    LPQUERY_SERVICE_CONFIGW cfg = NULL;
+    LPSERVICE_DESCRIPTIONW desc = NULL;
+    LPSERVICE_DELAYED_AUTO_START_INFO delayed_start = NULL;
+    LPSERVICE_FAILURE_ACTIONS_FLAG failure_actions_flag = NULL;
+    LPSERVICE_FAILURE_ACTIONSW failure_actions = NULL;
+    DWORD size, needed;
+
+    if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!", &service, &service_len, &machine, &machine_len)) {
+        RETURN_THROWS();
+    }
+
+    if (service_len == 0) {
+        zend_argument_value_error(1, "the value cannot be empty");
+        RETURN_THROWS();
+    }
+
+    hmgr = OpenSCManager(machine, NULL, GENERIC_READ);
+    if (!hmgr) {
+        convert_error_to_exception(GetLastError(), "");
+        RETURN_THROWS();
+    }
+    hsvc = OpenService(hmgr, service, SERVICE_QUERY_CONFIG);
+    if (!hsvc) {
+        CloseServiceHandle(hmgr);
+        convert_error_to_exception(GetLastError(), "");
+        RETURN_THROWS();
+    }
+
+    /* Query Service Config */
+    if (!QueryServiceConfig(hsvc, NULL, 0, &needed)) {
+        if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
+            CloseServiceHandle(hsvc);
+            CloseServiceHandle(hmgr);
+            convert_error_to_exception(GetLastError(), "");
+            RETURN_THROWS();
+        }
+        cfg = (LPQUERY_SERVICE_CONFIG) emalloc(needed);
+        if (!QueryServiceConfig(hsvc, cfg, needed, &needed)) {
+            efree(cfg);
+            CloseServiceHandle(hsvc);
+            CloseServiceHandle(hmgr);
+            convert_error_to_exception(GetLastError(), "");
+            RETURN_THROWS();
+        }
+    }
+
+    array_init(return_value);
+    add_assoc_long(return_value, INFO_SVC_TYPE, cfg->dwServiceType);
+    add_assoc_long(return_value, INFO_START_TYPE, cfg->dwStartType);
+    add_assoc_long(return_value, INFO_ERROR_CONTROL, cfg->dwErrorControl);
+
+    if (cfg->lpBinaryPathName) {
+        add_assoc_string(return_value, INFO_PATH, cfg->lpBinaryPathName);
+    } else {
+        add_assoc_null(return_value, INFO_PATH);
+    }
+
+    if (cfg->lpLoadOrderGroup) {
+        add_assoc_string(return_value, INFO_LOAD_ORDER, cfg->lpLoadOrderGroup);
+    } else {
+        add_assoc_null(return_value, INFO_LOAD_ORDER);
+    }
+
+    add_assoc_long(return_value, INFO_TAG_ID, cfg->dwTagId);
+
+    if (cfg->lpDependencies) {
+        zval deps;
+        array_init(&deps);
+        char *p = cfg->lpDependencies;
+        while (*p) {
+            add_next_index_string(&deps, p);
+            p += strlen(p) + 1;
+        }
+        add_assoc_zval(return_value, INFO_DEPENDENCIES, &deps);
+    } else {
+        add_assoc_null(return_value, INFO_DEPENDENCIES);
+    }
+
+    if (cfg->lpServiceStartName) {
+        add_assoc_string(return_value, INFO_USER, cfg->lpServiceStartName);
+    } else {
+        add_assoc_null(return_value, INFO_USER);
+    }
+
+    if (cfg->lpDisplayName) {
+        add_assoc_string(return_value, INFO_DISPLAY, cfg->lpDisplayName);
+    } else {
+        add_assoc_null(return_value, INFO_DISPLAY);
+    }
+
+    /* Query Service Description */
+    if (!QueryServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, NULL, 0, &needed)) {
+        if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+            desc = (LPSERVICE_DESCRIPTION) emalloc(needed);
+            if (QueryServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, (LPBYTE)desc, needed, &needed)) {
+                if (desc->lpDescription) {
+                    add_assoc_string(return_value, INFO_DESCRIPTION, desc->lpDescription);
+                } else {
+                    add_assoc_null(return_value, INFO_DESCRIPTION);
+                }
+            }
+            efree(desc);
+        }
+    }
+
+    /* Query Delayed Auto Start Info */
+    if (!QueryServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, NULL, 0, &needed)) {
+        if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+            delayed_start = (LPSERVICE_DELAYED_AUTO_START_INFO) emalloc(needed);
+            if (QueryServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, (LPBYTE)delayed_start, needed, &needed)) {
+                add_assoc_bool(return_value, INFO_DELAYED_START, delayed_start->fDelayedAutostart);
+            }
+            efree(delayed_start);
+        }
+    }
+
+    /* Query Failure Actions Flag */
+    if (!QueryServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, NULL, 0, &needed)) {
+        if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+            failure_actions_flag = (LPSERVICE_FAILURE_ACTIONS_FLAG) emalloc(needed);
+            if (QueryServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, (LPBYTE)failure_actions_flag, needed, &needed)) {
+                add_assoc_bool(return_value, INFO_RECOVERY_ENABLED, failure_actions_flag->fFailureActionsOnNonCrashFailures);
+            }
+            efree(failure_actions_flag);
+        }
+    }
+
+    /* Query Failure Actions */
+    if (!QueryServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, NULL, 0, &needed)) {
+        if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+            failure_actions = (LPSERVICE_FAILURE_ACTIONS) emalloc(needed);
+            if (QueryServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, (LPBYTE)failure_actions, needed, &needed)) {
+                add_assoc_long(return_value, INFO_RECOVERY_RESET_PERIOD, failure_actions->dwResetPeriod);
+                if (failure_actions->lpRebootMsg) {
+                    add_assoc_string(return_value, INFO_RECOVERY_REBOOT_MSG, failure_actions->lpRebootMsg);
+                } else {
+                    add_assoc_null(return_value, INFO_RECOVERY_REBOOT_MSG);
+                }
+                if (failure_actions->lpCommand) {
+                    add_assoc_string(return_value, INFO_RECOVERY_COMMAND, failure_actions->lpCommand);
+                } else {
+                    add_assoc_null(return_value, INFO_RECOVERY_COMMAND);
+                }
+
+                if (failure_actions->cActions >= 1) {
+                    add_assoc_long(return_value, INFO_RECOVERY_ACTION_1, failure_actions->lpsaActions[0].Type);
+                    add_assoc_long(return_value, INFO_RECOVERY_DELAY, failure_actions->lpsaActions[0].Delay);
+                }
+                if (failure_actions->cActions >= 2) {
+                    add_assoc_long(return_value, INFO_RECOVERY_ACTION_2, failure_actions->lpsaActions[1].Type);
+                }
+                if (failure_actions->cActions >= 3) {
+                    add_assoc_long(return_value, INFO_RECOVERY_ACTION_3, failure_actions->lpsaActions[2].Type);
+                }
+            }
+            efree(failure_actions);
+        }
+    }
+
+    efree(cfg);
+    CloseServiceHandle(hsvc);
+    CloseServiceHandle(hmgr);
+}
+/* }}} */
+
+/* {{{ proto void win32_update_service_config(string servicename, array details [, string machine])
+   Updates the configuration of a service */
+static PHP_FUNCTION(win32_update_service_config) {
+    zval *details, *tmp;
+    char *machine = NULL;
+    char *service = NULL;
+    size_t machine_len = 0;
+    size_t service_len = 0;
+    SC_HANDLE hsvc, hmgr;
+    DWORD svc_type = SERVICE_NO_CHANGE;
+    DWORD start_type = SERVICE_NO_CHANGE;
+    DWORD error_control = SERVICE_NO_CHANGE;
+    char *path = NULL, *load_order = NULL, *deps = NULL, *user = NULL, *password = NULL, *display = NULL;
+    BOOL update_main_config = FALSE;
+
+    if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "sa|s!", &service, &service_len, &details, &machine, &machine_len)) {
+        RETURN_THROWS();
+    }
+
+    if (service_len == 0) {
+        zend_argument_value_error(1, "the value cannot be empty");
+        RETURN_THROWS();
+    }
+
+    hmgr = OpenSCManager(machine, NULL, SC_MANAGER_ALL_ACCESS);
+    if (!hmgr) {
+        convert_error_to_exception(GetLastError(), "");
+        RETURN_THROWS();
+    }
+    hsvc = OpenService(hmgr, service, SERVICE_CHANGE_CONFIG);
+    if (!hsvc) {
+        CloseServiceHandle(hmgr);
+        convert_error_to_exception(GetLastError(), "");
+        RETURN_THROWS();
+    }
+
+#define GET_STR(name, var) \
+    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), name, sizeof(name)-1)) != NULL) { \
+        if (Z_TYPE_P(tmp) == IS_STRING) { \
+            var = Z_STRVAL_P(tmp); \
+            update_main_config = TRUE; \
+        } else if (Z_TYPE_P(tmp) == IS_NULL) { \
+            var = NULL; \
+            update_main_config = TRUE; \
+        } \
+    }
+
+#define GET_INT_U(name, var) \
+    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), name, sizeof(name)-1)) != NULL) { \
+        convert_to_long_ex(tmp); \
+        var = (DWORD)Z_LVAL_P(tmp); \
+        update_main_config = TRUE; \
+    }
+
+    GET_INT_U(INFO_SVC_TYPE, svc_type);
+    GET_INT_U(INFO_START_TYPE, start_type);
+    GET_INT_U(INFO_ERROR_CONTROL, error_control);
+    GET_STR(INFO_PATH, path);
+    GET_STR(INFO_LOAD_ORDER, load_order);
+    GET_STR(INFO_USER, user);
+    GET_STR(INFO_PASSWORD, password);
+    GET_STR(INFO_DISPLAY, display);
+
+    /* Dependencies */
+    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_DEPENDENCIES, sizeof(INFO_DEPENDENCIES)-1)) != NULL) {
+        if (Z_TYPE_P(tmp) == IS_ARRAY) {
+            HashTable *ht = Z_ARRVAL_P(tmp);
+            zval *val;
+            size_t total_len = 0;
+            ZEND_HASH_FOREACH_VAL(ht, val) {
+                convert_to_string_ex(val);
+                total_len += Z_STRLEN_P(val) + 1;
+            } ZEND_HASH_FOREACH_END();
+            total_len++;
+            deps = (char *) safe_emalloc(total_len, sizeof(char), 0);
+            char *p = deps;
+            ZEND_HASH_FOREACH_VAL(ht, val) {
+                strcpy(p, Z_STRVAL_P(val));
+                p += Z_STRLEN_P(val) + 1;
+            } ZEND_HASH_FOREACH_END();
+            *p = '\0';
+            update_main_config = TRUE;
+        } else if (Z_TYPE_P(tmp) == IS_STRING) {
+             deps = Z_STRVAL_P(tmp);
+             update_main_config = TRUE;
+        } else if (Z_TYPE_P(tmp) == IS_NULL) {
+             deps = NULL;
+             update_main_config = TRUE;
+        }
+    }
+
+    if (update_main_config) {
+        if (!ChangeServiceConfig(hsvc, svc_type, start_type, error_control, path, load_order, NULL, deps, user, password, display)) {
+            DWORD err = GetLastError();
+            if (deps && (tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_DEPENDENCIES, sizeof(INFO_DEPENDENCIES)-1)) != NULL && Z_TYPE_P(tmp) == IS_ARRAY) efree(deps);
+            CloseServiceHandle(hsvc);
+            CloseServiceHandle(hmgr);
+            convert_error_to_exception(err, "");
+            RETURN_THROWS();
+        }
+    }
+
+    if (deps && (tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_DEPENDENCIES, sizeof(INFO_DEPENDENCIES)-1)) != NULL && Z_TYPE_P(tmp) == IS_ARRAY) efree(deps);
+
+    /* ChangeServiceConfig2 settings */
+    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_DESCRIPTION, sizeof(INFO_DESCRIPTION)-1)) != NULL) {
+        SERVICE_DESCRIPTION sd;
+        if (Z_TYPE_P(tmp) == IS_STRING) {
+            sd.lpDescription = Z_STRVAL_P(tmp);
+        } else {
+            sd.lpDescription = NULL;
+        }
+        ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, &sd);
+    }
+
+    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_DELAYED_START, sizeof(INFO_DELAYED_START)-1)) != NULL) {
+        SERVICE_DELAYED_AUTO_START_INFO sdasi;
+        sdasi.fDelayedAutostart = zend_is_true(tmp);
+        ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, &sdasi);
+    }
+
+    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_RECOVERY_ENABLED, sizeof(INFO_RECOVERY_ENABLED)-1)) != NULL) {
+        SERVICE_FAILURE_ACTIONS_FLAG sfaf;
+        sfaf.fFailureActionsOnNonCrashFailures = zend_is_true(tmp);
+        ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, &sfaf);
+    }
+
+    /* Recovery Actions */
+    BOOL update_failure_actions = FALSE;
+    SERVICE_FAILURE_ACTIONS sfa;
+    memset(&sfa, 0, sizeof(sfa));
+    SC_ACTION actions[3];
+    memset(actions, 0, sizeof(actions));
+    sfa.lpsaActions = actions;
+
+    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_RECOVERY_RESET_PERIOD, sizeof(INFO_RECOVERY_RESET_PERIOD)-1)) != NULL) {
+        sfa.dwResetPeriod = (DWORD)zval_get_long(tmp);
+        update_failure_actions = TRUE;
+    }
+    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_RECOVERY_REBOOT_MSG, sizeof(INFO_RECOVERY_REBOOT_MSG)-1)) != NULL) {
+        if (Z_TYPE_P(tmp) == IS_STRING) sfa.lpRebootMsg = Z_STRVAL_P(tmp);
+        update_failure_actions = TRUE;
+    }
+    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_RECOVERY_COMMAND, sizeof(INFO_RECOVERY_COMMAND)-1)) != NULL) {
+        if (Z_TYPE_P(tmp) == IS_STRING) sfa.lpCommand = Z_STRVAL_P(tmp);
+        update_failure_actions = TRUE;
+    }
+
+    DWORD recovery_delay = 60000;
+    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_RECOVERY_DELAY, sizeof(INFO_RECOVERY_DELAY)-1)) != NULL) {
+        recovery_delay = (DWORD)zval_get_long(tmp);
+        update_failure_actions = TRUE;
+    }
+
+    int action_count = 0;
+    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_RECOVERY_ACTION_1, sizeof(INFO_RECOVERY_ACTION_1)-1)) != NULL) {
+        actions[0].Type = (SC_ACTION_TYPE)zval_get_long(tmp);
+        actions[0].Delay = recovery_delay;
+        action_count = 1;
+        update_failure_actions = TRUE;
+    }
+    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_RECOVERY_ACTION_2, sizeof(INFO_RECOVERY_ACTION_2)-1)) != NULL) {
+        actions[1].Type = (SC_ACTION_TYPE)zval_get_long(tmp);
+        actions[1].Delay = recovery_delay;
+        action_count = 2;
+        update_failure_actions = TRUE;
+    }
+    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_RECOVERY_ACTION_3, sizeof(INFO_RECOVERY_ACTION_3)-1)) != NULL) {
+        actions[2].Type = (SC_ACTION_TYPE)zval_get_long(tmp);
+        actions[2].Delay = recovery_delay;
+        action_count = 3;
+        update_failure_actions = TRUE;
+    }
+    sfa.cActions = action_count;
+
+    if (update_failure_actions) {
+        ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, &sfa);
+    }
+
+    CloseServiceHandle(hsvc);
+    CloseServiceHandle(hmgr);
+}
+/* }}} */
+
 /* {{{ proto void win32_start_service(string servicename [, string machine])
    Starts a service */
 static PHP_FUNCTION(win32_start_service) {
@@ -1755,8 +2113,10 @@ static zend_function_entry functions[] = {
         PHP_FE(win32_get_service_priority, arginfo_win32_get_service_priority)
         PHP_FE(win32_get_last_control_message, arginfo_win32_get_last_control_message)
         PHP_FE(win32_set_service_pause_resume_state, arginfo_win32_set_service_pause_resume_state)
-        PHP_FE(win32_query_service_status, arginfo_win32_query_service_status)
-        PHP_FE(win32_start_service, arginfo_win32_start_service)
+       	PHP_FE(win32_query_service_status, arginfo_win32_query_service_status)
+       	PHP_FE(win32_query_service_config, arginfo_win32_query_service_config)
+       	PHP_FE(win32_update_service_config, arginfo_win32_update_service_config)
+       	PHP_FE(win32_start_service, arginfo_win32_start_service)
         PHP_FE(win32_stop_service, arginfo_win32_stop_service)
         PHP_FE(win32_pause_service, arginfo_win32_pause_service)
         PHP_FE(win32_continue_service, arginfo_win32_continue_service)

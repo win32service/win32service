@@ -74,6 +74,14 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_win32_get_last_control_message, 0, 0, long, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_win32_query_service_config arginfo_win32_query_service_status
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_win32_update_service_config, 0, 2, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, servicename, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, details, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, machine, IS_STRING, 0, "\'\'")
+ZEND_END_ARG_INFO()
+
 #define arginfo_win32_query_service_status arginfo_win32_read_all_rights_access_service
 
 #define arginfo_win32_start_service arginfo_win32_delete_service

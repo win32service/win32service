@@ -33,6 +33,10 @@ function win32_get_last_control_message(): long {}
 
 function win32_query_service_status(string $servicename, string $machine = ''): array {}
 
+function win32_query_service_config(string $servicename, string $machine = ''): array {}
+
+function win32_update_service_config(string $servicename, array $details, string $machine = ''): void {}
+
 function win32_start_service(string $servicename, string $machine = ''): void {}
 
 function win32_get_service_env_vars(string $servicename): array {}
