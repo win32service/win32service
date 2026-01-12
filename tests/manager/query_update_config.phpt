@@ -47,6 +47,7 @@ $config = win32_query_service_config($serviceName);
 var_dump($config['display']);
 var_dump($config['description']);
 var_dump($config['start_type']);
+unset($config);
 
 echo "Updating more config fields\n";
 $updateMore = [
@@ -58,7 +59,7 @@ $updateMore = [
     'recovery_command' => 'echo "service failed"',
 ];
 win32_update_service_config($serviceName, $updateMore);
-
+sleep(1);
 echo "Querying more updated config\n";
 $config = win32_query_service_config($serviceName);
 var_dump($config['path']);
@@ -67,6 +68,7 @@ var_dump($config['recovery_action_1']);
 var_dump($config['recovery_action_2']);
 var_dump($config['recovery_command']);
 
+sleep(1);
 echo "Cleaning up\n";
 win32_delete_service($serviceName);
 
@@ -76,14 +78,13 @@ Creating service
 Querying initial config
 string(22) "Win32ServiceTestConfig"
 string(32) "Win32Service Test Config Service"
-string(39) "Test description for win32service config"
+string(40) "Test description for win32service config"
 int(3)
 Updating config
 Querying updated config
 string(33) "Updated Win32Service Display Name"
 string(19) "Updated description"
 int(2)
-Cleaning up
 Updating more config fields
 Querying more updated config
 string(%d) ""%s" %s run-updated"

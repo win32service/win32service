@@ -54,6 +54,6 @@ Win32ServiceException: (1060) Error service does not exist ()
 win32_update_service_config with empty name
 ValueError: (0) win32_update_service_config(): Argument #1 ($servicename) the value cannot be empty
 win32_update_service_config with non-existent service
-Win32ServiceException: (1060) Error service does not exist (on openning service)
+Win32ServiceException: (1060) Error service does not exist ()
 win32_update_service_config with bad details type
 TypeError: (0) win32_update_service_config(): Argument #2 ($details) must be of type array, stdClass given
