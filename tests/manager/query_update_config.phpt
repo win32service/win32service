@@ -67,6 +67,7 @@ var_dump($config['recovery_delay']);
 var_dump($config['recovery_action_1']);
 var_dump($config['recovery_action_2']);
 var_dump($config['recovery_command']);
+var_dump($config);
 
 sleep(1);
 echo "Cleaning up\n";
@@ -91,5 +92,5 @@ string(%d) ""%s" %s run-updated"
 int(120000)
 int(1)
 int(3)
-string(19) "echo "service failed""
+string(21) "echo "service failed""
 Cleaning up
