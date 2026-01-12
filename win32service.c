@@ -1772,7 +1772,7 @@ static DWORD win32_configure_service_ex(SC_HANDLE hsvc, zval *details, BOOL is_u
     BOOL recovery_enabled_changed = FALSE;
     SERVICE_FAILURE_ACTIONS_FLAG sfaf;
     WIN32_GET_BOOL_DETAIL(details, INFO_RECOVERY_ENABLED, sfaf.fFailureActionsOnNonCrashFailures, FALSE, recovery_enabled_changed);
-    if (recovery_enabled_changed || !is_update) {
+    if (recovery_enabled_changed) {
         if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, &sfaf)) {
             *error_msg = "error on change the failure action flag";
             return GetLastError();
@@ -1794,40 +1794,27 @@ static DWORD win32_configure_service_ex(SC_HANDLE hsvc, zval *details, BOOL is_u
     long recovery_delay;
     WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_DELAY, recovery_delay, 60000, update_failure_actions);
 
+    long recovery_action1;
+    long recovery_action2;
+    long recovery_action3;
+
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_1, recovery_action1, SC_ACTION_NONE, update_failure_actions);
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_2, recovery_action2, SC_ACTION_NONE, update_failure_actions);
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_3, recovery_action3, SC_ACTION_NONE, update_failure_actions);
+
     int action_count = 0;
-    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_RECOVERY_ACTION_1, sizeof(INFO_RECOVERY_ACTION_1)-1)) != NULL) {
-        actions[0].Type = (SC_ACTION_TYPE)zval_get_long(tmp);
-        actions[0].Delay = recovery_delay;
-        action_count = 1;
-        update_failure_actions = TRUE;
-    } else if (!is_update) {
-        actions[0].Type = SC_ACTION_NONE;
-        actions[0].Delay = recovery_delay;
-    }
+    actions[0].Type = recovery_action1;
+    actions[0].Delay = recovery_delay;
 
-    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_RECOVERY_ACTION_2, sizeof(INFO_RECOVERY_ACTION_2)-1)) != NULL) {
-        actions[1].Type = (SC_ACTION_TYPE)zval_get_long(tmp);
-        actions[1].Delay = recovery_delay;
-        action_count = 2;
-        update_failure_actions = TRUE;
-    } else if (!is_update) {
-        actions[1].Type = SC_ACTION_NONE;
-        actions[1].Delay = recovery_delay;
-    }
+    actions[1].Type = recovery_action2;
+    actions[1].Delay = recovery_delay;
 
-    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_RECOVERY_ACTION_3, sizeof(INFO_RECOVERY_ACTION_3)-1)) != NULL) {
-        actions[2].Type = (SC_ACTION_TYPE)zval_get_long(tmp);
-        actions[2].Delay = recovery_delay;
-        action_count = 3;
-        update_failure_actions = TRUE;
-    } else if (!is_update) {
-        actions[2].Type = SC_ACTION_NONE;
-        actions[2].Delay = recovery_delay;
-    }
+    actions[2].Type = recovery_action3;
+    actions[2].Delay = recovery_delay;
 
-    sfa.cActions = (is_update ? action_count : 3);
+    sfa.cActions = 3;
 
-    if (update_failure_actions || !is_update) {
+    if (update_failure_actions) {
         if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, &sfa)) {
             *error_msg = "error on change the failure action";
             return GetLastError();
