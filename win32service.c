@@ -760,105 +760,34 @@ static PHP_FUNCTION(win32_create_service) {
     HKEY hKey;
     char *service_key;
     long registry_result;
+    BOOL dummy_changed = FALSE;
 
     if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "a|s!", &details, &machine, &machine_len)) {
         RETURN_THROWS();
     }
 
-#define STR_DETAIL(name, var, def) \
-    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), name, sizeof(name)-1)) != NULL) { \
-        if (IS_NULL != Z_TYPE_P(tmp)) { \
-            convert_to_string_ex(tmp); \
-        } else { \
-            convert_to_null_ex(tmp); \
-        } \
-        if (strlen(Z_STRVAL_P(tmp)) != Z_STRLEN_P(tmp)) { \
-            php_error_docref(NULL, E_WARNING, "malformed " name); \
-            RETURN_FALSE; \
-        } \
-        var = Z_STRVAL_P(tmp); \
-    } else { \
-        var = def; \
-    }
-
-#define INT_DETAIL(name, var, def) \
-    if ((tmp = zend_hash_find(Z_ARRVAL_P(details), zend_string_init(name, strlen(name), 0))) != NULL) { \
-        convert_to_long_ex(tmp); \
-        var = Z_LVAL_P(tmp); \
-    } else { \
-        var = def; \
-    }
-
-#define BOOL_DETAIL(name, var, def) \
-    if ((tmp = zend_hash_find(Z_ARRVAL_P(details), zend_string_init(name, strlen(name), 0))) != NULL) { \
-        convert_to_boolean_ex(tmp); \
-        var = Z_TYPE_P(tmp) == IS_TRUE ? 1 : 0; \
-    } else { \
-        var = def; \
-    }
-
-#define ARRAY_TO_STR_DETAIL(name, var, def) \
-    if ((tmp = zend_hash_find(Z_ARRVAL_P(details), zend_string_init(name, strlen(name), 0))) != NULL) { \
-        if (Z_TYPE_P(tmp) == IS_STRING) { \
-            STR_DETAIL(name, var, def); \
-        } else if (Z_TYPE_P(tmp) == IS_ARRAY) { \
-            HashTable * myht = Z_ARRVAL_P(tmp); \
-            uint32_t  count = zend_array_count(myht); \
-            if (count == 0) { \
-                var = NULL; \
-            } else { \
-                zend_ulong num; \
-                zend_string *key; \
-                zval *val; \
-                uint32_t totalLenth = 0; \
-                char ** var2 = emalloc(sizeof(char*) * count); \
-                ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) { \
-                    convert_to_string_ex(val); \
-                    totalLenth += strlen(Z_STRVAL_P(val)) + 1; \
-                    var2[num] = Z_STRVAL_P(val); \
-                } ZEND_HASH_FOREACH_END(); \
-                totalLenth++; \
-                var = emalloc(sizeof(char)*totalLenth); \
-                uint32_t j = 0; \
-                for (uint32_t l = 0; l < count; l++) { \
-                    for (uint32_t k = 0; k <= strlen(var2[l]); k++) { \
-                        var[j] = var2[l][k]; \
-                        j++; \
-                    } \
-                    var[j] = '\0'; \
-                } \
-                var[totalLenth - 1] = '\0'; \
-            } \
-        } else { \
-            var = def; \
-        } \
-    } else { \
-        var = def; \
-    }
-
-
-    STR_DETAIL(INFO_SERVICE, service, NULL);
-    STR_DETAIL(INFO_DISPLAY, display, NULL);
-    STR_DETAIL(INFO_USER, user, NULL);
-    STR_DETAIL(INFO_PASSWORD, password, "");
-    STR_DETAIL(INFO_PATH, path, NULL);
-    STR_DETAIL(INFO_PARAMS, params, "");
-    STR_DETAIL(INFO_LOAD_ORDER, load_order, NULL);
-    ARRAY_TO_STR_DETAIL(INFO_DEPENDENCIES, deps, NULL);
-    STR_DETAIL(INFO_DESCRIPTION, desc, NULL);
-    INT_DETAIL(INFO_SVC_TYPE, svc_type, SERVICE_WIN32_OWN_PROCESS);
-    INT_DETAIL(INFO_START_TYPE, start_type, SERVICE_AUTO_START);
-    INT_DETAIL(INFO_ERROR_CONTROL, error_control, SERVICE_ERROR_IGNORE);
-    BOOL_DETAIL(INFO_DELAYED_START, delayed_start, 0); /* Allow Vista+ delayed service start. */
-    INT_DETAIL(INFO_BASE_PRIORITY, base_priority, NORMAL_PRIORITY_CLASS);
-    INT_DETAIL(INFO_RECOVERY_DELAY, recovery_delay, 60000);
-    INT_DETAIL(INFO_RECOVERY_ACTION_1, recovery_action1, SC_ACTION_NONE);
-    INT_DETAIL(INFO_RECOVERY_ACTION_2, recovery_action2, SC_ACTION_NONE);
-    INT_DETAIL(INFO_RECOVERY_ACTION_3, recovery_action3, SC_ACTION_NONE);
-    INT_DETAIL(INFO_RECOVERY_RESET_PERIOD, recovery_reset_period, 86400);
-    BOOL_DETAIL(INFO_RECOVERY_ENABLED, recovery_enabled, 0);
-    STR_DETAIL(INFO_RECOVERY_REBOOT_MSG, recovery_reboot_msg, NULL);
-    STR_DETAIL(INFO_RECOVERY_COMMAND, recovery_command, NULL);
+    WIN32_GET_STR_DETAIL(details, INFO_SERVICE, service, NULL, dummy_changed);
+    WIN32_GET_STR_DETAIL(details, INFO_DISPLAY, display, NULL, dummy_changed);
+    WIN32_GET_STR_DETAIL(details, INFO_USER, user, NULL, dummy_changed);
+    WIN32_GET_STR_DETAIL(details, INFO_PASSWORD, password, "", dummy_changed);
+    WIN32_GET_STR_DETAIL(details, INFO_PATH, path, NULL, dummy_changed);
+    WIN32_GET_STR_DETAIL(details, INFO_PARAMS, params, "", dummy_changed);
+    WIN32_GET_STR_DETAIL(details, INFO_LOAD_ORDER, load_order, NULL, dummy_changed);
+    WIN32_GET_DEPS_DETAIL(details, deps, NULL, dummy_changed);
+    WIN32_GET_STR_DETAIL(details, INFO_DESCRIPTION, desc, NULL, dummy_changed);
+    WIN32_GET_LONG_DETAIL(details, INFO_SVC_TYPE, svc_type, SERVICE_WIN32_OWN_PROCESS, dummy_changed);
+    WIN32_GET_LONG_DETAIL(details, INFO_START_TYPE, start_type, SERVICE_AUTO_START, dummy_changed);
+    WIN32_GET_LONG_DETAIL(details, INFO_ERROR_CONTROL, error_control, SERVICE_ERROR_IGNORE, dummy_changed);
+    WIN32_GET_BOOL_DETAIL(details, INFO_DELAYED_START, delayed_start, 0, dummy_changed); /* Allow Vista+ delayed service start. */
+    WIN32_GET_LONG_DETAIL(details, INFO_BASE_PRIORITY, base_priority, NORMAL_PRIORITY_CLASS, dummy_changed);
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_DELAY, recovery_delay, 60000, dummy_changed);
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_1, recovery_action1, SC_ACTION_NONE, dummy_changed);
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_2, recovery_action2, SC_ACTION_NONE, dummy_changed);
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_3, recovery_action3, SC_ACTION_NONE, dummy_changed);
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_RESET_PERIOD, recovery_reset_period, 86400, dummy_changed);
+    WIN32_GET_BOOL_DETAIL(details, INFO_RECOVERY_ENABLED, recovery_enabled, 0, dummy_changed);
+    WIN32_GET_STR_DETAIL(details, INFO_RECOVERY_REBOOT_MSG, recovery_reboot_msg, NULL, dummy_changed);
+    WIN32_GET_STR_DETAIL(details, INFO_RECOVERY_COMMAND, recovery_command, NULL, dummy_changed);
 
 
     if (service == NULL) {
@@ -1541,68 +1470,24 @@ static PHP_FUNCTION(win32_update_service_config) {
         RETURN_THROWS();
     }
 
-#define GET_STR(name, var) \
-    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), name, sizeof(name)-1)) != NULL) { \
-        if (Z_TYPE_P(tmp) == IS_STRING) { \
-            var = Z_STRVAL_P(tmp); \
-            update_main_config = TRUE; \
-        } else if (Z_TYPE_P(tmp) == IS_NULL) { \
-            var = NULL; \
-            update_main_config = TRUE; \
-        } \
-    }
-
-#define GET_INT_U(name, var) \
-    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), name, sizeof(name)-1)) != NULL) { \
-        convert_to_long_ex(tmp); \
-        var = (DWORD)Z_LVAL_P(tmp); \
-        update_main_config = TRUE; \
-    }
-
-    GET_INT_U(INFO_SVC_TYPE, svc_type);
-    GET_INT_U(INFO_START_TYPE, start_type);
-    GET_INT_U(INFO_ERROR_CONTROL, error_control);
-    GET_STR(INFO_PATH, path);
-    GET_STR(INFO_LOAD_ORDER, load_order);
-    GET_STR(INFO_USER, user);
-    GET_STR(INFO_PASSWORD, password);
-    GET_STR(INFO_DISPLAY, display);
+    WIN32_GET_LONG_DETAIL(details, INFO_SVC_TYPE, svc_type, SERVICE_NO_CHANGE, update_main_config);
+    WIN32_GET_LONG_DETAIL(details, INFO_START_TYPE, start_type, SERVICE_NO_CHANGE, update_main_config);
+    WIN32_GET_LONG_DETAIL(details, INFO_ERROR_CONTROL, error_control, SERVICE_NO_CHANGE, update_main_config);
+    WIN32_GET_STR_DETAIL(details, INFO_PATH, path, NULL, update_main_config);
+    WIN32_GET_STR_DETAIL(details, INFO_LOAD_ORDER, load_order, NULL, update_main_config);
+    WIN32_GET_STR_DETAIL(details, INFO_USER, user, NULL, update_main_config);
+    WIN32_GET_STR_DETAIL(details, INFO_PASSWORD, password, NULL, update_main_config);
+    WIN32_GET_STR_DETAIL(details, INFO_DISPLAY, display, NULL, update_main_config);
 
     /* Dependencies */
-    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_DEPENDENCIES, sizeof(INFO_DEPENDENCIES)-1)) != NULL) {
-        if (Z_TYPE_P(tmp) == IS_ARRAY) {
-            HashTable *ht = Z_ARRVAL_P(tmp);
-            zval *val;
-            size_t total_len = 0;
-            ZEND_HASH_FOREACH_VAL(ht, val) {
-                convert_to_string_ex(val);
-                total_len += Z_STRLEN_P(val) + 1;
-            } ZEND_HASH_FOREACH_END();
-            total_len++;
-            deps = (char *) safe_emalloc(total_len, sizeof(char), 0);
-            char *p = deps;
-            ZEND_HASH_FOREACH_VAL(ht, val) {
-                strcpy(p, Z_STRVAL_P(val));
-                p += Z_STRLEN_P(val) + 1;
-            } ZEND_HASH_FOREACH_END();
-            *p = '\0';
-            update_main_config = TRUE;
-        } else if (Z_TYPE_P(tmp) == IS_STRING) {
-             deps = Z_STRVAL_P(tmp);
-             update_main_config = TRUE;
-        } else if (Z_TYPE_P(tmp) == IS_NULL) {
-             deps = NULL;
-             update_main_config = TRUE;
-        }
-    }
+    WIN32_GET_DEPS_DETAIL(details, deps, NULL, update_main_config);
 
     if (update_main_config) {
         if (!ChangeServiceConfig(hsvc, svc_type, start_type, error_control, path, load_order, NULL, deps, user, password, display)) {
-            DWORD err = GetLastError();
             if (deps && (tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_DEPENDENCIES, sizeof(INFO_DEPENDENCIES)-1)) != NULL && Z_TYPE_P(tmp) == IS_ARRAY) efree(deps);
             CloseServiceHandle(hsvc);
             CloseServiceHandle(hmgr);
-            convert_error_to_exception(err, "");
+            convert_error_to_exception(GetLastError(), "");
             RETURN_THROWS();
         }
     }
@@ -1610,25 +1495,24 @@ static PHP_FUNCTION(win32_update_service_config) {
     if (deps && (tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_DEPENDENCIES, sizeof(INFO_DEPENDENCIES)-1)) != NULL && Z_TYPE_P(tmp) == IS_ARRAY) efree(deps);
 
     /* ChangeServiceConfig2 settings */
-    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_DESCRIPTION, sizeof(INFO_DESCRIPTION)-1)) != NULL) {
-        SERVICE_DESCRIPTION sd;
-        if (Z_TYPE_P(tmp) == IS_STRING) {
-            sd.lpDescription = Z_STRVAL_P(tmp);
-        } else {
-            sd.lpDescription = NULL;
-        }
+    BOOL description_changed = FALSE;
+    SERVICE_DESCRIPTION sd;
+    WIN32_GET_STR_DETAIL(details, INFO_DESCRIPTION, sd.lpDescription, NULL, description_changed);
+    if (description_changed) {
         ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, &sd);
     }
 
-    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_DELAYED_START, sizeof(INFO_DELAYED_START)-1)) != NULL) {
-        SERVICE_DELAYED_AUTO_START_INFO sdasi;
-        sdasi.fDelayedAutostart = zend_is_true(tmp);
+    BOOL delayed_start_changed = FALSE;
+    SERVICE_DELAYED_AUTO_START_INFO sdasi;
+    WIN32_GET_BOOL_DETAIL(details, INFO_DELAYED_START, sdasi.fDelayedAutostart, FALSE, delayed_start_changed);
+    if (delayed_start_changed) {
         ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, &sdasi);
     }
 
-    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_RECOVERY_ENABLED, sizeof(INFO_RECOVERY_ENABLED)-1)) != NULL) {
-        SERVICE_FAILURE_ACTIONS_FLAG sfaf;
-        sfaf.fFailureActionsOnNonCrashFailures = zend_is_true(tmp);
+    BOOL recovery_enabled_changed = FALSE;
+    SERVICE_FAILURE_ACTIONS_FLAG sfaf;
+    WIN32_GET_BOOL_DETAIL(details, INFO_RECOVERY_ENABLED, sfaf.fFailureActionsOnNonCrashFailures, FALSE, recovery_enabled_changed);
+    if (recovery_enabled_changed) {
         ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, &sfaf);
     }
 
@@ -1640,25 +1524,13 @@ static PHP_FUNCTION(win32_update_service_config) {
     memset(actions, 0, sizeof(actions));
     sfa.lpsaActions = actions;
 
-    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_RECOVERY_RESET_PERIOD, sizeof(INFO_RECOVERY_RESET_PERIOD)-1)) != NULL) {
-        sfa.dwResetPeriod = (DWORD)zval_get_long(tmp);
-        update_failure_actions = TRUE;
-    }
-    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_RECOVERY_REBOOT_MSG, sizeof(INFO_RECOVERY_REBOOT_MSG)-1)) != NULL) {
-        if (Z_TYPE_P(tmp) == IS_STRING) sfa.lpRebootMsg = Z_STRVAL_P(tmp);
-        update_failure_actions = TRUE;
-    }
-    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_RECOVERY_COMMAND, sizeof(INFO_RECOVERY_COMMAND)-1)) != NULL) {
-        if (Z_TYPE_P(tmp) == IS_STRING) sfa.lpCommand = Z_STRVAL_P(tmp);
-        update_failure_actions = TRUE;
-    }
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_RESET_PERIOD, sfa.dwResetPeriod, 0, update_failure_actions);
+    WIN32_GET_STR_DETAIL(details, INFO_RECOVERY_REBOOT_MSG, sfa.lpRebootMsg, NULL, update_failure_actions);
+    WIN32_GET_STR_DETAIL(details, INFO_RECOVERY_COMMAND, sfa.lpCommand, NULL, update_failure_actions);
 
-    DWORD recovery_delay = 60000;
-    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_RECOVERY_DELAY, sizeof(INFO_RECOVERY_DELAY)-1)) != NULL) {
-        recovery_delay = (DWORD)zval_get_long(tmp);
-        update_failure_actions = TRUE;
-    }
+    long recovery_delay;
 
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_DELAY, recovery_delay, 60000, update_failure_actions);
     int action_count = 0;
     if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_RECOVERY_ACTION_1, sizeof(INFO_RECOVERY_ACTION_1)-1)) != NULL) {
         actions[0].Type = (SC_ACTION_TYPE)zval_get_long(tmp);
