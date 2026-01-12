@@ -747,15 +747,8 @@ static PHP_FUNCTION(win32_create_service) {
 
     char *load_order;
     char *deps = NULL;
-    char *desc;
-    BOOL delayed_start;
-    BOOL recovery_enabled;
     SC_HANDLE hsvc, hmgr;
     char *path_and_params;
-    SERVICE_DESCRIPTION srvc_desc;
-    SERVICE_DELAYED_AUTO_START_INFO srvc_delayed_start;
-    SERVICE_FAILURE_ACTIONS srvc_failure_infos;
-    SERVICE_FAILURE_ACTIONS_FLAG srvc_failure_action;
     DWORD base_priority;
     HKEY hKey;
     char *service_key;
@@ -774,20 +767,15 @@ static PHP_FUNCTION(win32_create_service) {
     WIN32_GET_STR_DETAIL(details, INFO_PARAMS, params, "", dummy_changed);
     WIN32_GET_STR_DETAIL(details, INFO_LOAD_ORDER, load_order, NULL, dummy_changed);
     WIN32_GET_DEPS_DETAIL(details, deps, NULL, dummy_changed);
-    WIN32_GET_STR_DETAIL(details, INFO_DESCRIPTION, desc, NULL, dummy_changed);
     WIN32_GET_LONG_DETAIL(details, INFO_SVC_TYPE, svc_type, SERVICE_WIN32_OWN_PROCESS, dummy_changed);
     WIN32_GET_LONG_DETAIL(details, INFO_START_TYPE, start_type, SERVICE_AUTO_START, dummy_changed);
     WIN32_GET_LONG_DETAIL(details, INFO_ERROR_CONTROL, error_control, SERVICE_ERROR_IGNORE, dummy_changed);
-    WIN32_GET_BOOL_DETAIL(details, INFO_DELAYED_START, delayed_start, 0, dummy_changed); /* Allow Vista+ delayed service start. */
     WIN32_GET_LONG_DETAIL(details, INFO_BASE_PRIORITY, base_priority, NORMAL_PRIORITY_CLASS, dummy_changed);
     WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_DELAY, recovery_delay, 60000, dummy_changed);
     WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_1, recovery_action1, SC_ACTION_NONE, dummy_changed);
     WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_2, recovery_action2, SC_ACTION_NONE, dummy_changed);
     WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_3, recovery_action3, SC_ACTION_NONE, dummy_changed);
     WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_RESET_PERIOD, recovery_reset_period, 86400, dummy_changed);
-    WIN32_GET_BOOL_DETAIL(details, INFO_RECOVERY_ENABLED, recovery_enabled, 0, dummy_changed);
-    WIN32_GET_STR_DETAIL(details, INFO_RECOVERY_REBOOT_MSG, recovery_reboot_msg, NULL, dummy_changed);
-    WIN32_GET_STR_DETAIL(details, INFO_RECOVERY_COMMAND, recovery_command, NULL, dummy_changed);
 
 
     if (service == NULL) {
@@ -897,31 +885,6 @@ static PHP_FUNCTION(win32_create_service) {
     }
 
 
-    srvc_desc.lpDescription = desc;
-    srvc_delayed_start.fDelayedAutostart = delayed_start;
-    srvc_failure_infos.lpRebootMsg = NULL;
-    srvc_failure_infos.lpCommand = NULL;
-
-    srvc_failure_infos.dwResetPeriod = recovery_reset_period;
-    if (recovery_reboot_msg != NULL) {
-        srvc_failure_infos.lpRebootMsg = recovery_reboot_msg;
-    }
-    if (recovery_command != NULL) {
-        srvc_failure_infos.lpCommand = recovery_command;
-    }
-
-    srvc_failure_infos.cActions = 3;
-    SC_ACTION recovery_actions[3];
-    recovery_actions[0].Delay = recovery_delay;
-    recovery_actions[0].Type = recovery_action1;
-    recovery_actions[1].Delay = recovery_delay;
-    recovery_actions[1].Type = recovery_action2;
-    recovery_actions[2].Delay = recovery_delay;
-    recovery_actions[2].Type = recovery_action3;
-
-    srvc_failure_infos.lpsaActions = recovery_actions;
-    srvc_failure_action.fFailureActionsOnNonCrashFailures = recovery_enabled;
-
     /* Connect to the SCManager. */
     hmgr = OpenSCManager(machine, NULL, SC_MANAGER_ALL_ACCESS);
 
@@ -984,32 +947,13 @@ static PHP_FUNCTION(win32_create_service) {
         RETURN_THROWS();
     }
 
-    if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, &srvc_desc)) {
-        CloseServiceHandle(hsvc);
-        CloseServiceHandle(hmgr);
-        convert_error_to_exception(GetLastError(), "service partially configured, error when defining the description");
-        RETURN_THROWS();
-    }
-    if ((start_type & SERVICE_AUTO_START &&
-         !ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, &srvc_delayed_start))) {
-        CloseServiceHandle(hsvc);
-        CloseServiceHandle(hmgr);
-        convert_error_to_exception(GetLastError(), "service partially configured, error on change the start type");
-        RETURN_THROWS();
-    }
+    char *error_msg = "";
+    DWORD error_code = win32_configure_service_ex(hsvc, details, FALSE, start_type, &error_msg);
 
-    if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, &srvc_failure_infos)) {
+    if (error_code != ERROR_SUCCESS) {
         CloseServiceHandle(hsvc);
         CloseServiceHandle(hmgr);
-        convert_error_to_exception(GetLastError(), "service partially configured, error on change the failure action");
-        RETURN_THROWS();
-    }
-
-    if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, &srvc_failure_action)) {
-        CloseServiceHandle(hsvc);
-        CloseServiceHandle(hmgr);
-        convert_error_to_exception(GetLastError(),
-                                   "service partially configured, error on change the failure action flag");
+        convert_error_to_exception(error_code, error_msg);
         RETURN_THROWS();
     }
 
@@ -1494,66 +1438,14 @@ static PHP_FUNCTION(win32_update_service_config) {
 
     if (deps && (tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_DEPENDENCIES, sizeof(INFO_DEPENDENCIES)-1)) != NULL && Z_TYPE_P(tmp) == IS_ARRAY) efree(deps);
 
-    /* ChangeServiceConfig2 settings */
-    BOOL description_changed = FALSE;
-    SERVICE_DESCRIPTION sd;
-    WIN32_GET_STR_DETAIL(details, INFO_DESCRIPTION, sd.lpDescription, NULL, description_changed);
-    if (description_changed) {
-        ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, &sd);
-    }
+    char *error_msg = "";
+    DWORD error_code = win32_configure_service_ex(hsvc, details, TRUE, start_type, &error_msg);
 
-    BOOL delayed_start_changed = FALSE;
-    SERVICE_DELAYED_AUTO_START_INFO sdasi;
-    WIN32_GET_BOOL_DETAIL(details, INFO_DELAYED_START, sdasi.fDelayedAutostart, FALSE, delayed_start_changed);
-    if (delayed_start_changed) {
-        ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, &sdasi);
-    }
-
-    BOOL recovery_enabled_changed = FALSE;
-    SERVICE_FAILURE_ACTIONS_FLAG sfaf;
-    WIN32_GET_BOOL_DETAIL(details, INFO_RECOVERY_ENABLED, sfaf.fFailureActionsOnNonCrashFailures, FALSE, recovery_enabled_changed);
-    if (recovery_enabled_changed) {
-        ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, &sfaf);
-    }
-
-    /* Recovery Actions */
-    BOOL update_failure_actions = FALSE;
-    SERVICE_FAILURE_ACTIONS sfa;
-    memset(&sfa, 0, sizeof(sfa));
-    SC_ACTION actions[3];
-    memset(actions, 0, sizeof(actions));
-    sfa.lpsaActions = actions;
-
-    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_RESET_PERIOD, sfa.dwResetPeriod, 0, update_failure_actions);
-    WIN32_GET_STR_DETAIL(details, INFO_RECOVERY_REBOOT_MSG, sfa.lpRebootMsg, NULL, update_failure_actions);
-    WIN32_GET_STR_DETAIL(details, INFO_RECOVERY_COMMAND, sfa.lpCommand, NULL, update_failure_actions);
-
-    long recovery_delay;
-
-    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_DELAY, recovery_delay, 60000, update_failure_actions);
-    int action_count = 0;
-    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_RECOVERY_ACTION_1, sizeof(INFO_RECOVERY_ACTION_1)-1)) != NULL) {
-        actions[0].Type = (SC_ACTION_TYPE)zval_get_long(tmp);
-        actions[0].Delay = recovery_delay;
-        action_count = 1;
-        update_failure_actions = TRUE;
-    }
-    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_RECOVERY_ACTION_2, sizeof(INFO_RECOVERY_ACTION_2)-1)) != NULL) {
-        actions[1].Type = (SC_ACTION_TYPE)zval_get_long(tmp);
-        actions[1].Delay = recovery_delay;
-        action_count = 2;
-        update_failure_actions = TRUE;
-    }
-    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_RECOVERY_ACTION_3, sizeof(INFO_RECOVERY_ACTION_3)-1)) != NULL) {
-        actions[2].Type = (SC_ACTION_TYPE)zval_get_long(tmp);
-        actions[2].Delay = recovery_delay;
-        action_count = 3;
-        update_failure_actions = TRUE;
-    }
-    sfa.cActions = action_count;
-
-    if (update_failure_actions) {
-        ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, &sfa);
+    if (error_code != ERROR_SUCCESS) {
+        CloseServiceHandle(hsvc);
+        CloseServiceHandle(hmgr);
+        convert_error_to_exception(error_code, error_msg);
+        RETURN_THROWS();
     }
 
     CloseServiceHandle(hsvc);
@@ -1844,6 +1736,106 @@ static PHP_FUNCTION(win32_remove_service_env_var) {
 
 /* }}} */
 
+
+static void win32_handle_service_controls(INTERNAL_FUNCTION_PARAMETERS, long access, long status);
+
+static DWORD win32_configure_service_ex(SC_HANDLE hsvc, zval *details, BOOL is_update, DWORD start_type, char **error_msg) {
+    zval *tmp;
+
+    /* Description */
+    BOOL description_changed = FALSE;
+    SERVICE_DESCRIPTION sd;
+    WIN32_GET_STR_DETAIL(details, INFO_DESCRIPTION, sd.lpDescription, NULL, description_changed);
+    if (description_changed || !is_update) {
+        if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, &sd)) {
+            *error_msg = "error when defining the description";
+            return GetLastError();
+        }
+    }
+
+    /* Delayed start */
+    BOOL delayed_start_changed = FALSE;
+    SERVICE_DELAYED_AUTO_START_INFO sdasi;
+    WIN32_GET_BOOL_DETAIL(details, INFO_DELAYED_START, sdasi.fDelayedAutostart, FALSE, delayed_start_changed);
+    if (delayed_start_changed || (!is_update && (start_type & SERVICE_AUTO_START))) {
+        if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, &sdasi)) {
+            /* If it's an update, we might ignore the error if the service is not auto-start,
+               but for now let's be strict if it was explicitly requested or during creation. */
+            if (!is_update || delayed_start_changed) {
+                *error_msg = "error on change the start type";
+                return GetLastError();
+            }
+        }
+    }
+
+    /* Recovery Actions Flag */
+    BOOL recovery_enabled_changed = FALSE;
+    SERVICE_FAILURE_ACTIONS_FLAG sfaf;
+    WIN32_GET_BOOL_DETAIL(details, INFO_RECOVERY_ENABLED, sfaf.fFailureActionsOnNonCrashFailures, FALSE, recovery_enabled_changed);
+    if (recovery_enabled_changed || !is_update) {
+        if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, &sfaf)) {
+            *error_msg = "error on change the failure action flag";
+            return GetLastError();
+        }
+    }
+
+    /* Recovery Actions */
+    BOOL update_failure_actions = FALSE;
+    SERVICE_FAILURE_ACTIONS sfa;
+    memset(&sfa, 0, sizeof(sfa));
+    SC_ACTION actions[3];
+    memset(actions, 0, sizeof(actions));
+    sfa.lpsaActions = actions;
+
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_RESET_PERIOD, sfa.dwResetPeriod, (is_update ? 0 : 86400), update_failure_actions);
+    WIN32_GET_STR_DETAIL(details, INFO_RECOVERY_REBOOT_MSG, sfa.lpRebootMsg, NULL, update_failure_actions);
+    WIN32_GET_STR_DETAIL(details, INFO_RECOVERY_COMMAND, sfa.lpCommand, NULL, update_failure_actions);
+
+    long recovery_delay;
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_DELAY, recovery_delay, 60000, update_failure_actions);
+
+    int action_count = 0;
+    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_RECOVERY_ACTION_1, sizeof(INFO_RECOVERY_ACTION_1)-1)) != NULL) {
+        actions[0].Type = (SC_ACTION_TYPE)zval_get_long(tmp);
+        actions[0].Delay = recovery_delay;
+        action_count = 1;
+        update_failure_actions = TRUE;
+    } else if (!is_update) {
+        actions[0].Type = SC_ACTION_NONE;
+        actions[0].Delay = recovery_delay;
+    }
+
+    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_RECOVERY_ACTION_2, sizeof(INFO_RECOVERY_ACTION_2)-1)) != NULL) {
+        actions[1].Type = (SC_ACTION_TYPE)zval_get_long(tmp);
+        actions[1].Delay = recovery_delay;
+        action_count = 2;
+        update_failure_actions = TRUE;
+    } else if (!is_update) {
+        actions[1].Type = SC_ACTION_NONE;
+        actions[1].Delay = recovery_delay;
+    }
+
+    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_RECOVERY_ACTION_3, sizeof(INFO_RECOVERY_ACTION_3)-1)) != NULL) {
+        actions[2].Type = (SC_ACTION_TYPE)zval_get_long(tmp);
+        actions[2].Delay = recovery_delay;
+        action_count = 3;
+        update_failure_actions = TRUE;
+    } else if (!is_update) {
+        actions[2].Type = SC_ACTION_NONE;
+        actions[2].Delay = recovery_delay;
+    }
+
+    sfa.cActions = (is_update ? action_count : 3);
+
+    if (update_failure_actions || !is_update) {
+        if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, &sfa)) {
+            *error_msg = "error on change the failure action";
+            return GetLastError();
+        }
+    }
+
+    return ERROR_SUCCESS;
+}
 
 static void win32_handle_service_controls(INTERNAL_FUNCTION_PARAMETERS, long access, long status) /* {{{ */
 {
