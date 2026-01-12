@@ -42,6 +42,9 @@
 
 /* gargh! service_main run from a new thread that we don't spawn, so we can't do this nicely */
 static void *tmp_service_g = NULL;
+static char *win32_generate_path_and_params(char *path, char *params, long svc_type, char *user);
+static DWORD win32_configure_service_ex(SC_HANDLE hsvc, zval *details, BOOL is_update, DWORD start_type, char **error_msg);
+static void convert_error_to_exception(DWORD code, const char *message);
 
 
 static DWORD WINAPI service_handler(DWORD dwControl, DWORD dwEventType, LPVOID lpEventData, LPVOID lpContext) {
@@ -748,7 +751,6 @@ static PHP_FUNCTION(win32_create_service) {
     char *load_order;
     char *deps = NULL;
     SC_HANDLE hsvc, hmgr;
-    char *path_and_params;
     DWORD base_priority;
     HKEY hKey;
     char *service_key;
@@ -894,29 +896,7 @@ static PHP_FUNCTION(win32_create_service) {
         RETURN_THROWS();
     }
 
-    /* Build service path and parameters. */
-    if (path == NULL) {
-        DWORD len;
-        char buf[MAX_PATH];
-
-        len = GetModuleFileName(NULL, buf, sizeof(buf));
-        buf[len] = '\0';
-
-        if (strchr(buf, ' '))
-            spprintf(&path_and_params, 0, "\"%s\" %s", buf, params);
-        else
-            spprintf(&path_and_params, 0, "%s %s", buf, params);
-    } else {
-        if (strchr(path, ' '))
-            spprintf(&path_and_params, 0, "\"%s\" %s", path, params);
-        else
-            spprintf(&path_and_params, 0, "%s %s", path, params);
-    }
-
-    /* If interact with desktop is set and no username supplied (Only LocalSystem allows InteractWithDesktop) then pass the path and params through %COMSPEC% /C "..." */
-    if (SERVICE_INTERACTIVE_PROCESS & svc_type && user == NULL) {
-        spprintf(&path_and_params, 0, "\"%s\" /C \"%s\"", getenv("COMSPEC"), path_and_params);
-    }
+    char * path_and_params = win32_generate_path_and_params(path, params, svc_type, user);
 
     /* Register the service. */
     hsvc = CreateService(hmgr,
@@ -933,7 +913,9 @@ static PHP_FUNCTION(win32_create_service) {
                          (LPCSTR) user,
                          (LPCSTR) password);
 
-    efree(path_and_params);
+    if (path_and_params) {
+        efree(path_and_params);
+    }
 
 
     /* If there was an error :
@@ -1387,10 +1369,11 @@ static PHP_FUNCTION(win32_update_service_config) {
     size_t machine_len = 0;
     size_t service_len = 0;
     SC_HANDLE hsvc, hmgr;
-    DWORD svc_type = SERVICE_NO_CHANGE;
+    long svc_type = SERVICE_NO_CHANGE;
     DWORD start_type = SERVICE_NO_CHANGE;
     DWORD error_control = SERVICE_NO_CHANGE;
     char *path = NULL, *load_order = NULL, *deps = NULL, *user = NULL, *password = NULL, *display = NULL;
+    char *params = NULL;
     BOOL update_main_config = FALSE;
 
     if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "sa|s!", &service, &service_len, &details, &machine, &machine_len)) {
@@ -1418,16 +1401,45 @@ static PHP_FUNCTION(win32_update_service_config) {
     WIN32_GET_LONG_DETAIL(details, INFO_START_TYPE, start_type, SERVICE_NO_CHANGE, update_main_config);
     WIN32_GET_LONG_DETAIL(details, INFO_ERROR_CONTROL, error_control, SERVICE_NO_CHANGE, update_main_config);
     WIN32_GET_STR_DETAIL(details, INFO_PATH, path, NULL, update_main_config);
+    WIN32_GET_STR_DETAIL(details, INFO_PARAMS, params, NULL, update_main_config);
     WIN32_GET_STR_DETAIL(details, INFO_LOAD_ORDER, load_order, NULL, update_main_config);
     WIN32_GET_STR_DETAIL(details, INFO_USER, user, NULL, update_main_config);
     WIN32_GET_STR_DETAIL(details, INFO_PASSWORD, password, NULL, update_main_config);
     WIN32_GET_STR_DETAIL(details, INFO_DISPLAY, display, NULL, update_main_config);
 
+	if (svc_type == SERVICE_NO_CHANGE) {
+    	LPQUERY_SERVICE_CONFIGW cfg = NULL;
+        DWORD needed;
+	    if (!QueryServiceConfig(hsvc, NULL, 0, &needed)) {
+            if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
+                CloseServiceHandle(hsvc);
+                CloseServiceHandle(hmgr);
+                convert_error_to_exception(GetLastError(), "");
+                RETURN_THROWS();
+            }
+            cfg = (LPQUERY_SERVICE_CONFIG) emalloc(needed);
+            if (!QueryServiceConfig(hsvc, cfg, needed, &needed)) {
+                efree(cfg);
+                CloseServiceHandle(hsvc);
+                CloseServiceHandle(hmgr);
+                convert_error_to_exception(GetLastError(), "");
+                RETURN_THROWS();
+            }
+        }
+	    svc_type = cfg->dwServiceType;
+        efree(cfg);
+    }
+
+
+
     /* Dependencies */
     WIN32_GET_DEPS_DETAIL(details, deps, NULL, update_main_config);
 
+    char * path_and_params = win32_generate_path_and_params(path, params, svc_type, user);
+
     if (update_main_config) {
-        if (!ChangeServiceConfig(hsvc, svc_type, start_type, error_control, path, load_order, NULL, deps, user, password, display)) {
+        if (!ChangeServiceConfig(hsvc, svc_type, start_type, error_control, path_and_params, load_order, NULL, deps, user, password, display)) {
+            if (path_and_params) efree(path_and_params);
             if (deps && (tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_DEPENDENCIES, sizeof(INFO_DEPENDENCIES)-1)) != NULL && Z_TYPE_P(tmp) == IS_ARRAY) efree(deps);
             CloseServiceHandle(hsvc);
             CloseServiceHandle(hmgr);
@@ -1436,7 +1448,9 @@ static PHP_FUNCTION(win32_update_service_config) {
         }
     }
 
+    if (path_and_params) efree(path_and_params);
     if (deps && (tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_DEPENDENCIES, sizeof(INFO_DEPENDENCIES)-1)) != NULL && Z_TYPE_P(tmp) == IS_ARRAY) efree(deps);
+
 
     char *error_msg = "";
     DWORD error_code = win32_configure_service_ex(hsvc, details, TRUE, start_type, &error_msg);
@@ -1736,6 +1750,27 @@ static PHP_FUNCTION(win32_remove_service_env_var) {
 
 /* }}} */
 
+static char *win32_generate_path_and_params(char *path, char *params, long svc_type, char *user) {
+    char *result = NULL;
+	if (!path) {
+        return NULL;
+    }
+	/* Build service path and parameters. */
+    if (strchr(path, ' '))
+        spprintf(&result, 0, "\"%s\" %s", path, params);
+    else
+        spprintf(&result, 0, "%s %s", path, params);
+
+
+    /* If interact with desktop is set and no username supplied (Only LocalSystem allows InteractWithDesktop) then pass the path and params through %COMSPEC% /C "..." */
+    if (result && SERVICE_INTERACTIVE_PROCESS & svc_type && user == NULL) {
+        char *tmp = result;
+		result = NULL;
+        spprintf(&result, 0, "\"%s\" /C \"%s\"", getenv("COMSPEC"), tmp);
+        efree(tmp);
+    }
+	return result;
+}
 
 static void win32_handle_service_controls(INTERNAL_FUNCTION_PARAMETERS, long access, long status);
 
@@ -1793,22 +1828,21 @@ static DWORD win32_configure_service_ex(SC_HANDLE hsvc, zval *details, BOOL is_u
     long recovery_delay;
     WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_DELAY, recovery_delay, 60000, update_failure_actions);
 
-    long recovery_action1;
-    long recovery_action2;
-    long recovery_action3;
+    long recovery_action1 = SC_ACTION_NONE;
+    long recovery_action2 = SC_ACTION_NONE;
+    long recovery_action3 = SC_ACTION_NONE;
 
     WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_1, recovery_action1, SC_ACTION_NONE, update_failure_actions);
     WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_2, recovery_action2, SC_ACTION_NONE, update_failure_actions);
     WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_3, recovery_action3, SC_ACTION_NONE, update_failure_actions);
 
-    int action_count = 0;
-    actions[0].Type = recovery_action1;
+    actions[0].Type = (SC_ACTION_TYPE)recovery_action1;
     actions[0].Delay = recovery_delay;
 
-    actions[1].Type = recovery_action2;
+    actions[1].Type = (SC_ACTION_TYPE)recovery_action2;
     actions[1].Delay = recovery_delay;
 
-    actions[2].Type = recovery_action3;
+    actions[2].Type = (SC_ACTION_TYPE)recovery_action3;
     actions[2].Delay = recovery_delay;
 
     sfa.lpsaActions = actions;
