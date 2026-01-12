@@ -1407,7 +1407,7 @@ static PHP_FUNCTION(win32_update_service_config) {
         convert_error_to_exception(GetLastError(), "");
         RETURN_THROWS();
     }
-    hsvc = OpenService(hmgr, service, SERVICE_CHANGE_CONFIG);
+    hsvc = OpenService(hmgr, service, SERVICE_ALL_ACCESS);
     if (!hsvc) {
         CloseServiceHandle(hmgr);
         convert_error_to_exception(GetLastError(), "");
@@ -1784,8 +1784,7 @@ static DWORD win32_configure_service_ex(SC_HANDLE hsvc, zval *details, BOOL is_u
     SERVICE_FAILURE_ACTIONS sfa;
     memset(&sfa, 0, sizeof(sfa));
     SC_ACTION actions[3];
-    memset(actions, 0, sizeof(actions));
-    sfa.lpsaActions = actions;
+    //memset(actions, 0, sizeof(actions));
 
     WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_RESET_PERIOD, sfa.dwResetPeriod, (is_update ? 0 : 86400), update_failure_actions);
     WIN32_GET_STR_DETAIL(details, INFO_RECOVERY_REBOOT_MSG, sfa.lpRebootMsg, NULL, update_failure_actions);
@@ -1812,6 +1811,7 @@ static DWORD win32_configure_service_ex(SC_HANDLE hsvc, zval *details, BOOL is_u
     actions[2].Type = recovery_action3;
     actions[2].Delay = recovery_delay;
 
+    sfa.lpsaActions = actions;
     sfa.cActions = 3;
 
     if (update_failure_actions) {
