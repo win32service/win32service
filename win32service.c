@@ -1309,7 +1309,8 @@ static PHP_FUNCTION(win32_update_service_config) {
         RETURN_THROWS();
     }
 
-    if (error_control != SERVICE_ERROR_IGNORE &&
+    if (error_control != SERVICE_NO_CHANGE &&
+    		error_control != SERVICE_ERROR_IGNORE &&
         error_control != SERVICE_ERROR_NORMAL &&
         error_control != SERVICE_ERROR_SEVERE &&
         error_control != SERVICE_ERROR_CRITICAL) {
