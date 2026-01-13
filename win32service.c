@@ -38,13 +38,12 @@
 #include "win32service_right.h"
 #include "win32service_right_info.h"
 #include "win32service_registry.h"
+#include "win32service_error.h"
+#include "win32service_config.h"
 
 
 /* gargh! service_main run from a new thread that we don't spawn, so we can't do this nicely */
 static void *tmp_service_g = NULL;
-static char *win32_generate_path_and_params(char *path, char *params, long svc_type, char *user);
-static DWORD win32_configure_service_ex(SC_HANDLE hsvc, zval *details, BOOL is_update, DWORD start_type, char **error_msg);
-static void convert_error_to_exception(DWORD code, const char *message);
 
 
 static DWORD WINAPI service_handler(DWORD dwControl, DWORD dwEventType, LPVOID lpEventData, LPVOID lpContext) {
@@ -130,142 +129,6 @@ static DWORD WINAPI svc_thread_proc(LPVOID _globals) {
     return 0;
 }
 
-static void convert_error_to_exception(DWORD code, const char *message) {
-    if (code == ERROR_ACCESS_DENIED) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error access denied (%s)", message);
-        return;
-    }
-    if (code == ERROR_CIRCULAR_DEPENDENCY) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error circular dependency (%s)", message);
-        return;
-    }
-    if (code == ERROR_DATABASE_DOES_NOT_EXIST) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error database does not exist (%s)", message);
-        return;
-    }
-    if (code == ERROR_DEPENDENT_SERVICES_RUNNING) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error dependent services running (%s)", message);
-        return;
-    }
-    if (code == ERROR_DUPLICATE_SERVICE_NAME) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error duplicate service name (%s)", message);
-        return;
-    }
-    if (code == ERROR_FAILED_SERVICE_CONTROLLER_CONNECT) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error failed service controller connect (%s)",
-                                message);
-        return;
-    }
-    if (code == ERROR_INSUFFICIENT_BUFFER) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error insufficient buffer (%s)", message);
-        return;
-    }
-    if (code == ERROR_INVALID_DATA) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid data (%s)", message);
-        return;
-    }
-    if (code == ERROR_INVALID_HANDLE) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid handle (%s)", message);
-        return;
-    }
-    if (code == ERROR_INVALID_LEVEL) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid level (%s)", message);
-        return;
-    }
-    if (code == ERROR_INVALID_NAME) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid name (%s)", message);
-        return;
-    }
-    if (code == ERROR_INVALID_PARAMETER) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid parameter (%s)", message);
-        return;
-    }
-    if (code == ERROR_INVALID_SERVICE_ACCOUNT) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid service account (%s)", message);
-        return;
-    }
-    if (code == ERROR_INVALID_SERVICE_CONTROL) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid service control (%s)", message);
-        return;
-    }
-    if (code == ERROR_PATH_NOT_FOUND) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error path not found (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_ALREADY_RUNNING) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service already running (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_CANNOT_ACCEPT_CTRL) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service cannot accept ctrl (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_DATABASE_LOCKED) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service database locked (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_DEPENDENCY_DELETED) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service dependency deleted (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_DEPENDENCY_FAIL) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service dependency fail (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_DISABLED) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service disabled (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_DOES_NOT_EXIST) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service does not exist (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_EXISTS) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service exists (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_LOGON_FAILED) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service logon failed (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_MARKED_FOR_DELETE) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service marked for delete (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_NO_THREAD) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service no thread (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_NOT_ACTIVE) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service not active (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_REQUEST_TIMEOUT) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service request timeout (%s)", message);
-        return;
-    }
-    if (code == ERROR_SHUTDOWN_IN_PROGRESS) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error shutdown in progress (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_SPECIFIC_ERROR) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service specific error (%s)", message);
-        return;
-    }
-    if (code == ERROR_NONE_MAPPED) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code,
-                                "No mapping between account names and security IDs was done. (%s)", message);
-        return;
-    }
-    if (code == 16000) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Internal extension error (%s)", message);
-        return;
-    }
-    if (code != NO_ERROR) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Unknow error no %d (%s)", code, message);
-        return;
-    }
-}
 
 static bool win32_check_if_is_service() {
     HWINSTA hWinStation = GetProcessWindowStation();
@@ -1750,113 +1613,7 @@ static PHP_FUNCTION(win32_remove_service_env_var) {
 
 /* }}} */
 
-static char *win32_generate_path_and_params(char *path, char *params, long svc_type, char *user) {
-    char *result = NULL;
-	if (!path) {
-        return NULL;
-    }
-	/* Build service path and parameters. */
-    if (strchr(path, ' '))
-        spprintf(&result, 0, "\"%s\" %s", path, params);
-    else
-        spprintf(&result, 0, "%s %s", path, params);
-
-
-    /* If interact with desktop is set and no username supplied (Only LocalSystem allows InteractWithDesktop) then pass the path and params through %COMSPEC% /C "..." */
-    if (result && SERVICE_INTERACTIVE_PROCESS & svc_type && user == NULL) {
-        char *tmp = result;
-		result = NULL;
-        spprintf(&result, 0, "\"%s\" /C \"%s\"", getenv("COMSPEC"), tmp);
-        efree(tmp);
-    }
-	return result;
-}
-
 static void win32_handle_service_controls(INTERNAL_FUNCTION_PARAMETERS, long access, long status);
-
-static DWORD win32_configure_service_ex(SC_HANDLE hsvc, zval *details, BOOL is_update, DWORD start_type, char **error_msg) {
-    zval *tmp;
-
-    /* Description */
-    BOOL description_changed = FALSE;
-    SERVICE_DESCRIPTION sd;
-    WIN32_GET_STR_DETAIL(details, INFO_DESCRIPTION, sd.lpDescription, NULL, description_changed);
-    if (description_changed || !is_update) {
-        if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, &sd)) {
-            *error_msg = "error when defining the description";
-            return GetLastError();
-        }
-    }
-
-    /* Delayed start */
-    BOOL delayed_start_changed = FALSE;
-    SERVICE_DELAYED_AUTO_START_INFO sdasi;
-    WIN32_GET_BOOL_DETAIL(details, INFO_DELAYED_START, sdasi.fDelayedAutostart, FALSE, delayed_start_changed);
-    if (delayed_start_changed || (!is_update && (start_type & SERVICE_AUTO_START))) {
-        if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, &sdasi)) {
-            /* If it's an update, we might ignore the error if the service is not auto-start,
-               but for now let's be strict if it was explicitly requested or during creation. */
-            if (!is_update || delayed_start_changed) {
-                *error_msg = "error on change the start type";
-                return GetLastError();
-            }
-        }
-    }
-
-    /* Recovery Actions Flag */
-    BOOL recovery_enabled_changed = FALSE;
-    SERVICE_FAILURE_ACTIONS_FLAG sfaf;
-    WIN32_GET_BOOL_DETAIL(details, INFO_RECOVERY_ENABLED, sfaf.fFailureActionsOnNonCrashFailures, FALSE, recovery_enabled_changed);
-    if (recovery_enabled_changed) {
-        if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, &sfaf)) {
-            *error_msg = "error on change the failure action flag";
-            return GetLastError();
-        }
-    }
-
-    /* Recovery Actions */
-    BOOL update_failure_actions = FALSE;
-    SERVICE_FAILURE_ACTIONS sfa;
-    memset(&sfa, 0, sizeof(sfa));
-    SC_ACTION actions[3];
-    //memset(actions, 0, sizeof(actions));
-
-    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_RESET_PERIOD, sfa.dwResetPeriod, (is_update ? 0 : 86400), update_failure_actions);
-    WIN32_GET_STR_DETAIL(details, INFO_RECOVERY_REBOOT_MSG, sfa.lpRebootMsg, NULL, update_failure_actions);
-    WIN32_GET_STR_DETAIL(details, INFO_RECOVERY_COMMAND, sfa.lpCommand, NULL, update_failure_actions);
-
-    long recovery_delay;
-    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_DELAY, recovery_delay, 60000, update_failure_actions);
-
-    long recovery_action1 = SC_ACTION_NONE;
-    long recovery_action2 = SC_ACTION_NONE;
-    long recovery_action3 = SC_ACTION_NONE;
-
-    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_1, recovery_action1, SC_ACTION_NONE, update_failure_actions);
-    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_2, recovery_action2, SC_ACTION_NONE, update_failure_actions);
-    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_3, recovery_action3, SC_ACTION_NONE, update_failure_actions);
-
-    actions[0].Type = (SC_ACTION_TYPE)recovery_action1;
-    actions[0].Delay = recovery_delay;
-
-    actions[1].Type = (SC_ACTION_TYPE)recovery_action2;
-    actions[1].Delay = recovery_delay;
-
-    actions[2].Type = (SC_ACTION_TYPE)recovery_action3;
-    actions[2].Delay = recovery_delay;
-
-    sfa.lpsaActions = actions;
-    sfa.cActions = 3;
-
-    if (update_failure_actions) {
-        if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, &sfa)) {
-            *error_msg = "error on change the failure action";
-            return GetLastError();
-        }
-    }
-
-    return ERROR_SUCCESS;
-}
 
 static void win32_handle_service_controls(INTERNAL_FUNCTION_PARAMETERS, long access, long status) /* {{{ */
 {
