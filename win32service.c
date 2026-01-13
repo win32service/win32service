@@ -1319,19 +1319,6 @@ static PHP_FUNCTION(win32_update_service_config) {
                                   INFO_ERROR_CONTROL);
         RETURN_THROWS();
     }
-    if (base_priority != SERVICE_NO_CHANGE &&
-    		base_priority != ABOVE_NORMAL_PRIORITY_CLASS &&
-        base_priority != BELOW_NORMAL_PRIORITY_CLASS &&
-        base_priority != HIGH_PRIORITY_CLASS &&
-        base_priority != IDLE_PRIORITY_CLASS &&
-        base_priority != NORMAL_PRIORITY_CLASS &&
-        base_priority != REALTIME_PRIORITY_CLASS) {
-        zend_argument_value_error(1,
-                                  "the value %d for '%s' key is wrong, Use WIN32_ABOVE_NORMAL_PRIORITY_CLASS, WIN32_BELOW_NORMAL_PRIORITY_CLASS, WIN32_HIGH_PRIORITY_CLASS, WIN32_IDLE_PRIORITY_CLASS, WIN32_NORMAL_PRIORITY_CLASS or WIN32_REALTIME_PRIORITY_CLASS constants",
-                                  base_priority,
-                                  INFO_BASE_PRIORITY);
-        RETURN_THROWS();
-    }
 
     if (recovery_delay < 0 || recovery_delay > ZEND_LONG_MAX) {
         zend_argument_value_error(1,
