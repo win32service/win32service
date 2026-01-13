@@ -3,7 +3,7 @@
 
 # Win32Service
 
-The [win32service](https://pecl.php.net/package/win32service) extension is a Windows-specific extension that allows PHP to communicate with the Service Control Manager to start, stop, register and unregister the services, and even allows your PHP scripts to run as a service.
+The win32service extension is a Windows-specific extension that allows PHP to communicate with the Service Control Manager to start, stop, register and unregister the services, and even allows your PHP scripts to run as a service.
 
 | Branch | PHP Version | Support status |
 |--------|-------------|----------------|
@@ -14,8 +14,8 @@ The [win32service](https://pecl.php.net/package/win32service) extension is a Win
 
 # Documentation
 
-See: [https://win32service.github.io/](https://win32service.github.io/)
+See: [https://www.php.net/manual/en/book.win32service.php](https://www.php.net/manual/en/book.win32service.php)
 
 # News
 
-For project news, search on Twitter: [https://twitter.com/hashtag/Win32Service](https://twitter.com/hashtag/Win32Service).
+For project news, see the Github Discussions space: [https://github.com/win32service/win32service/discussions](https://github.com/win32service/win32service/discussions).

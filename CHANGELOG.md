@@ -1,6 +1,7 @@
-# Version 1.1.0 (2025-10-20)
+# Version 1.1.0 (2026-01-12)
 
 * Add PHP 8.5 compatibility
+* Add PIE compatibility
 
 # Version 1.1.0 beta 1 (2024-08-24)
 
