@@ -9,7 +9,21 @@ on:
     branches: [ v1.1.x ]
 
 jobs:
+  setup-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo 'matrix={"php-rel":["8.1", "8.2", "8.3", "8.4", "8.5"], "platform":["x64", "x86"], "ts":["ts", "nts"]}' >> $GITHUB_OUTPUT
+          else
+            echo 'matrix={"php-rel":["8.5"], "platform":["x64"], "ts":["nts"]}' >> $GITHUB_OUTPUT
+          fi
+
   build:
+    needs: setup-matrix
     name: Build
     runs-on: windows-latest
     defaults:
@@ -19,13 +33,7 @@ jobs:
       repo_tag_name: ${{ steps.install.outputs.repo_tag_name }}
     strategy:
       fail-fast: false
-      matrix:
-        php-rel: ['8.1', '8.2', '8.3', '8.4', '8.5']
-#        php-rel: ['8.3']
-        platform: [x64, x86]
-#        platform: [x64]
-        ts: [ts, nts]
-#        ts: [nts]
+      matrix: ${{ fromJSON(needs.setup-matrix.outputs.matrix) }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
