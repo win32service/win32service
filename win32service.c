@@ -1270,6 +1270,116 @@ static PHP_FUNCTION(win32_update_service_config) {
     WIN32_GET_STR_DETAIL(details, INFO_PASSWORD, password, NULL, update_main_config);
     WIN32_GET_STR_DETAIL(details, INFO_DISPLAY, display, NULL, update_main_config);
 
+		bool update_failure_actions=FALSE;
+    long recovery_delay;
+    long recovery_reset_period;
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_DELAY, recovery_delay, 60000, update_failure_actions);
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_RESET_PERIOD, recovery_reset_period, 0, update_failure_actions);
+
+
+    long recovery_action1 = SC_ACTION_NONE;
+    long recovery_action2 = SC_ACTION_NONE;
+    long recovery_action3 = SC_ACTION_NONE;
+
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_1, recovery_action1, SC_ACTION_NONE, update_failure_actions);
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_2, recovery_action2, SC_ACTION_NONE, update_failure_actions);
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_3, recovery_action3, SC_ACTION_NONE, update_failure_actions);
+
+
+    if (svc_type != SERVICE_NO_CHANGE &&
+	      svc_type != SERVICE_WIN32_OWN_PROCESS &&
+        svc_type != SERVICE_INTERACTIVE_PROCESS &&
+        svc_type != SERVICE_WIN32_OWN_PROCESS_INTERACTIVE) {
+        zend_argument_value_error(1,
+                                  "the value %d for '%s' key is wrong, Use WIN32_SERVICE_WIN32_OWN_PROCESS, WIN32_SERVICE_INTERACTIVE_PROCESS or WIN32_SERVICE_WIN32_OWN_PROCESS_INTERACTIVE constants",
+                                  svc_type,
+                                  INFO_SVC_TYPE);
+        RETURN_THROWS();
+    }
+    if (start_type != SERVICE_NO_CHANGE &&
+    		start_type != SERVICE_BOOT_START &&
+        start_type != SERVICE_SYSTEM_START &&
+        start_type != SERVICE_AUTO_START &&
+        start_type != SERVICE_DEMAND_START &&
+        start_type != SERVICE_DISABLED) {
+        zend_argument_value_error(1,
+                                  "the value %d for '%s' key is wrong, Use WIN32_SERVICE_BOOT_START, WIN32_SERVICE_SYSTEM_START, WIN32_SERVICE_AUTO_START, WIN32_SERVICE_DEMAND_START or WIN32_SERVICE_DISABLED constants",
+                                  start_type,
+                                  INFO_START_TYPE);
+        RETURN_THROWS();
+    }
+
+    if (error_control != SERVICE_ERROR_IGNORE &&
+        error_control != SERVICE_ERROR_NORMAL &&
+        error_control != SERVICE_ERROR_SEVERE &&
+        error_control != SERVICE_ERROR_CRITICAL) {
+        zend_argument_value_error(1,
+                                  "the value %d for '%s' key is wrong, Use WIN32_SERVICE_ERROR_IGNORE, WIN32_SERVICE_ERROR_NORMAL, WIN32_SERVICE_ERROR_SEVERE or WIN32_SERVICE_ERROR_CRITICAL constants",
+                                  error_control,
+                                  INFO_ERROR_CONTROL);
+        RETURN_THROWS();
+    }
+    if (base_priority != SERVICE_NO_CHANGE &&
+    		base_priority != ABOVE_NORMAL_PRIORITY_CLASS &&
+        base_priority != BELOW_NORMAL_PRIORITY_CLASS &&
+        base_priority != HIGH_PRIORITY_CLASS &&
+        base_priority != IDLE_PRIORITY_CLASS &&
+        base_priority != NORMAL_PRIORITY_CLASS &&
+        base_priority != REALTIME_PRIORITY_CLASS) {
+        zend_argument_value_error(1,
+                                  "the value %d for '%s' key is wrong, Use WIN32_ABOVE_NORMAL_PRIORITY_CLASS, WIN32_BELOW_NORMAL_PRIORITY_CLASS, WIN32_HIGH_PRIORITY_CLASS, WIN32_IDLE_PRIORITY_CLASS, WIN32_NORMAL_PRIORITY_CLASS or WIN32_REALTIME_PRIORITY_CLASS constants",
+                                  base_priority,
+                                  INFO_BASE_PRIORITY);
+        RETURN_THROWS();
+    }
+
+    if (recovery_delay < 0 || recovery_delay > ZEND_LONG_MAX) {
+        zend_argument_value_error(1,
+                                  "the value for key '%s' must between 0 and " ZEND_LONG_FMT
+        ". Got %d.",
+                INFO_RECOVERY_DELAY,
+                ZEND_LONG_MAX,
+                recovery_delay);
+        RETURN_THROWS();
+    }
+
+
+    if (recovery_action1 != SC_ACTION_NONE && recovery_action1 != SC_ACTION_REBOOT &&
+        recovery_action1 != SC_ACTION_RESTART && recovery_action1 != SC_ACTION_RUN_COMMAND) {
+        zend_argument_value_error(1,
+                                  "the value %d for '%s' key is wrong. Use WIN32_SC_ACTION_NONE, WIN32_SC_ACTION_REBOOT, WIN32_SC_ACTION_RESTART or WIN32_SC_ACTION_RUN_COMMAND constants",
+                                  recovery_action1,
+                                  INFO_RECOVERY_ACTION_1);
+        RETURN_THROWS();
+    }
+
+    if (recovery_action2 != SC_ACTION_NONE && recovery_action2 != SC_ACTION_REBOOT &&
+        recovery_action2 != SC_ACTION_RESTART && recovery_action2 != SC_ACTION_RUN_COMMAND) {
+        zend_argument_value_error(1,
+                                  "the value %d for '%s' key is wrong. Use WIN32_SC_ACTION_NONE, WIN32_SC_ACTION_REBOOT, WIN32_SC_ACTION_RESTART or WIN32_SC_ACTION_RUN_COMMAND constants",
+                                  recovery_action2,
+                                  INFO_RECOVERY_ACTION_2);
+        RETURN_THROWS();
+    }
+
+    if (recovery_action3 != SC_ACTION_NONE && recovery_action3 != SC_ACTION_REBOOT &&
+        recovery_action3 != SC_ACTION_RESTART && recovery_action3 != SC_ACTION_RUN_COMMAND) {
+        zend_argument_value_error(1,
+                                  "the value %d for '%s' key is wrong. Use WIN32_SC_ACTION_NONE, WIN32_SC_ACTION_REBOOT, WIN32_SC_ACTION_RESTART or WIN32_SC_ACTION_RUN_COMMAND constants",
+                                  recovery_action3,
+                                  INFO_RECOVERY_ACTION_3);
+        RETURN_THROWS();
+    }
+    if (recovery_reset_period < 0 || recovery_reset_period > ZEND_LONG_MAX) {
+        zend_argument_value_error(1,
+                                  "the value for key '%s' must between 0 and " ZEND_LONG_FMT
+        ". Got %d.",
+                INFO_RECOVERY_RESET_PERIOD,
+                ZEND_LONG_MAX,
+                recovery_reset_period);
+        RETURN_THROWS();
+    }
+
 	if (svc_type == SERVICE_NO_CHANGE) {
     	LPQUERY_SERVICE_CONFIGW cfg = NULL;
         DWORD needed;
