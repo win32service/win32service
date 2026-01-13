@@ -22,21 +22,22 @@
         <email>jbnahan@php.net</email>
         <active>yes</active>
     </lead>
-    <date>2024-10-25</date>
-    <time>08:30:00</time>
+    <date>2026-01-12</date>
+    <time>23:59:00</time>
     <version>
-        <release>1.1.0beta3</release>
+        <release>1.1.0</release>
         <api>0.5.0</api>
     </version>
     <stability>
-        <release>beta</release>
-        <api>beta</api>
+        <release>stable</release>
+        <api>stable</api>
     </stability>
     <license uri="http://www.php.net/license">PHP License</license>
     <notes><![CDATA[
-    * Fix memory leak on Win32Service\RightInfo username and domain.
+    * PHP 8.5 compatibility
+    * PHP PIE compatibility
 
-     The binary is also available here: https://github.com/win32service/win32service/releases/tag/v1.1.0-beta3
+     The binary is also available here: https://github.com/win32service/win32service/releases/tag/1.1.0
  ]]></notes>
     <contents>
         <dir name="/">
@@ -77,6 +78,21 @@
     <providesextension>win32service</providesextension>
     <extsrcrelease/>
     <changelog>
+        <release>
+            <version>
+                <release>1.1.0</release>
+                <api>0.5.0</api>
+            </version>
+            <stability>
+                <release>stable</release>
+                <api>stable</api>
+            </stability>
+            <license uri="http://www.php.net/license">PHP License</license>
+            <notes><![CDATA[
+    * PHP 8.5 compatibility
+    * PHP PIE compatibility
+ ]]></notes>
+        </release>
         <release>
             <version>
                 <release>1.1.0beta3</release>
