@@ -43,7 +43,7 @@ jobs:
         shell: powershell
         run: |
           chcp 65001
-          $r = Select-String -Path php_win32service.h -Pattern 'PHP_WIN32SERVICE_VERSION\s+"[^"]+"'
+          $r = Select-String -Path php_win32service.h -Pattern 'PHP_WIN32SERVICE_VERSION\s+"([^"]+)"'
           $s = $r.Matches[0].Groups[1]
           $extension_version = 'EXTENSION_VERSION=' + $s
           echo $extension_version >> $env:GITHUB_ENV
