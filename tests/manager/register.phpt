@@ -28,6 +28,10 @@ try {
     displayException($e);
 }
 sleep(5);
+echo "Get priority\n";
+echo WIN32_BELOW_NORMAL_PRIORITY_CLASS,"\n";
+var_dump(win32_get_service_priority($service[WIN32_INFO_SERVICE]));
+sleep(1);
 echo "Set priority\n";
 var_dump(win32_set_service_priority($service[WIN32_INFO_SERVICE], WIN32_NORMAL_PRIORITY_CLASS));
 echo "Read right\n";
@@ -76,6 +80,9 @@ try {
 --EXPECTF--
 NULL
 Win32ServiceException: (1073) Error service exists (on create service)
+Get priority
+16384
+int(16384)
 Set priority
 NULL
 Read right

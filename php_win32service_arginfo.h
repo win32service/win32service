@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 01929bcf032688eb01f225aca403ba5b934f542d */
+ * Stub hash: 109138389e8d890472873cf9644d324f6c8c4dca */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_win32_start_service_ctrl_dispatcher, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -65,6 +65,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_win32_set_service_priority, 0, 2, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, servicename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, priority, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_win32_get_service_priority, 0, 1, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, servicename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_win32_get_last_control_message, 0, 0, long, 0)

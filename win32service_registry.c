@@ -215,3 +215,31 @@ long set_service_base_priority(char *service, int service_len, int priority) {
 
 		return lReturnValue;
 }
+
+
+long get_service_base_priority(char *service, int service_len, int *priority) {
+    HKEY hKey;
+    LONG lReturnValue = 0;
+    char * keyName = NULL;
+    int keyNameLen = 0;
+    DWORD dwType = REG_DWORD;
+    DWORD dwSize = sizeof(DWORD);
+
+    get_service_registry_key(service, service_len, &keyName, &keyNameLen);
+    lReturnValue = RegOpenKeyEx(HKEY_LOCAL_MACHINE, keyName, 0, KEY_ALL_ACCESS, &hKey);
+		if (lReturnValue != ERROR_SUCCESS) {
+				efree(keyName);
+				if (lReturnValue == ERROR_FILE_NOT_FOUND) {
+						return ERROR_SERVICE_DOES_NOT_EXIST;
+				}
+
+				return lReturnValue;
+		}
+
+		lReturnValue = RegQueryValueEx(hKey, SERVICES_REG_BASE_PRIORITY, 0, &dwType, (LPBYTE)priority, &dwSize);
+
+		RegCloseKey(hKey);
+		efree(keyName);
+
+		return lReturnValue;
+}

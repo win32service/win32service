@@ -1218,6 +1218,32 @@ static PHP_FUNCTION(win32_set_service_priority) {
 }
 /* }}} */
 
+/* {{{ proto long win32_get_service_priority()
+   Get the service priority level */
+static PHP_FUNCTION(win32_get_service_priority) {
+    char *service = NULL;
+    size_t service_len = 0;
+    long base_priority = NULL;
+    long registry_result = 0;
+
+    if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s", &service, &service_len)) {
+        RETURN_THROWS();
+    }
+
+    if (service_len == 0) {
+        zend_argument_value_error(1, "the value cannot be empty");
+        RETURN_THROWS();
+    }
+
+    if (ERROR_SUCCESS != (registry_result = get_service_base_priority(service, service_len, &base_priority))) {
+				convert_error_to_exception(registry_result, "On get base_priority");
+				RETURN_THROWS();
+		}
+
+		RETURN_LONG(base_priority);
+}
+/* }}} */
+
 /* {{{ proto long win32_get_last_control_message()
    Returns the last control message that was sent to this service process */
 static PHP_FUNCTION(win32_get_last_control_message) {
@@ -1726,6 +1752,7 @@ static zend_function_entry functions[] = {
         PHP_FE(win32_delete_service, arginfo_win32_delete_service)
         PHP_FE(win32_exists_service, arginfo_win32_exists_service)
         PHP_FE(win32_set_service_priority, arginfo_win32_set_service_priority)
+        PHP_FE(win32_get_service_priority, arginfo_win32_get_service_priority)
         PHP_FE(win32_get_last_control_message, arginfo_win32_get_last_control_message)
         PHP_FE(win32_set_service_pause_resume_state, arginfo_win32_set_service_pause_resume_state)
         PHP_FE(win32_query_service_status, arginfo_win32_query_service_status)
@@ -2076,6 +2103,7 @@ static PHP_MINFO_FUNCTION(win32service) {
     php_info_print_table_row(2, "win32_create_service", "enabled");
     php_info_print_table_row(2, "win32_delete_service", "enabled");
     php_info_print_table_row(2, "win32_set_service_priority", "enabled");
+    php_info_print_table_row(2, "win32_get_service_priority", "enabled");
     php_info_print_table_row(2, "win32_query_service_status", "enabled");
     php_info_print_table_row(2, "win32_start_service", "enabled");
     php_info_print_table_row(2, "win32_stop_service", "enabled");

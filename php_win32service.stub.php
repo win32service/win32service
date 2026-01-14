@@ -27,6 +27,8 @@ function win32_delete_service(string $servicename, string $machine = ''): void {
 
 function win32_set_service_priority(string $servicename, int $priority): void {}
 
+function win32_get_service_priority(string $servicename): int {}
+
 function win32_get_last_control_message(): long {}
 
 function win32_query_service_status(string $servicename, string $machine = ''): array {}
