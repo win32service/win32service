@@ -78,8 +78,6 @@ typedef struct _win32service_right_info_object win32service_right_info_object;
 #define INFO_STATUS_PROCESS_ID "ProcessId"
 #define INFO_STATUS_SERVICE_FLAGS "ServiceFlags"
 
-
-
 /* NOTE: due to how internally PHP works with custom object, zend_object position in structure matters */
 struct _win32service_right_info_object {
     long mask;

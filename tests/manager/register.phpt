@@ -10,12 +10,13 @@ function displayException(Throwable $e){
     printf("%s: (%d) %s\n", get_class($e), $e->getCode(), $e->getMessage());
 }
 $service = [
-		'service' => 'WindowsServicePhpTest',
-		'display' => 'Windows service PHP test',
-		'description' => 'This service is an PHP example for test',
-		'path' => '"' . dirname(PHP_BINARY) . '\\php-win.exe"',
-		'params' => '"' . __FILE__ . '" run',
-		'start_type' => WIN32_SERVICE_AUTO_START,
+		WIN32_INFO_SERVICE => 'WindowsServicePhpTest',
+		WIN32_INFO_DISPLAY => 'Windows service PHP test',
+		WIN32_INFO_DESCRIPTION => 'This service is an PHP example for test',
+		WIN32_INFO_PATH => '"' . dirname(PHP_BINARY) . '\\php-win.exe"',
+		WIN32_INFO_PARAMS => '"' . __FILE__ . '" run',
+		WIN32_INFO_START_TYPE => WIN32_SERVICE_AUTO_START,
+		WIN32_INFO_BASE_PRIORITY => WIN32_BELOW_NORMAL_PRIORITY_CLASS,
 ];
 if (win32_exists_service($service['service'])) {
     win32_delete_service($service['service']);

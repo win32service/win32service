@@ -192,3 +192,26 @@ void remove_environment_value(char *data, int data_len, const char *env_name, ch
     *new_data_len = new_offset;
 }
 
+long set_service_base_priority(char *service, int service_len, int priority) {
+    HKEY hKey;
+    LONG lReturnValue = 0;
+    char * keyName = NULL;
+    int keyNameLen = 0;
+    get_service_registry_key(service, service_len, &keyName, &keyNameLen);
+    lReturnValue = RegOpenKeyEx(HKEY_LOCAL_MACHINE, keyName, 0, KEY_ALL_ACCESS, &hKey);
+		if (lReturnValue != ERROR_SUCCESS) {
+				efree(keyName);
+				if (lReturnValue == ERROR_FILE_NOT_FOUND) {
+						return ERROR_SERVICE_DOES_NOT_EXIST;
+				}
+
+				return lReturnValue;
+		}
+
+		lReturnValue = RegSetValueEx(hKey, SERVICES_REG_BASE_PRIORITY, 0, REG_DWORD, (CONST BYTE *)&priority, sizeof(REG_DWORD));
+
+		RegCloseKey(hKey);
+		efree(keyName);
+
+		return lReturnValue;
+}

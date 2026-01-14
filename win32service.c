@@ -39,8 +39,6 @@
 #include "win32service_right_info.h"
 #include "win32service_registry.h"
 
-#define SERVICES_REG_BASE_PRIORITY "BasePriority"
-
 
 /* gargh! service_main run from a new thread that we don't spawn, so we can't do this nicely */
 static void *tmp_service_g = NULL;
@@ -1089,22 +1087,10 @@ static PHP_FUNCTION(win32_create_service) {
     CloseServiceHandle(hsvc);
     CloseServiceHandle(hmgr);
 
-    return;
-
-    /* Store the base_priority in the registry. */
-    spprintf(&service_key, 0, "%s%s", SERVICES_REG_KEY_ROOT, service);
-    if (ERROR_SUCCESS != (registry_result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, service_key, 0, KEY_ALL_ACCESS, &hKey))) {
-        convert_error_to_exception(registry_result, "On openning registry key to set base_priority");
-        RETURN_THROWS();
-    }
-    if (ERROR_SUCCESS != (registry_result = RegSetValueEx(hKey, SERVICES_REG_BASE_PRIORITY, 0, REG_DWORD, (CONST
-        BYTE *)&base_priority, sizeof(REG_DWORD)))) {
-        convert_error_to_exception(registry_result, "On change the registry key value of base_priority");
-        RETURN_THROWS();
-    }
-
-    RegCloseKey(hKey);
-    efree(service_key);
+    if (ERROR_SUCCESS != (registry_result = set_service_base_priority(service, sizeof(service), base_priority))) {
+				convert_error_to_exception(registry_result, "On set base_priority");
+				RETURN_THROWS();
+		}
 
 }
 /* }}} */
@@ -1463,7 +1449,7 @@ static PHP_FUNCTION(win32_add_service_env_var) {
         RETURN_THROWS();
     }
 
-    lReturnValue = RegSetValueEx(hKey, "Environment", 0, REG_MULTI_SZ, new_data, new_data_len);
+    lReturnValue = RegSetValueEx(hKey, SERVICES_REG_ENVIRONMENT, 0, REG_MULTI_SZ, new_data, new_data_len);
     if (lReturnValue != ERROR_SUCCESS) {
         efree(keyName);
         efree(new_data);
@@ -1540,7 +1526,7 @@ static PHP_FUNCTION(win32_remove_service_env_var) {
         RETURN_THROWS();
     }
     if (new_data_len > 0) {
-        lReturnValue = RegSetValueEx(hKey, "Environment", 0, REG_MULTI_SZ, new_data, new_data_len);
+        lReturnValue = RegSetValueEx(hKey, SERVICES_REG_ENVIRONMENT, 0, REG_MULTI_SZ, new_data, new_data_len);
         if (lReturnValue != ERROR_SUCCESS) {
             efree(keyName);
             efree(new_data);
@@ -1548,7 +1534,7 @@ static PHP_FUNCTION(win32_remove_service_env_var) {
             RETURN_THROWS();
         }
     } else {
-        lReturnValue = RegDeleteValue(hKey, "Environment");
+        lReturnValue = RegDeleteValue(hKey, SERVICES_REG_ENVIRONMENT);
         if (lReturnValue != ERROR_SUCCESS) {
             efree(keyName);
             efree(new_data);
