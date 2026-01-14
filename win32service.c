@@ -1265,15 +1265,15 @@ static PHP_FUNCTION(win32_query_service_status) {
     }
     /* map the struct to an array */
     array_init(return_value);
-    add_assoc_long(return_value, "ServiceType", st->dwServiceType);
-    add_assoc_long(return_value, "CurrentState", st->dwCurrentState);
-    add_assoc_long(return_value, "ControlsAccepted", st->dwControlsAccepted);
-    add_assoc_long(return_value, "Win32ExitCode", st->dwWin32ExitCode);
-    add_assoc_long(return_value, "ServiceSpecificExitCode", st->dwServiceSpecificExitCode);
-    add_assoc_long(return_value, "CheckPoint", st->dwCheckPoint);
-    add_assoc_long(return_value, "WaitHint", st->dwWaitHint);
-    add_assoc_long(return_value, "ProcessId", st->dwProcessId);
-    add_assoc_long(return_value, "ServiceFlags", st->dwServiceFlags);
+    add_assoc_long(return_value, INFO_STATUS_SERVICE_TYPE, st->dwServiceType);
+    add_assoc_long(return_value, INFO_STATUS_CURRENT_STATE, st->dwCurrentState);
+    add_assoc_long(return_value, INFO_STATUS_CONTROLS_ACCEPTED, st->dwControlsAccepted);
+    add_assoc_long(return_value, INFO_STATUS_WIN32_EXIT_CODE, st->dwWin32ExitCode);
+    add_assoc_long(return_value, INFO_STATUS_SERVICE_SPECIFIC_EXIT_CODE, st->dwServiceSpecificExitCode);
+    add_assoc_long(return_value, INFO_STATUS_CHECK_POINT, st->dwCheckPoint);
+    add_assoc_long(return_value, INFO_STATUS_WAIT_HINT, st->dwWaitHint);
+    add_assoc_long(return_value, INFO_STATUS_PROCESS_ID, st->dwProcessId);
+    add_assoc_long(return_value, INFO_STATUS_SERVICE_FLAGS, st->dwServiceFlags);
 
     efree(st);
     CloseServiceHandle(hsvc);
@@ -1947,6 +1947,16 @@ static PHP_MINIT_FUNCTION(win32service) {
     MKSCONST(INFO_RECOVERY_ENABLED);
     MKSCONST(INFO_RECOVERY_REBOOT_MSG);
     MKSCONST(INFO_RECOVERY_COMMAND);
+
+    MKSCONST(INFO_STATUS_SERVICE_TYPE);
+    MKSCONST(INFO_STATUS_CURRENT_STATE);
+    MKSCONST(INFO_STATUS_CONTROLS_ACCEPTED);
+    MKSCONST(INFO_STATUS_WIN32_EXIT_CODE);
+    MKSCONST(INFO_STATUS_SERVICE_SPECIFIC_EXIT_CODE);
+    MKSCONST(INFO_STATUS_CHECK_POINT);
+    MKSCONST(INFO_STATUS_WAIT_HINT);
+    MKSCONST(INFO_STATUS_PROCESS_ID);
+    MKSCONST(INFO_STATUS_SERVICE_FLAGS);
 
     return SUCCESS;
 }

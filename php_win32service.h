@@ -68,6 +68,18 @@ typedef struct _win32service_right_info_object win32service_right_info_object;
 #define INFO_RECOVERY_REBOOT_MSG "recovery_reboot_msg"
 #define INFO_RECOVERY_COMMAND "recovery_command"
 
+#define INFO_STATUS_SERVICE_TYPE "ServiceType"
+#define INFO_STATUS_CURRENT_STATE "CurrentState"
+#define INFO_STATUS_CONTROLS_ACCEPTED "ControlsAccepted"
+#define INFO_STATUS_WIN32_EXIT_CODE "Win32ExitCode"
+#define INFO_STATUS_SERVICE_SPECIFIC_EXIT_CODE "ServiceSpecificExitCode"
+#define INFO_STATUS_CHECK_POINT "CheckPoint"
+#define INFO_STATUS_WAIT_HINT "WaitHint"
+#define INFO_STATUS_PROCESS_ID "ProcessId"
+#define INFO_STATUS_SERVICE_FLAGS "ServiceFlags"
+
+
+
 /* NOTE: due to how internally PHP works with custom object, zend_object position in structure matters */
 struct _win32service_right_info_object {
     long mask;

@@ -13,7 +13,7 @@ function win32_set_service_status(int $status, int $checkpoint = 0): bool {}
 
 function win32_read_right_access_service(string $servicename, string $username , string $machine = ''): object {}
 
-function win32_read_all_rights_access_service(string $servicename , string $machine = ''): object {}
+function win32_read_all_rights_access_service(string $servicename , string $machine = ''): array {}
 
 function win32_add_right_access_service(string $servicename, string $username, int $right, string $machine = ''): void {}
 
@@ -31,7 +31,7 @@ function win32_query_service_status(string $servicename, string $machine = ''): 
 
 function win32_start_service(string $servicename, string $machine = ''): void {}
 
-function win32_get_service_env_vars(string $servicename): void {}
+function win32_get_service_env_vars(string $servicename): array {}
 
 function win32_add_service_env_var(string $servicename, string $varName, string $varValue): void {}
 
