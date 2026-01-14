@@ -2207,6 +2207,8 @@ static PHP_MINFO_FUNCTION(win32service) {
     php_info_print_table_row(2, "win32_set_service_priority", "enabled");
     php_info_print_table_row(2, "win32_get_service_priority", "enabled");
     php_info_print_table_row(2, "win32_query_service_status", "enabled");
+    php_info_print_table_row(2, "win32_query_service_config", "enabled");
+    php_info_print_table_row(2, "win32_update_service_config", "enabled");
     php_info_print_table_row(2, "win32_start_service", "enabled");
     php_info_print_table_row(2, "win32_stop_service", "enabled");
     php_info_print_table_row(2, "win32_pause_service", "enabled");
@@ -2219,8 +2221,6 @@ static PHP_MINFO_FUNCTION(win32service) {
     php_info_print_table_row(2, "win32_add_service_env_var", "enabled");
     php_info_print_table_row(2, "win32_remove_service_env_var", "enabled");
     php_info_print_table_row(2, "win32_get_service_env_vars", "enabled");
-    php_info_print_table_row(2, "win32_query_service_config", "enabled");
-    php_info_print_table_row(2, "win32_update_service_config", "enabled");
     php_info_print_table_end();
 }
 
