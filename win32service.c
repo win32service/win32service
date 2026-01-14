@@ -349,7 +349,7 @@ static PHP_FUNCTION(win32_read_right_access_service) {
 
     if (pACL == NULL) {
         if (pSD != NULL) { LocalFree((HLOCAL) pSD); }
-        convert_error_to_exception(16000, "ACL empty");
+        convert_error_to_exception(ERROR_WIN32SERVICE_INTERNAL, "ACL empty");
         RETURN_THROWS();
     }
 
@@ -433,7 +433,7 @@ static PHP_FUNCTION(win32_read_all_rights_access_service) {
 
     if (pACL == NULL) {
         if (pSD != NULL) { LocalFree((HLOCAL) pSD); }
-        convert_error_to_exception(16000, "ACL empty");
+        convert_error_to_exception(ERROR_WIN32SERVICE_INTERNAL, "ACL empty");
         RETURN_THROWS();
     }
 
@@ -2029,6 +2029,7 @@ static PHP_MINIT_FUNCTION(win32service) {
     MKCONST(ERROR_SERVICE_REQUEST_TIMEOUT);            /* 0x0000041D The process for the service was started, but it did not call StartServiceCtrlDispatcher, or the thread that called StartServiceCtrlDispatcher may be blocked in a control handler function. */
     MKCONST(ERROR_SHUTDOWN_IN_PROGRESS);               /* 0x0000045B The system is shutting down; this function cannot be called. */
     MKCONST(ERROR_SERVICE_SPECIFIC_ERROR);             /* 0x0000042A The service has returned a service-specific error code. */
+    MKCONST(ERROR_WIN32SERVICE_INTERNAL);                     /* 0x00003E80 Win32Service Internal error. */
     MKCONST(NO_ERROR);                                 /* 0x00000000 No error. */
 
     /* Win32 Priority Constants */
@@ -2218,6 +2219,8 @@ static PHP_MINFO_FUNCTION(win32service) {
     php_info_print_table_row(2, "win32_add_service_env_var", "enabled");
     php_info_print_table_row(2, "win32_remove_service_env_var", "enabled");
     php_info_print_table_row(2, "win32_get_service_env_vars", "enabled");
+    php_info_print_table_row(2, "win32_query_service_config", "enabled");
+    php_info_print_table_row(2, "win32_update_service_config", "enabled");
     php_info_print_table_end();
 }
 

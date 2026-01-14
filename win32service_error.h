@@ -22,6 +22,8 @@
 
 #include <windows.h>
 
+#define ERROR_WIN32SERVICE_INTERNAL       16000
+
 void convert_error_to_exception(DWORD code, const char *message);
 
 #endif /* WIN32SERVICE_ERROR_H */
