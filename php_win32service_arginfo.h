@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 109138389e8d890472873cf9644d324f6c8c4dca */
+ * Stub hash: 5cc2808d07751d341a0155076070b9453546e1b6 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_win32_start_service_ctrl_dispatcher, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -75,6 +75,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_win32_get_last_control_message, 0
 ZEND_END_ARG_INFO()
 
 #define arginfo_win32_query_service_status arginfo_win32_read_all_rights_access_service
+
+#define arginfo_win32_query_service_config arginfo_win32_read_all_rights_access_service
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_win32_update_service_config, 0, 2, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, servicename, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, details, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, machine, IS_STRING, 0, "\'\'")
+ZEND_END_ARG_INFO()
 
 #define arginfo_win32_start_service arginfo_win32_delete_service
 

@@ -45,28 +45,29 @@ typedef struct _win32service_right_info_object win32service_right_info_object;
 #define SERVICE_WIN32_OWN_PROCESS_INTERACTIVE SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS
 #endif
 
-#define INFO_SERVICE        "service"
-#define INFO_DISPLAY        "display"
-#define INFO_USER           "user"
-#define INFO_PASSWORD       "password"
-#define INFO_PATH           "path"
-#define INFO_PARAMS         "params"
-#define INFO_DESCRIPTION    "description"
-#define INFO_START_TYPE     "start_type"
-#define INFO_LOAD_ORDER        "load_order"
-#define INFO_SVC_TYPE        "svc_type"
-#define INFO_ERROR_CONTROL    "error_control"
-#define INFO_DELAYED_START    "delayed_start"
-#define INFO_BASE_PRIORITY    "base_priority"
-#define INFO_DEPENDENCIES   "dependencies"
-#define INFO_RECOVERY_DELAY "recovery_delay"
-#define INFO_RECOVERY_ACTION_1 "recovery_action_1"
-#define INFO_RECOVERY_ACTION_2 "recovery_action_2"
-#define INFO_RECOVERY_ACTION_3 "recovery_action_3"
-#define INFO_RECOVERY_RESET_PERIOD "recovery_reset_period"
-#define INFO_RECOVERY_ENABLED "recovery_enabled"
-#define INFO_RECOVERY_REBOOT_MSG "recovery_reboot_msg"
-#define INFO_RECOVERY_COMMAND "recovery_command"
+#define INFO_SERVICE                "service"
+#define INFO_DISPLAY                "display"
+#define INFO_USER                   "user"
+#define INFO_PASSWORD               "password"
+#define INFO_PATH                   "path"
+#define INFO_PARAMS                 "params"
+#define INFO_DESCRIPTION            "description"
+#define INFO_START_TYPE             "start_type"
+#define INFO_TAG_ID                 "tag_id"
+#define INFO_LOAD_ORDER             "load_order"
+#define INFO_SVC_TYPE               "svc_type"
+#define INFO_ERROR_CONTROL          "error_control"
+#define INFO_DELAYED_START          "delayed_start"
+#define INFO_BASE_PRIORITY          "base_priority"
+#define INFO_DEPENDENCIES           "dependencies"
+#define INFO_RECOVERY_DELAY         "recovery_delay"
+#define INFO_RECOVERY_ACTION_1      "recovery_action_1"
+#define INFO_RECOVERY_ACTION_2      "recovery_action_2"
+#define INFO_RECOVERY_ACTION_3      "recovery_action_3"
+#define INFO_RECOVERY_RESET_PERIOD  "recovery_reset_period"
+#define INFO_RECOVERY_ENABLED       "recovery_enabled"
+#define INFO_RECOVERY_REBOOT_MSG    "recovery_reboot_msg"
+#define INFO_RECOVERY_COMMAND       "recovery_command"
 
 #define INFO_STATUS_SERVICE_TYPE "ServiceType"
 #define INFO_STATUS_CURRENT_STATE "CurrentState"
@@ -132,6 +133,65 @@ static inline win32service_right_info_object *php_win32service_right_info_object
         )                                                                                                              \
     }
 
+
+#define WIN32_GET_STR_DETAIL(details, name, var, def, changed_flag) \
+    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), name, sizeof(name)-1)) != NULL) { \
+        if (Z_TYPE_P(tmp) == IS_STRING) { \
+            var = Z_STRVAL_P(tmp); \
+            changed_flag = TRUE; \
+        } else if (Z_TYPE_P(tmp) == IS_NULL) { \
+            var = NULL; \
+            changed_flag = TRUE; \
+        } \
+    } else { \
+        var = def; \
+    }
+
+#define WIN32_GET_LONG_DETAIL(details, name, var, def, changed_flag) \
+    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), name, sizeof(name)-1)) != NULL) { \
+        var = (DWORD)zval_get_long(tmp); \
+        changed_flag = TRUE; \
+    } else { \
+        var = def; \
+    }
+
+#define WIN32_GET_BOOL_DETAIL(details, name, var, def, changed_flag) \
+    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), name, sizeof(name)-1)) != NULL) { \
+        var = zend_is_true(tmp); \
+        changed_flag = TRUE; \
+    } else { \
+        var = def; \
+    }
+
+#define WIN32_GET_DEPS_DETAIL(details, var, def, changed_flag) \
+    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_DEPENDENCIES, sizeof(INFO_DEPENDENCIES)-1)) != NULL) { \
+        if (Z_TYPE_P(tmp) == IS_ARRAY) { \
+            HashTable *ht = Z_ARRVAL_P(tmp); \
+            zval *val; \
+            size_t total_len = 0; \
+            ZEND_HASH_FOREACH_VAL(ht, val) { \
+                convert_to_string_ex(val); \
+                total_len += Z_STRLEN_P(val) + 1; \
+            } ZEND_HASH_FOREACH_END(); \
+            total_len++; \
+            var = (char *) safe_emalloc(total_len, sizeof(char), 0); \
+            char *p = var; \
+            ZEND_HASH_FOREACH_VAL(ht, val) { \
+                strcpy(p, Z_STRVAL_P(val)); \
+                p += Z_STRLEN_P(val) + 1; \
+            } ZEND_HASH_FOREACH_END(); \
+            *p = '\0'; \
+            changed_flag = TRUE; \
+        } else if (Z_TYPE_P(tmp) == IS_STRING) { \
+             var = Z_STRVAL_P(tmp); \
+             changed_flag = TRUE; \
+        } else if (Z_TYPE_P(tmp) == IS_NULL) { \
+             var = NULL; \
+             changed_flag = TRUE; \
+        } \
+    } else { \
+        var = def; \
+    }
 
 #endif
 

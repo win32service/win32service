@@ -38,6 +38,8 @@
 #include "win32service_right.h"
 #include "win32service_right_info.h"
 #include "win32service_registry.h"
+#include "win32service_error.h"
+#include "win32service_config.h"
 
 
 /* gargh! service_main run from a new thread that we don't spawn, so we can't do this nicely */
@@ -127,142 +129,6 @@ static DWORD WINAPI svc_thread_proc(LPVOID _globals) {
     return 0;
 }
 
-static void convert_error_to_exception(DWORD code, const char *message) {
-    if (code == ERROR_ACCESS_DENIED) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error access denied (%s)", message);
-        return;
-    }
-    if (code == ERROR_CIRCULAR_DEPENDENCY) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error circular dependency (%s)", message);
-        return;
-    }
-    if (code == ERROR_DATABASE_DOES_NOT_EXIST) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error database does not exist (%s)", message);
-        return;
-    }
-    if (code == ERROR_DEPENDENT_SERVICES_RUNNING) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error dependent services running (%s)", message);
-        return;
-    }
-    if (code == ERROR_DUPLICATE_SERVICE_NAME) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error duplicate service name (%s)", message);
-        return;
-    }
-    if (code == ERROR_FAILED_SERVICE_CONTROLLER_CONNECT) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error failed service controller connect (%s)",
-                                message);
-        return;
-    }
-    if (code == ERROR_INSUFFICIENT_BUFFER) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error insufficient buffer (%s)", message);
-        return;
-    }
-    if (code == ERROR_INVALID_DATA) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid data (%s)", message);
-        return;
-    }
-    if (code == ERROR_INVALID_HANDLE) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid handle (%s)", message);
-        return;
-    }
-    if (code == ERROR_INVALID_LEVEL) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid level (%s)", message);
-        return;
-    }
-    if (code == ERROR_INVALID_NAME) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid name (%s)", message);
-        return;
-    }
-    if (code == ERROR_INVALID_PARAMETER) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid parameter (%s)", message);
-        return;
-    }
-    if (code == ERROR_INVALID_SERVICE_ACCOUNT) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid service account (%s)", message);
-        return;
-    }
-    if (code == ERROR_INVALID_SERVICE_CONTROL) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error invalid service control (%s)", message);
-        return;
-    }
-    if (code == ERROR_PATH_NOT_FOUND) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error path not found (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_ALREADY_RUNNING) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service already running (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_CANNOT_ACCEPT_CTRL) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service cannot accept ctrl (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_DATABASE_LOCKED) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service database locked (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_DEPENDENCY_DELETED) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service dependency deleted (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_DEPENDENCY_FAIL) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service dependency fail (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_DISABLED) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service disabled (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_DOES_NOT_EXIST) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service does not exist (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_EXISTS) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service exists (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_LOGON_FAILED) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service logon failed (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_MARKED_FOR_DELETE) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service marked for delete (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_NO_THREAD) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service no thread (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_NOT_ACTIVE) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service not active (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_REQUEST_TIMEOUT) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service request timeout (%s)", message);
-        return;
-    }
-    if (code == ERROR_SHUTDOWN_IN_PROGRESS) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error shutdown in progress (%s)", message);
-        return;
-    }
-    if (code == ERROR_SERVICE_SPECIFIC_ERROR) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Error service specific error (%s)", message);
-        return;
-    }
-    if (code == ERROR_NONE_MAPPED) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code,
-                                "No mapping between account names and security IDs was done. (%s)", message);
-        return;
-    }
-    if (code == 16000) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Internal extension error (%s)", message);
-        return;
-    }
-    if (code != NO_ERROR) {
-        zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Unknow error no %d (%s)", code, message);
-        return;
-    }
-}
 
 static bool win32_check_if_is_service() {
     HWINSTA hWinStation = GetProcessWindowStation();
@@ -483,7 +349,7 @@ static PHP_FUNCTION(win32_read_right_access_service) {
 
     if (pACL == NULL) {
         if (pSD != NULL) { LocalFree((HLOCAL) pSD); }
-        convert_error_to_exception(16000, "ACL empty");
+        convert_error_to_exception(ERROR_WIN32SERVICE_INTERNAL, "ACL empty");
         RETURN_THROWS();
     }
 
@@ -567,7 +433,7 @@ static PHP_FUNCTION(win32_read_all_rights_access_service) {
 
     if (pACL == NULL) {
         if (pSD != NULL) { LocalFree((HLOCAL) pSD); }
-        convert_error_to_exception(16000, "ACL empty");
+        convert_error_to_exception(ERROR_WIN32SERVICE_INTERNAL, "ACL empty");
         RETURN_THROWS();
     }
 
@@ -747,118 +613,34 @@ static PHP_FUNCTION(win32_create_service) {
 
     char *load_order;
     char *deps = NULL;
-    char *desc;
-    BOOL delayed_start;
-    BOOL recovery_enabled;
     SC_HANDLE hsvc, hmgr;
-    char *path_and_params;
-    SERVICE_DESCRIPTION srvc_desc;
-    SERVICE_DELAYED_AUTO_START_INFO srvc_delayed_start;
-    SERVICE_FAILURE_ACTIONS srvc_failure_infos;
-    SERVICE_FAILURE_ACTIONS_FLAG srvc_failure_action;
     DWORD base_priority;
     HKEY hKey;
     char *service_key;
     long registry_result;
+    BOOL dummy_changed = FALSE;
 
     if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "a|s!", &details, &machine, &machine_len)) {
         RETURN_THROWS();
     }
 
-#define STR_DETAIL(name, var, def) \
-    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), name, sizeof(name)-1)) != NULL) { \
-        if (IS_NULL != Z_TYPE_P(tmp)) { \
-            convert_to_string_ex(tmp); \
-        } else { \
-            convert_to_null_ex(tmp); \
-        } \
-        if (strlen(Z_STRVAL_P(tmp)) != Z_STRLEN_P(tmp)) { \
-            php_error_docref(NULL, E_WARNING, "malformed " name); \
-            RETURN_FALSE; \
-        } \
-        var = Z_STRVAL_P(tmp); \
-    } else { \
-        var = def; \
-    }
-
-#define INT_DETAIL(name, var, def) \
-    if ((tmp = zend_hash_find(Z_ARRVAL_P(details), zend_string_init(name, strlen(name), 0))) != NULL) { \
-        convert_to_long_ex(tmp); \
-        var = Z_LVAL_P(tmp); \
-    } else { \
-        var = def; \
-    }
-
-#define BOOL_DETAIL(name, var, def) \
-    if ((tmp = zend_hash_find(Z_ARRVAL_P(details), zend_string_init(name, strlen(name), 0))) != NULL) { \
-        convert_to_boolean_ex(tmp); \
-        var = Z_TYPE_P(tmp) == IS_TRUE ? 1 : 0; \
-    } else { \
-        var = def; \
-    }
-
-#define ARRAY_TO_STR_DETAIL(name, var, def) \
-    if ((tmp = zend_hash_find(Z_ARRVAL_P(details), zend_string_init(name, strlen(name), 0))) != NULL) { \
-        if (Z_TYPE_P(tmp) == IS_STRING) { \
-            STR_DETAIL(name, var, def); \
-        } else if (Z_TYPE_P(tmp) == IS_ARRAY) { \
-            HashTable * myht = Z_ARRVAL_P(tmp); \
-            uint32_t  count = zend_array_count(myht); \
-            if (count == 0) { \
-                var = NULL; \
-            } else { \
-                zend_ulong num; \
-                zend_string *key; \
-                zval *val; \
-                uint32_t totalLenth = 0; \
-                char ** var2 = emalloc(sizeof(char*) * count); \
-                ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) { \
-                    convert_to_string_ex(val); \
-                    totalLenth += strlen(Z_STRVAL_P(val)) + 1; \
-                    var2[num] = Z_STRVAL_P(val); \
-                } ZEND_HASH_FOREACH_END(); \
-                totalLenth++; \
-                var = emalloc(sizeof(char)*totalLenth); \
-                uint32_t j = 0; \
-                for (uint32_t l = 0; l < count; l++) { \
-                    for (uint32_t k = 0; k <= strlen(var2[l]); k++) { \
-                        var[j] = var2[l][k]; \
-                        j++; \
-                    } \
-                    var[j] = '\0'; \
-                } \
-                var[totalLenth - 1] = '\0'; \
-            } \
-        } else { \
-            var = def; \
-        } \
-    } else { \
-        var = def; \
-    }
-
-
-    STR_DETAIL(INFO_SERVICE, service, NULL);
-    STR_DETAIL(INFO_DISPLAY, display, NULL);
-    STR_DETAIL(INFO_USER, user, NULL);
-    STR_DETAIL(INFO_PASSWORD, password, "");
-    STR_DETAIL(INFO_PATH, path, NULL);
-    STR_DETAIL(INFO_PARAMS, params, "");
-    STR_DETAIL(INFO_LOAD_ORDER, load_order, NULL);
-    ARRAY_TO_STR_DETAIL(INFO_DEPENDENCIES, deps, NULL);
-    STR_DETAIL(INFO_DESCRIPTION, desc, NULL);
-    INT_DETAIL(INFO_SVC_TYPE, svc_type, SERVICE_WIN32_OWN_PROCESS);
-    INT_DETAIL(INFO_START_TYPE, start_type, SERVICE_AUTO_START);
-    INT_DETAIL(INFO_ERROR_CONTROL, error_control, SERVICE_ERROR_IGNORE);
-    BOOL_DETAIL(INFO_DELAYED_START, delayed_start, 0); /* Allow Vista+ delayed service start. */
-    INT_DETAIL(INFO_BASE_PRIORITY, base_priority, NORMAL_PRIORITY_CLASS);
-    INT_DETAIL(INFO_RECOVERY_DELAY, recovery_delay, 60000);
-    INT_DETAIL(INFO_RECOVERY_ACTION_1, recovery_action1, SC_ACTION_NONE);
-    INT_DETAIL(INFO_RECOVERY_ACTION_2, recovery_action2, SC_ACTION_NONE);
-    INT_DETAIL(INFO_RECOVERY_ACTION_3, recovery_action3, SC_ACTION_NONE);
-    INT_DETAIL(INFO_RECOVERY_RESET_PERIOD, recovery_reset_period, 86400);
-    BOOL_DETAIL(INFO_RECOVERY_ENABLED, recovery_enabled, 0);
-    STR_DETAIL(INFO_RECOVERY_REBOOT_MSG, recovery_reboot_msg, NULL);
-    STR_DETAIL(INFO_RECOVERY_COMMAND, recovery_command, NULL);
+    WIN32_GET_STR_DETAIL(details, INFO_SERVICE, service, NULL, dummy_changed);
+    WIN32_GET_STR_DETAIL(details, INFO_DISPLAY, display, NULL, dummy_changed);
+    WIN32_GET_STR_DETAIL(details, INFO_USER, user, NULL, dummy_changed);
+    WIN32_GET_STR_DETAIL(details, INFO_PASSWORD, password, "", dummy_changed);
+    WIN32_GET_STR_DETAIL(details, INFO_PATH, path, NULL, dummy_changed);
+    WIN32_GET_STR_DETAIL(details, INFO_PARAMS, params, "", dummy_changed);
+    WIN32_GET_STR_DETAIL(details, INFO_LOAD_ORDER, load_order, NULL, dummy_changed);
+    WIN32_GET_DEPS_DETAIL(details, deps, NULL, dummy_changed);
+    WIN32_GET_LONG_DETAIL(details, INFO_SVC_TYPE, svc_type, SERVICE_WIN32_OWN_PROCESS, dummy_changed);
+    WIN32_GET_LONG_DETAIL(details, INFO_START_TYPE, start_type, SERVICE_AUTO_START, dummy_changed);
+    WIN32_GET_LONG_DETAIL(details, INFO_ERROR_CONTROL, error_control, SERVICE_ERROR_IGNORE, dummy_changed);
+    WIN32_GET_LONG_DETAIL(details, INFO_BASE_PRIORITY, base_priority, NORMAL_PRIORITY_CLASS, dummy_changed);
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_DELAY, recovery_delay, 60000, dummy_changed);
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_1, recovery_action1, SC_ACTION_NONE, dummy_changed);
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_2, recovery_action2, SC_ACTION_NONE, dummy_changed);
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_3, recovery_action3, SC_ACTION_NONE, dummy_changed);
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_RESET_PERIOD, recovery_reset_period, 86400, dummy_changed);
 
 
     if (service == NULL) {
@@ -968,31 +750,6 @@ static PHP_FUNCTION(win32_create_service) {
     }
 
 
-    srvc_desc.lpDescription = desc;
-    srvc_delayed_start.fDelayedAutostart = delayed_start;
-    srvc_failure_infos.lpRebootMsg = NULL;
-    srvc_failure_infos.lpCommand = NULL;
-
-    srvc_failure_infos.dwResetPeriod = recovery_reset_period;
-    if (recovery_reboot_msg != NULL) {
-        srvc_failure_infos.lpRebootMsg = recovery_reboot_msg;
-    }
-    if (recovery_command != NULL) {
-        srvc_failure_infos.lpCommand = recovery_command;
-    }
-
-    srvc_failure_infos.cActions = 3;
-    SC_ACTION recovery_actions[3];
-    recovery_actions[0].Delay = recovery_delay;
-    recovery_actions[0].Type = recovery_action1;
-    recovery_actions[1].Delay = recovery_delay;
-    recovery_actions[1].Type = recovery_action2;
-    recovery_actions[2].Delay = recovery_delay;
-    recovery_actions[2].Type = recovery_action3;
-
-    srvc_failure_infos.lpsaActions = recovery_actions;
-    srvc_failure_action.fFailureActionsOnNonCrashFailures = recovery_enabled;
-
     /* Connect to the SCManager. */
     hmgr = OpenSCManager(machine, NULL, SC_MANAGER_ALL_ACCESS);
 
@@ -1002,29 +759,7 @@ static PHP_FUNCTION(win32_create_service) {
         RETURN_THROWS();
     }
 
-    /* Build service path and parameters. */
-    if (path == NULL) {
-        DWORD len;
-        char buf[MAX_PATH];
-
-        len = GetModuleFileName(NULL, buf, sizeof(buf));
-        buf[len] = '\0';
-
-        if (strchr(buf, ' '))
-            spprintf(&path_and_params, 0, "\"%s\" %s", buf, params);
-        else
-            spprintf(&path_and_params, 0, "%s %s", buf, params);
-    } else {
-        if (strchr(path, ' '))
-            spprintf(&path_and_params, 0, "\"%s\" %s", path, params);
-        else
-            spprintf(&path_and_params, 0, "%s %s", path, params);
-    }
-
-    /* If interact with desktop is set and no username supplied (Only LocalSystem allows InteractWithDesktop) then pass the path and params through %COMSPEC% /C "..." */
-    if (SERVICE_INTERACTIVE_PROCESS & svc_type && user == NULL) {
-        spprintf(&path_and_params, 0, "\"%s\" /C \"%s\"", getenv("COMSPEC"), path_and_params);
-    }
+    char * path_and_params = win32_generate_path_and_params(path, params, svc_type, user);
 
     /* Register the service. */
     hsvc = CreateService(hmgr,
@@ -1041,7 +776,9 @@ static PHP_FUNCTION(win32_create_service) {
                          (LPCSTR) user,
                          (LPCSTR) password);
 
-    efree(path_and_params);
+    if (path_and_params) {
+        efree(path_and_params);
+    }
 
 
     /* If there was an error :
@@ -1055,32 +792,13 @@ static PHP_FUNCTION(win32_create_service) {
         RETURN_THROWS();
     }
 
-    if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, &srvc_desc)) {
-        CloseServiceHandle(hsvc);
-        CloseServiceHandle(hmgr);
-        convert_error_to_exception(GetLastError(), "service partially configured, error when defining the description");
-        RETURN_THROWS();
-    }
-    if ((start_type & SERVICE_AUTO_START &&
-         !ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, &srvc_delayed_start))) {
-        CloseServiceHandle(hsvc);
-        CloseServiceHandle(hmgr);
-        convert_error_to_exception(GetLastError(), "service partially configured, error on change the start type");
-        RETURN_THROWS();
-    }
+    char *error_msg = "";
+    DWORD error_code = win32_configure_service_ex(hsvc, details, FALSE, start_type, &error_msg);
 
-    if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, &srvc_failure_infos)) {
+    if (error_code != ERROR_SUCCESS) {
         CloseServiceHandle(hsvc);
         CloseServiceHandle(hmgr);
-        convert_error_to_exception(GetLastError(), "service partially configured, error on change the failure action");
-        RETURN_THROWS();
-    }
-
-    if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, &srvc_failure_action)) {
-        CloseServiceHandle(hsvc);
-        CloseServiceHandle(hmgr);
-        convert_error_to_exception(GetLastError(),
-                                   "service partially configured, error on change the failure action flag");
+        convert_error_to_exception(error_code, error_msg);
         RETURN_THROWS();
     }
 
@@ -1325,6 +1043,386 @@ static PHP_FUNCTION(win32_query_service_status) {
     add_assoc_long(return_value, INFO_STATUS_SERVICE_FLAGS, st->dwServiceFlags);
 
     efree(st);
+    CloseServiceHandle(hsvc);
+    CloseServiceHandle(hmgr);
+}
+/* }}} */
+
+/* {{{ proto array win32_query_service_config(string servicename [, string machine])
+   Queries the configuration of a service */
+static PHP_FUNCTION(win32_query_service_config) {
+    char *machine = NULL;
+    char *service = NULL;
+    size_t machine_len = 0;
+    size_t service_len = 0;
+    SC_HANDLE hsvc;
+    SC_HANDLE hmgr;
+    LPQUERY_SERVICE_CONFIGW cfg = NULL;
+    LPSERVICE_DESCRIPTIONW desc = NULL;
+    LPSERVICE_DELAYED_AUTO_START_INFO delayed_start = NULL;
+    LPSERVICE_FAILURE_ACTIONS_FLAG failure_actions_flag = NULL;
+    LPSERVICE_FAILURE_ACTIONSW failure_actions = NULL;
+    DWORD size, needed;
+
+    if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!", &service, &service_len, &machine, &machine_len)) {
+        RETURN_THROWS();
+    }
+
+    if (service_len == 0) {
+        zend_argument_value_error(1, "the value cannot be empty");
+        RETURN_THROWS();
+    }
+
+    hmgr = OpenSCManager(machine, NULL, GENERIC_READ);
+    if (!hmgr) {
+        convert_error_to_exception(GetLastError(), "");
+        RETURN_THROWS();
+    }
+    hsvc = OpenService(hmgr, service, SERVICE_QUERY_CONFIG);
+    if (!hsvc) {
+        CloseServiceHandle(hmgr);
+        convert_error_to_exception(GetLastError(), "");
+        RETURN_THROWS();
+    }
+
+    /* Query Service Config */
+    if (!QueryServiceConfig(hsvc, NULL, 0, &needed)) {
+        if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
+            CloseServiceHandle(hsvc);
+            CloseServiceHandle(hmgr);
+            convert_error_to_exception(GetLastError(), "");
+            RETURN_THROWS();
+        }
+        cfg = (LPQUERY_SERVICE_CONFIG) emalloc(needed);
+        if (!QueryServiceConfig(hsvc, cfg, needed, &needed)) {
+            efree(cfg);
+            CloseServiceHandle(hsvc);
+            CloseServiceHandle(hmgr);
+            convert_error_to_exception(GetLastError(), "");
+            RETURN_THROWS();
+        }
+    }
+
+    array_init(return_value);
+    add_assoc_string(return_value, INFO_SERVICE, service);
+    add_assoc_long(return_value, INFO_SVC_TYPE, cfg->dwServiceType);
+    add_assoc_long(return_value, INFO_START_TYPE, cfg->dwStartType);
+    add_assoc_long(return_value, INFO_ERROR_CONTROL, cfg->dwErrorControl);
+
+    if (cfg->lpBinaryPathName) {
+        add_assoc_string(return_value, INFO_PATH, cfg->lpBinaryPathName);
+    } else {
+        add_assoc_null(return_value, INFO_PATH);
+    }
+
+    if (cfg->lpLoadOrderGroup) {
+        add_assoc_string(return_value, INFO_LOAD_ORDER, cfg->lpLoadOrderGroup);
+    } else {
+        add_assoc_null(return_value, INFO_LOAD_ORDER);
+    }
+
+    add_assoc_long(return_value, INFO_TAG_ID, cfg->dwTagId);
+
+    if (cfg->lpDependencies) {
+        zval deps;
+        array_init(&deps);
+        char *p = cfg->lpDependencies;
+        while (*p) {
+            add_next_index_string(&deps, p);
+            p += strlen(p) + 1;
+        }
+        add_assoc_zval(return_value, INFO_DEPENDENCIES, &deps);
+    } else {
+        add_assoc_null(return_value, INFO_DEPENDENCIES);
+    }
+
+    if (cfg->lpServiceStartName) {
+        add_assoc_string(return_value, INFO_USER, cfg->lpServiceStartName);
+    } else {
+        add_assoc_null(return_value, INFO_USER);
+    }
+
+    if (cfg->lpDisplayName) {
+        add_assoc_string(return_value, INFO_DISPLAY, cfg->lpDisplayName);
+    } else {
+        add_assoc_null(return_value, INFO_DISPLAY);
+    }
+
+    /* Query Service Description */
+    if (!QueryServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, NULL, 0, &needed)) {
+        if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+            desc = (LPSERVICE_DESCRIPTION) emalloc(needed);
+            if (QueryServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, (LPBYTE)desc, needed, &needed)) {
+                if (desc->lpDescription) {
+                    add_assoc_string(return_value, INFO_DESCRIPTION, desc->lpDescription);
+                } else {
+                    add_assoc_null(return_value, INFO_DESCRIPTION);
+                }
+            }
+            efree(desc);
+        }
+    }
+
+    /* Query Delayed Auto Start Info */
+    if (!QueryServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, NULL, 0, &needed)) {
+        if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+            delayed_start = (LPSERVICE_DELAYED_AUTO_START_INFO) emalloc(needed);
+            if (QueryServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, (LPBYTE)delayed_start, needed, &needed)) {
+                add_assoc_bool(return_value, INFO_DELAYED_START, delayed_start->fDelayedAutostart);
+            }
+            efree(delayed_start);
+        }
+    }
+
+    /* Query Failure Actions Flag */
+    if (!QueryServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, NULL, 0, &needed)) {
+        if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+            failure_actions_flag = (LPSERVICE_FAILURE_ACTIONS_FLAG) emalloc(needed);
+            if (QueryServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, (LPBYTE)failure_actions_flag, needed, &needed)) {
+                add_assoc_bool(return_value, INFO_RECOVERY_ENABLED, failure_actions_flag->fFailureActionsOnNonCrashFailures);
+            }
+            efree(failure_actions_flag);
+        }
+    }
+
+    /* Query Failure Actions */
+    if (!QueryServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, NULL, 0, &needed)) {
+        if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+            failure_actions = (LPSERVICE_FAILURE_ACTIONS) emalloc(needed);
+            if (QueryServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, (LPBYTE)failure_actions, needed, &needed)) {
+                add_assoc_long(return_value, INFO_RECOVERY_RESET_PERIOD, failure_actions->dwResetPeriod);
+                if (failure_actions->lpRebootMsg) {
+                    add_assoc_string(return_value, INFO_RECOVERY_REBOOT_MSG, failure_actions->lpRebootMsg);
+                } else {
+                    add_assoc_null(return_value, INFO_RECOVERY_REBOOT_MSG);
+                }
+                if (failure_actions->lpCommand) {
+                    add_assoc_string(return_value, INFO_RECOVERY_COMMAND, failure_actions->lpCommand);
+                } else {
+                    add_assoc_null(return_value, INFO_RECOVERY_COMMAND);
+                }
+
+                if (failure_actions->cActions >= 1) {
+                    add_assoc_long(return_value, INFO_RECOVERY_ACTION_1, failure_actions->lpsaActions[0].Type);
+                    add_assoc_long(return_value, INFO_RECOVERY_DELAY, failure_actions->lpsaActions[0].Delay);
+                }
+                if (failure_actions->cActions >= 2) {
+                    add_assoc_long(return_value, INFO_RECOVERY_ACTION_2, failure_actions->lpsaActions[1].Type);
+                }
+                if (failure_actions->cActions >= 3) {
+                    add_assoc_long(return_value, INFO_RECOVERY_ACTION_3, failure_actions->lpsaActions[2].Type);
+                }
+            }
+            efree(failure_actions);
+        }
+    }
+
+    efree(cfg);
+    CloseServiceHandle(hsvc);
+    CloseServiceHandle(hmgr);
+}
+/* }}} */
+
+/* {{{ proto void win32_update_service_config(string servicename, array details [, string machine])
+   Updates the configuration of a service */
+static PHP_FUNCTION(win32_update_service_config) {
+    zval *details, *tmp;
+    char *machine = NULL;
+    char *service = NULL;
+    size_t machine_len = 0;
+    size_t service_len = 0;
+    SC_HANDLE hsvc, hmgr;
+    long svc_type = SERVICE_NO_CHANGE;
+    DWORD start_type = SERVICE_NO_CHANGE;
+    DWORD error_control = SERVICE_NO_CHANGE;
+    char *path = NULL, *load_order = NULL, *deps = NULL, *user = NULL, *password = NULL, *display = NULL;
+    char *params = NULL;
+    BOOL update_main_config = FALSE;
+
+    if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "sa|s!", &service, &service_len, &details, &machine, &machine_len)) {
+        RETURN_THROWS();
+    }
+
+    if (service_len == 0) {
+        zend_argument_value_error(1, "the value cannot be empty");
+        RETURN_THROWS();
+    }
+
+    hmgr = OpenSCManager(machine, NULL, SC_MANAGER_ALL_ACCESS);
+    if (!hmgr) {
+        convert_error_to_exception(GetLastError(), "");
+        RETURN_THROWS();
+    }
+    hsvc = OpenService(hmgr, service, SERVICE_ALL_ACCESS);
+    if (!hsvc) {
+        CloseServiceHandle(hmgr);
+        convert_error_to_exception(GetLastError(), "");
+        RETURN_THROWS();
+    }
+
+    WIN32_GET_LONG_DETAIL(details, INFO_SVC_TYPE, svc_type, SERVICE_NO_CHANGE, update_main_config);
+    WIN32_GET_LONG_DETAIL(details, INFO_START_TYPE, start_type, SERVICE_NO_CHANGE, update_main_config);
+    WIN32_GET_LONG_DETAIL(details, INFO_ERROR_CONTROL, error_control, SERVICE_NO_CHANGE, update_main_config);
+    WIN32_GET_STR_DETAIL(details, INFO_PATH, path, NULL, update_main_config);
+    WIN32_GET_STR_DETAIL(details, INFO_PARAMS, params, NULL, update_main_config);
+    WIN32_GET_STR_DETAIL(details, INFO_LOAD_ORDER, load_order, NULL, update_main_config);
+    WIN32_GET_STR_DETAIL(details, INFO_USER, user, NULL, update_main_config);
+    WIN32_GET_STR_DETAIL(details, INFO_PASSWORD, password, NULL, update_main_config);
+    WIN32_GET_STR_DETAIL(details, INFO_DISPLAY, display, NULL, update_main_config);
+
+		bool update_failure_actions=FALSE;
+    long recovery_delay;
+    long recovery_reset_period;
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_DELAY, recovery_delay, 60000, update_failure_actions);
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_RESET_PERIOD, recovery_reset_period, 0, update_failure_actions);
+
+
+    long recovery_action1 = SC_ACTION_NONE;
+    long recovery_action2 = SC_ACTION_NONE;
+    long recovery_action3 = SC_ACTION_NONE;
+
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_1, recovery_action1, SC_ACTION_NONE, update_failure_actions);
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_2, recovery_action2, SC_ACTION_NONE, update_failure_actions);
+    WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_ACTION_3, recovery_action3, SC_ACTION_NONE, update_failure_actions);
+
+
+    if (svc_type != SERVICE_NO_CHANGE &&
+	      svc_type != SERVICE_WIN32_OWN_PROCESS &&
+        svc_type != SERVICE_INTERACTIVE_PROCESS &&
+        svc_type != SERVICE_WIN32_OWN_PROCESS_INTERACTIVE) {
+        zend_argument_value_error(1,
+                                  "the value %d for '%s' key is wrong, Use WIN32_SERVICE_WIN32_OWN_PROCESS, WIN32_SERVICE_INTERACTIVE_PROCESS or WIN32_SERVICE_WIN32_OWN_PROCESS_INTERACTIVE constants",
+                                  svc_type,
+                                  INFO_SVC_TYPE);
+        RETURN_THROWS();
+    }
+    if (start_type != SERVICE_NO_CHANGE &&
+    		start_type != SERVICE_BOOT_START &&
+        start_type != SERVICE_SYSTEM_START &&
+        start_type != SERVICE_AUTO_START &&
+        start_type != SERVICE_DEMAND_START &&
+        start_type != SERVICE_DISABLED) {
+        zend_argument_value_error(1,
+                                  "the value %d for '%s' key is wrong, Use WIN32_SERVICE_BOOT_START, WIN32_SERVICE_SYSTEM_START, WIN32_SERVICE_AUTO_START, WIN32_SERVICE_DEMAND_START or WIN32_SERVICE_DISABLED constants",
+                                  start_type,
+                                  INFO_START_TYPE);
+        RETURN_THROWS();
+    }
+
+    if (error_control != SERVICE_NO_CHANGE &&
+    		error_control != SERVICE_ERROR_IGNORE &&
+        error_control != SERVICE_ERROR_NORMAL &&
+        error_control != SERVICE_ERROR_SEVERE &&
+        error_control != SERVICE_ERROR_CRITICAL) {
+        zend_argument_value_error(1,
+                                  "the value %d for '%s' key is wrong, Use WIN32_SERVICE_ERROR_IGNORE, WIN32_SERVICE_ERROR_NORMAL, WIN32_SERVICE_ERROR_SEVERE or WIN32_SERVICE_ERROR_CRITICAL constants",
+                                  error_control,
+                                  INFO_ERROR_CONTROL);
+        RETURN_THROWS();
+    }
+
+    if (recovery_delay < 0 || recovery_delay > ZEND_LONG_MAX) {
+        zend_argument_value_error(1,
+                                  "the value for key '%s' must between 0 and " ZEND_LONG_FMT
+        ". Got %d.",
+                INFO_RECOVERY_DELAY,
+                ZEND_LONG_MAX,
+                recovery_delay);
+        RETURN_THROWS();
+    }
+
+
+    if (recovery_action1 != SC_ACTION_NONE && recovery_action1 != SC_ACTION_REBOOT &&
+        recovery_action1 != SC_ACTION_RESTART && recovery_action1 != SC_ACTION_RUN_COMMAND) {
+        zend_argument_value_error(1,
+                                  "the value %d for '%s' key is wrong. Use WIN32_SC_ACTION_NONE, WIN32_SC_ACTION_REBOOT, WIN32_SC_ACTION_RESTART or WIN32_SC_ACTION_RUN_COMMAND constants",
+                                  recovery_action1,
+                                  INFO_RECOVERY_ACTION_1);
+        RETURN_THROWS();
+    }
+
+    if (recovery_action2 != SC_ACTION_NONE && recovery_action2 != SC_ACTION_REBOOT &&
+        recovery_action2 != SC_ACTION_RESTART && recovery_action2 != SC_ACTION_RUN_COMMAND) {
+        zend_argument_value_error(1,
+                                  "the value %d for '%s' key is wrong. Use WIN32_SC_ACTION_NONE, WIN32_SC_ACTION_REBOOT, WIN32_SC_ACTION_RESTART or WIN32_SC_ACTION_RUN_COMMAND constants",
+                                  recovery_action2,
+                                  INFO_RECOVERY_ACTION_2);
+        RETURN_THROWS();
+    }
+
+    if (recovery_action3 != SC_ACTION_NONE && recovery_action3 != SC_ACTION_REBOOT &&
+        recovery_action3 != SC_ACTION_RESTART && recovery_action3 != SC_ACTION_RUN_COMMAND) {
+        zend_argument_value_error(1,
+                                  "the value %d for '%s' key is wrong. Use WIN32_SC_ACTION_NONE, WIN32_SC_ACTION_REBOOT, WIN32_SC_ACTION_RESTART or WIN32_SC_ACTION_RUN_COMMAND constants",
+                                  recovery_action3,
+                                  INFO_RECOVERY_ACTION_3);
+        RETURN_THROWS();
+    }
+    if (recovery_reset_period < 0 || recovery_reset_period > ZEND_LONG_MAX) {
+        zend_argument_value_error(1,
+                                  "the value for key '%s' must between 0 and " ZEND_LONG_FMT
+        ". Got %d.",
+                INFO_RECOVERY_RESET_PERIOD,
+                ZEND_LONG_MAX,
+                recovery_reset_period);
+        RETURN_THROWS();
+    }
+
+	if (svc_type == SERVICE_NO_CHANGE) {
+    	LPQUERY_SERVICE_CONFIGW cfg = NULL;
+        DWORD needed;
+	    if (!QueryServiceConfig(hsvc, NULL, 0, &needed)) {
+            if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
+                CloseServiceHandle(hsvc);
+                CloseServiceHandle(hmgr);
+                convert_error_to_exception(GetLastError(), "");
+                RETURN_THROWS();
+            }
+            cfg = (LPQUERY_SERVICE_CONFIG) emalloc(needed);
+            if (!QueryServiceConfig(hsvc, cfg, needed, &needed)) {
+                efree(cfg);
+                CloseServiceHandle(hsvc);
+                CloseServiceHandle(hmgr);
+                convert_error_to_exception(GetLastError(), "");
+                RETURN_THROWS();
+            }
+        }
+	    svc_type = cfg->dwServiceType;
+        efree(cfg);
+    }
+
+
+
+    /* Dependencies */
+    WIN32_GET_DEPS_DETAIL(details, deps, NULL, update_main_config);
+
+    char * path_and_params = win32_generate_path_and_params(path, params, svc_type, user);
+
+    if (update_main_config) {
+        if (!ChangeServiceConfig(hsvc, svc_type, start_type, error_control, path_and_params, load_order, NULL, deps, user, password, display)) {
+            if (path_and_params) efree(path_and_params);
+            if (deps && (tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_DEPENDENCIES, sizeof(INFO_DEPENDENCIES)-1)) != NULL && Z_TYPE_P(tmp) == IS_ARRAY) efree(deps);
+            CloseServiceHandle(hsvc);
+            CloseServiceHandle(hmgr);
+            convert_error_to_exception(GetLastError(), "");
+            RETURN_THROWS();
+        }
+    }
+
+    if (path_and_params) efree(path_and_params);
+    if (deps && (tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_DEPENDENCIES, sizeof(INFO_DEPENDENCIES)-1)) != NULL && Z_TYPE_P(tmp) == IS_ARRAY) efree(deps);
+
+
+    char *error_msg = "";
+    DWORD error_code = win32_configure_service_ex(hsvc, details, TRUE, start_type, &error_msg);
+
+    if (error_code != ERROR_SUCCESS) {
+        CloseServiceHandle(hsvc);
+        CloseServiceHandle(hmgr);
+        convert_error_to_exception(error_code, error_msg);
+        RETURN_THROWS();
+    }
+
     CloseServiceHandle(hsvc);
     CloseServiceHandle(hmgr);
 }
@@ -1613,6 +1711,7 @@ static PHP_FUNCTION(win32_remove_service_env_var) {
 
 /* }}} */
 
+static void win32_handle_service_controls(INTERNAL_FUNCTION_PARAMETERS, long access, long status);
 
 static void win32_handle_service_controls(INTERNAL_FUNCTION_PARAMETERS, long access, long status) /* {{{ */
 {
@@ -1755,8 +1854,10 @@ static zend_function_entry functions[] = {
         PHP_FE(win32_get_service_priority, arginfo_win32_get_service_priority)
         PHP_FE(win32_get_last_control_message, arginfo_win32_get_last_control_message)
         PHP_FE(win32_set_service_pause_resume_state, arginfo_win32_set_service_pause_resume_state)
-        PHP_FE(win32_query_service_status, arginfo_win32_query_service_status)
-        PHP_FE(win32_start_service, arginfo_win32_start_service)
+       	PHP_FE(win32_query_service_status, arginfo_win32_query_service_status)
+       	PHP_FE(win32_query_service_config, arginfo_win32_query_service_config)
+       	PHP_FE(win32_update_service_config, arginfo_win32_update_service_config)
+       	PHP_FE(win32_start_service, arginfo_win32_start_service)
         PHP_FE(win32_stop_service, arginfo_win32_stop_service)
         PHP_FE(win32_pause_service, arginfo_win32_pause_service)
         PHP_FE(win32_continue_service, arginfo_win32_continue_service)
@@ -1928,6 +2029,7 @@ static PHP_MINIT_FUNCTION(win32service) {
     MKCONST(ERROR_SERVICE_REQUEST_TIMEOUT);            /* 0x0000041D The process for the service was started, but it did not call StartServiceCtrlDispatcher, or the thread that called StartServiceCtrlDispatcher may be blocked in a control handler function. */
     MKCONST(ERROR_SHUTDOWN_IN_PROGRESS);               /* 0x0000045B The system is shutting down; this function cannot be called. */
     MKCONST(ERROR_SERVICE_SPECIFIC_ERROR);             /* 0x0000042A The service has returned a service-specific error code. */
+    MKCONST(ERROR_WIN32SERVICE_INTERNAL);                     /* 0x00003E80 Win32Service Internal error. */
     MKCONST(NO_ERROR);                                 /* 0x00000000 No error. */
 
     /* Win32 Priority Constants */
@@ -2105,6 +2207,8 @@ static PHP_MINFO_FUNCTION(win32service) {
     php_info_print_table_row(2, "win32_set_service_priority", "enabled");
     php_info_print_table_row(2, "win32_get_service_priority", "enabled");
     php_info_print_table_row(2, "win32_query_service_status", "enabled");
+    php_info_print_table_row(2, "win32_query_service_config", "enabled");
+    php_info_print_table_row(2, "win32_update_service_config", "enabled");
     php_info_print_table_row(2, "win32_start_service", "enabled");
     php_info_print_table_row(2, "win32_stop_service", "enabled");
     php_info_print_table_row(2, "win32_pause_service", "enabled");

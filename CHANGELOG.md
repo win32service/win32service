@@ -1,6 +1,7 @@
 # Version 1.2.0 (Unreleased)
 
-* Add `win32_set_service_priority` and `win32_get_service_priority` function.  (@macintoshplus) (issue [#100](https://github.com/win32service/win32service/issues/100))
+* Add `win32_set_service_priority` and `win32_get_service_priority` function. (@macintoshplus) (issue [#100](https://github.com/win32service/win32service/issues/100))
+* Add `win32_query_service_config` and `win32_update_service_config` function. (@macintoshplus) (issue [#101](https://github.com/win32service/win32service/issues/101))
 
 # Version 1.1.0 (2026-01-12)
 
