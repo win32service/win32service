@@ -18,8 +18,8 @@ $service = [
 		WIN32_INFO_START_TYPE => WIN32_SERVICE_AUTO_START,
 		WIN32_INFO_BASE_PRIORITY => WIN32_BELOW_NORMAL_PRIORITY_CLASS,
 ];
-if (win32_exists_service($service['service'])) {
-    win32_delete_service($service['service']);
+if (win32_exists_service($service[WIN32_INFO_SERVICE])) {
+    win32_delete_service($service[WIN32_INFO_SERVICE]);
 }
  var_dump(win32_create_service($service));
 try {
@@ -28,14 +28,16 @@ try {
     displayException($e);
 }
 sleep(5);
+echo "Set priority\n";
+var_dump(win32_set_service_priority($service[WIN32_INFO_SERVICE], WIN32_NORMAL_PRIORITY_CLASS));
 echo "Read right\n";
-var_dump(win32_read_right_access_service($service['service'], 'subuser'));
+var_dump(win32_read_right_access_service($service[WIN32_INFO_SERVICE], 'subuser'));
 sleep(1);
 echo "add right\n";
-var_dump(win32_add_right_access_service($service['service'], 'subuser',  WIN32_SERVICE_START | WIN32_SERVICE_STOP | WIN32_READ_CONTROL));
+var_dump(win32_add_right_access_service($service[WIN32_INFO_SERVICE], 'subuser',  WIN32_SERVICE_START | WIN32_SERVICE_STOP | WIN32_READ_CONTROL));
 sleep(1);
 echo "Read right\n";
-var_dump($infos = win32_read_right_access_service($service['service'], 'subuser'));
+var_dump($infos = win32_read_right_access_service($service[WIN32_INFO_SERVICE], 'subuser'));
 var_dump($infos->getFullUsername());
 var_dump($infos->getUsername());
 var_dump($infos->getDomain());
@@ -45,7 +47,7 @@ var_dump($infos->isDenyAccess());
 var_dump((string) $infos);
 sleep(1);
 echo "read all rights\n";
-var_dump($infoAll = win32_read_all_rights_access_service($service['service']));
+var_dump($infoAll = win32_read_all_rights_access_service($service[WIN32_INFO_SERVICE]));
 foreach ($infoAll as $info) {
 	var_dump($info->getFullUsername());
 	var_dump($info->getUsername());
@@ -58,15 +60,15 @@ foreach ($infoAll as $info) {
 
 sleep(1);
 echo "remove right\n";
-var_dump(win32_remove_right_access_service($service['service'], 'subuser'));
+var_dump(win32_remove_right_access_service($service[WIN32_INFO_SERVICE], 'subuser'));
 sleep(1);
 echo "Read right\n";
-var_dump(win32_read_right_access_service($service['service'], 'subuser'));
+var_dump(win32_read_right_access_service($service[WIN32_INFO_SERVICE], 'subuser'));
 sleep(5);
-var_dump(win32_delete_service($service['service']));
+var_dump(win32_delete_service($service[WIN32_INFO_SERVICE]));
 //sleep(5);
 try {
-    var_dump(win32_delete_service($service['service']));
+    var_dump(win32_delete_service($service[WIN32_INFO_SERVICE]));
 } catch (Throwable $e) {
     displayException($e);
 }
@@ -74,6 +76,8 @@ try {
 --EXPECTF--
 NULL
 Win32ServiceException: (1073) Error service exists (on create service)
+Set priority
+NULL
 Read right
 object(Win32Service\RightInfo)#2 (0) {
 }

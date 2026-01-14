@@ -41,7 +41,7 @@ long get_service_environment_vars(char * service, int service_len, char ** pvDat
 
     LPDWORD pdwType = NULL;
 
-    lReturnValue = RegGetValue(hKey, NULL ,"Environment", RRF_RT_REG_MULTI_SZ|RRF_ZEROONFAILURE, pdwType, NULL, pvDataLen);
+    lReturnValue = RegGetValue(hKey, NULL ,SERVICES_REG_ENVIRONMENT, RRF_RT_REG_MULTI_SZ|RRF_ZEROONFAILURE, pdwType, NULL, pvDataLen);
     if (lReturnValue != ERROR_SUCCESS) {
         efree(keyName);
         RegCloseKey(hKey);
@@ -49,7 +49,7 @@ long get_service_environment_vars(char * service, int service_len, char ** pvDat
     }
     *pvData = emalloc(sizeof(char) * *pvDataLen);
 
-    lReturnValue = RegGetValue(hKey, NULL ,"Environment", RRF_RT_REG_MULTI_SZ|RRF_ZEROONFAILURE, pdwType, *pvData, pvDataLen);
+    lReturnValue = RegGetValue(hKey, NULL ,SERVICES_REG_ENVIRONMENT, RRF_RT_REG_MULTI_SZ|RRF_ZEROONFAILURE, pdwType, *pvData, pvDataLen);
     if (lReturnValue != ERROR_SUCCESS) {
         efree(keyName);
         RegCloseKey(hKey);

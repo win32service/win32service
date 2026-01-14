@@ -1,3 +1,7 @@
+# Version 1.2.0 (Unreleased)
+
+* add `win32_set_service_priority` function
+
 # Version 1.1.0 (2026-01-12)
 
 * Add PHP 8.5 compatibility
