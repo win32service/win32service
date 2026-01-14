@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 689c86a8677f6d861f8cbb5cb0509c1415962f4c */
+ * Stub hash: 109138389e8d890472873cf9644d324f6c8c4dca */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_win32_start_service_ctrl_dispatcher, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -29,7 +29,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_win32_read_right_access_service,
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, machine, IS_STRING, 0, "\'\'")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_win32_read_all_rights_access_service, 0, 1, IS_OBJECT, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_win32_read_all_rights_access_service, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, servicename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, machine, IS_STRING, 0, "\'\'")
 ZEND_END_ARG_INFO()
@@ -62,17 +62,23 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_win32_delete_service, 0, 1, IS_V
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, machine, IS_STRING, 0, "\'\'")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_win32_set_service_priority, 0, 2, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, servicename, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, priority, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_win32_get_service_priority, 0, 1, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, servicename, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_win32_get_last_control_message, 0, 0, long, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_win32_query_service_status, 0, 1, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, servicename, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, machine, IS_STRING, 0, "\'\'")
-ZEND_END_ARG_INFO()
+#define arginfo_win32_query_service_status arginfo_win32_read_all_rights_access_service
 
 #define arginfo_win32_start_service arginfo_win32_delete_service
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_win32_get_service_env_vars, 0, 1, IS_VOID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_win32_get_service_env_vars, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, servicename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 

@@ -39,8 +39,6 @@
 #include "win32service_right_info.h"
 #include "win32service_registry.h"
 
-#define SERVICES_REG_BASE_PRIORITY "BasePriority"
-
 
 /* gargh! service_main run from a new thread that we don't spawn, so we can't do this nicely */
 static void *tmp_service_g = NULL;
@@ -920,7 +918,7 @@ static PHP_FUNCTION(win32_create_service) {
                                   base_priority,
                                   INFO_BASE_PRIORITY);
         RETURN_THROWS();
-    }
+        }
 
     if (recovery_delay < 0 || recovery_delay > ZEND_LONG_MAX) {
         zend_argument_value_error(1,
@@ -1088,24 +1086,10 @@ static PHP_FUNCTION(win32_create_service) {
 
     CloseServiceHandle(hsvc);
     CloseServiceHandle(hmgr);
-
-    return;
-
-    /* Store the base_priority in the registry. */
-    spprintf(&service_key, 0, "%s%s", SERVICES_REG_KEY_ROOT, service);
-    if (ERROR_SUCCESS != (registry_result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, service_key, 0, KEY_ALL_ACCESS, &hKey))) {
-        convert_error_to_exception(registry_result, "On openning registry key to set base_priority");
+    if (ERROR_SUCCESS != (registry_result = set_service_base_priority(service, strlen(service), base_priority))) {
+        convert_error_to_exception(registry_result, "On set base_priority");
         RETURN_THROWS();
     }
-    if (ERROR_SUCCESS != (registry_result = RegSetValueEx(hKey, SERVICES_REG_BASE_PRIORITY, 0, REG_DWORD, (CONST
-        BYTE *)&base_priority, sizeof(REG_DWORD)))) {
-        convert_error_to_exception(registry_result, "On change the registry key value of base_priority");
-        RETURN_THROWS();
-    }
-
-    RegCloseKey(hKey);
-    efree(service_key);
-
 }
 /* }}} */
 
@@ -1192,6 +1176,71 @@ static PHP_FUNCTION(win32_delete_service) {
 
     CloseServiceHandle(hsvc);
     CloseServiceHandle(hmgr);
+}
+/* }}} */
+
+/* {{{ proto long win32_set_service_priority()
+   Set the service priority level */
+static PHP_FUNCTION(win32_set_service_priority) {
+    char *service = NULL;
+    size_t service_len = 0;
+    long base_priority = NORMAL_PRIORITY_CLASS;
+    long registry_result = 0;
+
+    if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "sl", &service, &service_len, &base_priority)) {
+        RETURN_THROWS();
+    }
+
+    if (service_len == 0) {
+        zend_argument_value_error(1, "the value cannot be empty");
+        RETURN_THROWS();
+    }
+
+    if (base_priority != ABOVE_NORMAL_PRIORITY_CLASS &&
+            base_priority != BELOW_NORMAL_PRIORITY_CLASS &&
+            base_priority != HIGH_PRIORITY_CLASS &&
+            base_priority != IDLE_PRIORITY_CLASS &&
+            base_priority != NORMAL_PRIORITY_CLASS &&
+            base_priority != REALTIME_PRIORITY_CLASS) {
+				zend_argument_value_error(1,
+																	"the value %d for priority argument is wrong, Use WIN32_ABOVE_NORMAL_PRIORITY_CLASS, WIN32_BELOW_NORMAL_PRIORITY_CLASS, WIN32_HIGH_PRIORITY_CLASS, WIN32_IDLE_PRIORITY_CLASS, WIN32_NORMAL_PRIORITY_CLASS or WIN32_REALTIME_PRIORITY_CLASS constants",
+																	base_priority
+																	);
+				RETURN_THROWS();
+		}
+
+    if (ERROR_SUCCESS != (registry_result = set_service_base_priority(service, service_len, base_priority))) {
+				convert_error_to_exception(registry_result, "On set base_priority");
+				RETURN_THROWS();
+		}
+
+		RETURN_NULL();
+}
+/* }}} */
+
+/* {{{ proto long win32_get_service_priority()
+   Get the service priority level */
+static PHP_FUNCTION(win32_get_service_priority) {
+    char *service = NULL;
+    size_t service_len = 0;
+    long base_priority = NULL;
+    long registry_result = 0;
+
+    if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s", &service, &service_len)) {
+        RETURN_THROWS();
+    }
+
+    if (service_len == 0) {
+        zend_argument_value_error(1, "the value cannot be empty");
+        RETURN_THROWS();
+    }
+
+    if (ERROR_SUCCESS != (registry_result = get_service_base_priority(service, service_len, &base_priority))) {
+				convert_error_to_exception(registry_result, "On get base_priority");
+				RETURN_THROWS();
+		}
+
+		RETURN_LONG(base_priority);
 }
 /* }}} */
 
@@ -1402,7 +1451,7 @@ static PHP_FUNCTION(win32_add_service_env_var) {
     size_t var_name_len = 0;
     char *var_value = NULL;
     size_t var_value_len = 0;
-    HKEY hKey, hSubkey;
+    HKEY hKey;
     LONG lReturnValue = 0;
     DWORD dwDisposition;
 
@@ -1463,7 +1512,7 @@ static PHP_FUNCTION(win32_add_service_env_var) {
         RETURN_THROWS();
     }
 
-    lReturnValue = RegSetValueEx(hKey, "Environment", 0, REG_MULTI_SZ, new_data, new_data_len);
+    lReturnValue = RegSetValueEx(hKey, SERVICES_REG_ENVIRONMENT, 0, REG_MULTI_SZ, new_data, new_data_len);
     if (lReturnValue != ERROR_SUCCESS) {
         efree(keyName);
         efree(new_data);
@@ -1486,7 +1535,7 @@ static PHP_FUNCTION(win32_remove_service_env_var) {
     size_t service_len = 0;
     char *var_name = NULL;
     size_t var_name_len = 0;
-    HKEY hKey, hSubkey;
+    HKEY hKey;
     LONG lReturnValue = 0;
     DWORD dwDisposition;
 
@@ -1540,7 +1589,7 @@ static PHP_FUNCTION(win32_remove_service_env_var) {
         RETURN_THROWS();
     }
     if (new_data_len > 0) {
-        lReturnValue = RegSetValueEx(hKey, "Environment", 0, REG_MULTI_SZ, new_data, new_data_len);
+        lReturnValue = RegSetValueEx(hKey, SERVICES_REG_ENVIRONMENT, 0, REG_MULTI_SZ, new_data, new_data_len);
         if (lReturnValue != ERROR_SUCCESS) {
             efree(keyName);
             efree(new_data);
@@ -1548,7 +1597,7 @@ static PHP_FUNCTION(win32_remove_service_env_var) {
             RETURN_THROWS();
         }
     } else {
-        lReturnValue = RegDeleteValue(hKey, "Environment");
+        lReturnValue = RegDeleteValue(hKey, SERVICES_REG_ENVIRONMENT);
         if (lReturnValue != ERROR_SUCCESS) {
             efree(keyName);
             efree(new_data);
@@ -1702,6 +1751,8 @@ static zend_function_entry functions[] = {
         PHP_FE(win32_create_service, arginfo_win32_create_service)
         PHP_FE(win32_delete_service, arginfo_win32_delete_service)
         PHP_FE(win32_exists_service, arginfo_win32_exists_service)
+        PHP_FE(win32_set_service_priority, arginfo_win32_set_service_priority)
+        PHP_FE(win32_get_service_priority, arginfo_win32_get_service_priority)
         PHP_FE(win32_get_last_control_message, arginfo_win32_get_last_control_message)
         PHP_FE(win32_set_service_pause_resume_state, arginfo_win32_set_service_pause_resume_state)
         PHP_FE(win32_query_service_status, arginfo_win32_query_service_status)
@@ -2051,6 +2102,8 @@ static PHP_MINFO_FUNCTION(win32service) {
     }
     php_info_print_table_row(2, "win32_create_service", "enabled");
     php_info_print_table_row(2, "win32_delete_service", "enabled");
+    php_info_print_table_row(2, "win32_set_service_priority", "enabled");
+    php_info_print_table_row(2, "win32_get_service_priority", "enabled");
     php_info_print_table_row(2, "win32_query_service_status", "enabled");
     php_info_print_table_row(2, "win32_start_service", "enabled");
     php_info_print_table_row(2, "win32_stop_service", "enabled");

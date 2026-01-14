@@ -1,3 +1,7 @@
+# Version 1.2.0 (Unreleased)
+
+* Add `win32_set_service_priority` and `win32_get_service_priority` function.  (@macintoshplus) (issue [#100](https://github.com/win32service/win32service/issues/100))
+
 # Version 1.1.0 (2026-01-12)
 
 * Add PHP 8.5 compatibility
