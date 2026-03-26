@@ -1828,6 +1828,83 @@ static PHP_FUNCTION(win32_send_custom_control) {
 
 /* }}} */
 
+/* {{{ proto void win32_send_log(string appname, int eventCode, int eventLevel, string description)
+   Sends a log entry to Windows Event Log */
+static PHP_FUNCTION(win32_send_log) {
+    char *appname = NULL;
+    char *description = NULL;
+    size_t appname_len = 0;
+    size_t description_len = 0;
+    zend_long eventCode;
+    zend_long eventLevel;
+    HANDLE hEventLog;
+    WORD eventType;
+    LPCSTR messages[2];
+
+    if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "slls", &appname, &appname_len, &eventCode, &eventLevel, &description, &description_len)) {
+        RETURN_THROWS();
+    }
+
+    if (appname_len == 0) {
+        zend_argument_value_error(1, "the appname cannot be empty");
+        RETURN_THROWS();
+    }
+
+    if (description_len == 0) {
+        zend_argument_value_error(4, "the description cannot be empty");
+        RETURN_THROWS();
+    }
+
+    /* Map event level to Windows event type */
+    switch (eventLevel) {
+        case EVENTLOG_SUCCESS:
+        case EVENTLOG_ERROR_TYPE:
+        case EVENTLOG_WARNING_TYPE:
+        case EVENTLOG_INFORMATION_TYPE:
+        case EVENTLOG_AUDIT_SUCCESS:
+        case EVENTLOG_AUDIT_FAILURE:
+            eventType = (WORD)eventLevel;
+            break;
+        default:
+            zend_argument_value_error(3, "invalid event level. Must be EVENTLOG_SUCCESS, EVENTLOG_ERROR_TYPE, EVENTLOG_WARNING_TYPE, EVENTLOG_INFORMATION_TYPE, EVENTLOG_AUDIT_SUCCESS, or EVENTLOG_AUDIT_FAILURE");
+            RETURN_THROWS();
+    }
+
+    /* Register event source */
+    hEventLog = RegisterEventSource(NULL, appname);
+    if (!hEventLog) {
+        convert_error_to_exception(GetLastError(), "on registering event source");
+        RETURN_THROWS();
+    }
+
+    /* Report the event */
+    char *out = emalloc(sizeof(char) * MAX_PATH);;
+    if (!GetModuleFileName(NULL, out, (DWORD)MAX_PATH)) {
+        convert_error_to_exception(GetLastError(), "on get exe path event");
+        RETURN_THROWS();
+    }
+    char *buffer = emalloc(sizeof(char) * (1024 + MAX_PATH));;
+    sprintf(buffer,
+        "PHP=%s | PID=%lu | WIN32SERVICE Version=%s\0",
+        out,
+        GetCurrentProcessId(),
+        PHP_WIN32SERVICE_VERSION
+    );
+
+    messages[0] = buffer ;
+
+    messages[1] = description;
+    if (!ReportEvent(hEventLog, eventType, 0, (DWORD)eventCode, NULL, 2, 0, messages, NULL)) {
+        DeregisterEventSource(hEventLog);
+        convert_error_to_exception(GetLastError(), "on reporting event");
+        RETURN_THROWS();
+    }
+
+    /* Clean up */
+    DeregisterEventSource(hEventLog);
+}
+/* }}} */
+
 static int win32service_info_printf(const char *fmt, ...) /* {{{ */
 {
     char *buf;
@@ -1864,6 +1941,7 @@ static zend_function_entry functions[] = {
         PHP_FE(win32_set_service_exit_mode, arginfo_win32_set_service_exit_mode)
         PHP_FE(win32_set_service_exit_code, arginfo_win32_set_service_exit_code)
         PHP_FE(win32_send_custom_control, arginfo_win32_send_custom_control)
+        PHP_FE(win32_send_log, arginfo_win32_send_log)
         PHP_FE(win32_add_right_access_service, arginfo_win32_add_right_access_service)
         PHP_FE(win32_remove_right_access_service, arginfo_win32_remove_right_access_service)
         PHP_FE(win32_read_right_access_service, arginfo_win32_read_right_access_service)
