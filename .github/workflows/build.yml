@@ -132,6 +132,7 @@ jobs:
         with:
             name: ${{env.ARTIFACT_NAME}}
             path: ${{env.ARTIFACT_ARCHIVE}}
+            archive: false
       - name: Create new user
         run: |
           net user subuser p@ssw0rd /add
