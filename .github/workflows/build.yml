@@ -11,6 +11,8 @@ on:
 jobs:
   setup-matrix:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
