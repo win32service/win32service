@@ -25,7 +25,7 @@ jobs:
           if [[ $v =~ "^v?[0-9]+\.[0-9]+\.[0-9]+$" ]] ; then
             opt='--latest'
           fi
-          gh release create ${{ github.ref_name }} --draft --generate-notes --verify-tag $opt
+          gh release create ${{ github.ref_name }} --draft --generate-notes --repo win32service/win32service --verify-tag $opt
 
       - id: set-matrix
         run: |
@@ -193,4 +193,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload ${{ github.ref_name }} php_win32service-*.zip --clobber
+          gh release upload ${{ github.ref_name }} php_win32service-*.zip --clobber  --repo win32service/win32service
