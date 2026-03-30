@@ -41,6 +41,15 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
+      - name: Set commit in source code
+        shell: powershell
+        if: ${{ !startsWith(github.ref, 'refs/tags') }}
+        run: |
+          $tag = "${{ github.sha }}"
+          Write-Host "Update version to: $version"
+          $filePath = "php_win32service.h"
+          (Get-Content $filePath) -replace '(PHP_WIN32SERVICE_VERSION\s+)"[^"]+"', ('$1' + "`"$version`"") | Set-Content $filePath
+          Write-Host "File $filePath updated."
       - name: Set version in source code
         shell: powershell
         if: ${{ startsWith(github.ref, 'refs/tags') }}
