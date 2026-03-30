@@ -23,10 +23,6 @@ jobs:
           fi
 
   build:
-    permissions:
-      contents: write
-      id-token: write
-      attestations: write
     needs: setup-matrix
     name: Build
     runs-on: windows-latest
@@ -132,7 +128,7 @@ jobs:
         with:
             name: ${{env.ARTIFACT_NAME}}
             path: ${{env.ARTIFACT_ARCHIVE}}
-            archive: false
+            
       - name: Create new user
         run: |
           net user subuser p@ssw0rd /add
@@ -162,6 +158,9 @@ jobs:
     steps:
       - uses: actions/download-artifact@v8
         if: github.event_name != 'pull_request'
+        with:
+          merge-multiple: true
+          
       - name: Display structure of downloaded files
         if: github.event_name != 'pull_request'
         run: ls -R
