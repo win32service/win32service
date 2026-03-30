@@ -112,7 +112,7 @@ jobs:
           $fromDll = $dir+'\'+$artifact_name+'.dll'
           Copy-Item $from $fromDll
 
-          $to = $from + ".zip"
+          $to = $dir+'\'+$artifact_name+".zip"
           Compress-Archive $fromDll $to
           $extension_artifact = "ARTIFACT=" + $fromDll
           echo $extension_artifact >> $env:GITHUB_ENV
@@ -121,7 +121,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
-            name: ${{env.ARTIFACT_NAME}}.zip
+            name: ${{env.ARTIFACT_NAME}}
             path: ${{env.ARTIFACT_ARCHIVE}}
       - name: Create new user
         run: |
@@ -153,3 +153,14 @@ jobs:
         with:
             asset_name: ${{env.ARTIFACT_NAME}}.zip
             file: ${{env.ARTIFACT_ARCHIVE}}
+  check_artifact:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    needs: build
+    steps:
+      - uses: actions/download-artifact@v8
+      - name: Display structure of downloaded files
+        run: ls -R .
