@@ -119,7 +119,7 @@ jobs:
           $extension_artifact_archive = "ARTIFACT_ARCHIVE=" + $to
           echo $extension_artifact_archive >> $env:GITHUB_ENV
       - name: Upload artifacts
-        uses: actions/upload-artifact@7
+        uses: actions/upload-artifact@v7
         with:
             name: ${{env.ARTIFACT_NAME}}
             path: ${{env.ARTIFACT}}
