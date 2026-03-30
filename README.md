@@ -14,11 +14,11 @@ The win32service extension is a Windows-specific extension that allows PHP to co
 
 # Build attestation
 
-Since the version 1.1.1beta4, this repository generate a build attestation to certify the build provenance.
+Since the version 1.1.1beta4, this repository generates a build attestation to certify the build provenance.
 
 To verify the provenance, use the GitHub cli tool `gh attestation verify --owner win32service <release_dll_archive_path>`.
 
-If you want verify with [cosign](https://github.com/sigstore/cosign), use these options: `--certificate-oidc-issuer="https://token.actions.githubusercontent.com" --certificate-identity-regexp="^https://github.com/win32service/win32service/"`
+If you want to verify with [cosign](https://github.com/sigstore/cosign), use these options: `--certificate-oidc-issuer="https://token.actions.githubusercontent.com" --certificate-identity-regexp="^https://github.com/win32service/win32service/"`
 
 # Documentation
 

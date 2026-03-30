@@ -14,6 +14,15 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
+      - name: make draft release
+        if: ${{ !startsWith(github.ref, 'refs/tags') }}
+        run: |
+          opt='--prerelease'
+          if [[ $v =~ "^v?[0-9]+\.[0-9]+\.[0-9]+$" ]] ; then
+            opt='--latest'
+          fi
+          gh release create ${{ github.ref_name }} --draft --generate-notes --verify-tag $opt
+
       - id: set-matrix
         run: |
           if [[ "${{ github.ref_type }}" == "tag" ]]; then
@@ -73,7 +82,7 @@ jobs:
           arch: ${{matrix.platform}}
           ts: ${{matrix.ts}}
       - name: Enable Developer Command Prompt
-        uses: ilammy/msvc-dev-cmd@v1
+        uses: TheMrMilchmann/setup-msvc-dev@v4
         with:
           arch: ${{matrix.platform}}
           toolset: ${{steps.setup-php.outputs.toolset}}
@@ -119,8 +128,7 @@ jobs:
 
           $to = $dir+'\'+$artifact_name+".zip"
           Compress-Archive $fromDll $to
-          $extension_artifact = "ARTIFACT=" + $fromDll
-          echo $extension_artifact >> $env:GITHUB_ENV
+          
           $extension_artifact_archive = "ARTIFACT_ARCHIVE=" + $to
           echo $extension_artifact_archive >> $env:GITHUB_ENV
       - name: Upload artifacts
@@ -142,12 +150,12 @@ jobs:
           $env:TEST_PHP_JUNIT = "c:\junit.out.xml"
           nmake test TESTS="-c null -q --offline --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp"
           
-      - name: Publish Binaries to Release
-        if: ${{ startsWith(github.ref, 'refs/tags') }}
-        uses: svenstaro/upload-release-action@v2
-        with:
-            asset_name: ${{env.ARTIFACT_NAME}}.zip
-            file: ${{env.ARTIFACT_ARCHIVE}}
+#      - name: Publish Binaries to Release
+#        if: ${{ startsWith(github.ref, 'refs/tags') }}
+#        uses: svenstaro/upload-release-action@v2
+#        with:
+#            asset_name: ${{env.ARTIFACT_NAME}}.zip
+#            file: ${{env.ARTIFACT_ARCHIVE}}
   check_artifact:
     runs-on: ubuntu-latest
     permissions:
@@ -164,7 +172,7 @@ jobs:
       - name: Display structure of downloaded files
         if: github.event_name != 'pull_request'
         run: ls -R
-      
+
       - name: Generate build provenance attestation
         # It does not make sense to do this for PR builds, nor do contributors
         # have permission to do. We can't write attestations to `php/pie` in an
@@ -175,3 +183,8 @@ jobs:
         uses: actions/attest@v4
         with:
           subject-path: 'php_win32service-*.zip'
+
+      - name: Upload all artifacts
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
+        run: |
+          gh release upload ${{ github.ref_name }} php_win32service-*.zip --clobber

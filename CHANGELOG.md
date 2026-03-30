@@ -1,3 +1,9 @@
+# Version 1.1.1 (2026-03-30)
+
+* Add build attestation for Windows DLLs.
+* 
+
+
 # Version 1.1.0 (2026-01-12)
 
 * Add PHP 8.5 compatibility
