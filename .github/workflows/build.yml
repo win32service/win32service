@@ -145,7 +145,7 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: actions/attest@v4
         with:
-          subject-path: '${{ github.workspace }}/${{env.ARTIFACT_ARCHIVE}}'
+          subject-path: '${{env.ARTIFACT_ARCHIVE}}'
           
       - name: Publish Binaries to Release
         if: ${{ startsWith(github.ref, 'refs/tags') }}
