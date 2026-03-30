@@ -121,8 +121,8 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
-            name: ${{env.ARTIFACT_NAME}}
-            path: ${{env.ARTIFACT}}
+            name: ${{env.ARTIFACT_NAME}}.zip
+            path: ${{env.ARTIFACT_ARCHIVE}}
       - name: Create new user
         run: |
           net user subuser p@ssw0rd /add
