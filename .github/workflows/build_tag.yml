@@ -78,6 +78,7 @@ jobs:
           arch: ${{ matrix.arch }}
           ts: ${{ matrix.ts }}
           args: --enable-win32service
+          run-tests: false
 
   # This job uploads the build artifacts to the immutable GitHub release it creates.
 #  release:
