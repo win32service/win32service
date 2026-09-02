@@ -12,6 +12,26 @@ The win32service extension is a Windows-specific extension that allows PHP to co
 | v1.0.x | 8.0-8.5     | Unmaintained   |
 | v1.1.x | 8.x         | Maintained     |
 
+# Installation
+
+## PIE Installation (recommanded)
+
+Execute this command to install and activate Win32Service on your Windows PHP installation:
+
+```shell
+pie install win32service/win32service
+```
+
+Into you CI, you can lock the extension used to install a specific extension required by the project:
+
+```shell
+pie install --select win32service=win32service/win32service
+```
+
+## Manually
+
+Download the latest DLL from release and copy it into your PHP ext directory.
+
 # Build attestation
 
 Since the version 1.1.1beta4, this repository generates a build attestation to certify the build provenance.

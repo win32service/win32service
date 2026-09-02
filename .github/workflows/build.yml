@@ -1,12 +1,12 @@
 name: Win32Service build
 on:
   push:
-    branches: [ v1.1.x ]
-    tags:
-      - v1.**
-      - 1.**
+    branches: [ v1.1.x-dev ]
+#    tags:
+#      - v1.**
+#      - 1.**
   pull_request:
-    branches: [ v1.1.x ]
+    branches: [ v1.1.x-dev ]
 
 jobs:
   setup-matrix:
@@ -132,7 +132,7 @@ jobs:
 
           $to = $dir+'\'+$artifact_name+".zip"
           Compress-Archive $fromDll $to
-          
+
           $extension_artifact_archive = "ARTIFACT_ARCHIVE=" + $to
           echo $extension_artifact_archive >> $env:GITHUB_ENV
       - name: Upload artifacts
@@ -140,7 +140,7 @@ jobs:
         with:
             name: ${{env.ARTIFACT_NAME}}
             path: ${{env.ARTIFACT_ARCHIVE}}
-            
+
       - name: Create new user
         run: |
           net user subuser p@ssw0rd /add
@@ -153,7 +153,7 @@ jobs:
           mkdir c:\tests_tmp
           $env:TEST_PHP_JUNIT = "c:\junit.out.xml"
           nmake test TESTS="-c null -q --offline --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp"
-          
+
 #      - name: Publish Binaries to Release
 #        if: ${{ startsWith(github.ref, 'refs/tags') }}
 #        uses: svenstaro/upload-release-action@v2
@@ -172,7 +172,7 @@ jobs:
         if: github.event_name != 'pull_request'
         with:
           merge-multiple: true
-          
+
       - name: Display structure of downloaded files
         if: github.event_name != 'pull_request'
         run: ls -R

@@ -1,0 +1,109 @@
+name: Build extension
+on:
+  # When a new tag is pushed, we can build, and upload the DLLs to it.
+  push:
+    # branches: ['**'] # Uncomment this to run on push to a branch
+    tags: ['*']
+  # create: # Uncomment this to run on tag/branch creation
+  # pull_request: # Uncomment this to run on pull requests
+
+permissions:
+  contents: write
+
+jobs:
+  # This job generates a matrix of PHP versions, architectures, and thread safety options
+  # This is done by reading the constraints from composer.json or the package.xml file.
+  # Please refer to https://github.com/php/php-windows-builder#get-the-job-matrix-to-build-a-php-extension
+  get-extension-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.extension-matrix.outputs.matrix }}
+    steps:
+      - name: make draft release
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          opt='--prerelease'
+          if [[ $v =~ "^v?[0-9]+\.[0-9]+\.[0-9]+$" ]] ; then
+            opt='--latest'
+          fi
+          gh release create ${{ github.ref_name }} --draft --generate-notes --repo win32service/win32service --verify-tag $opt
+
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Get the extension matrix
+        id: extension-matrix
+        uses: php/php-windows-builder/extension-matrix@v1
+        with:
+          php-version-list: '8.1, 8.2, 8.3, 8.4, 8.5'
+          arch-list: 'x64, x86'
+          ts-list: 'nts, ts'
+
+  # This job builds the extension on Windows using the matrix generated from the previous job.
+  build:
+    needs: get-extension-matrix
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix: ${{fromJson(needs.get-extension-matrix.outputs.matrix)}}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Build the extension
+        uses: php/php-windows-builder/extension@v1
+        with:
+          # Always specify the php-version, arch, and ts as they are required inputs.
+          # Please refer to https://github.com/php/php-windows-builder#build-a-php-extension
+          php-version: ${{ matrix.php-version }}
+          arch: ${{ matrix.arch }}
+          ts: ${{ matrix.ts }}
+
+  # This job uploads the build artifacts to the immutable GitHub release it creates.
+#  release:
+#    runs-on: ubuntu-latest
+#    needs: build
+#    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
+#    steps:
+#      - name: Upload artifact to the release
+#        uses: php/php-windows-builder/release@v1
+#        with:
+#          release: ${{ github.ref }}
+#          token: ${{ secrets.GITHUB_TOKEN }}
+#          # Uncomment the line below to create a draft release
+#          # draft: 'true'
+  check_artifact:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    needs: build
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        if: github.event_name != 'pull_request'
+        with:
+          merge-multiple: true
+
+      - name: Display structure of downloaded files
+        if: github.event_name != 'pull_request'
+        run: ls -R
+
+      - name: Generate build provenance attestation
+        # It does not make sense to do this for PR builds, nor do contributors
+        # have permission to do. We can't write attestations to `php/pie` in an
+        # unprivileged context, otherwise anyone could send a PR with malicious
+        # code, which would store attestation that `php/pie` built the binaries,
+        # and it would look genuine. So this should NOT run for PR builds.
+        if: github.event_name != 'pull_request'
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-path: 'php_win32service-*.zip'
+
+      - name: Upload all artifacts
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload ${{ github.ref_name }} php_win32service-*.zip --clobber  --repo win32service/win32service
