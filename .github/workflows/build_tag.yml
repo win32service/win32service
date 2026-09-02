@@ -50,7 +50,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-
+      - name: Set commit in source code
+        shell: powershell
+        if: ${{ !startsWith(github.ref, 'refs/tags') }}
+        run: |
+          $version = "${{ github.sha }}"
+          Write-Host "Update version to: $version"
+          $filePath = "php_win32service.h"
+          (Get-Content $filePath) -replace '(PHP_WIN32SERVICE_VERSION\s+)"[^"]+"', ('$1' + "`"$version`"") | Set-Content $filePath
+          Write-Host "File $filePath updated."
+      - name: Set version in source code
+        shell: powershell
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $version = $tag -replace '^v', ''
+          Write-Host "Update version to: $version"
+          $filePath = "php_win32service.h"
+          (Get-Content $filePath) -replace '(PHP_WIN32SERVICE_VERSION\s+)"[^"]+"', ('$1' + "`"$version`"") | Set-Content $filePath
+          Write-Host "File $filePath updated."
       - name: Build the extension
         uses: php/php-windows-builder/extension@v1
         with:
@@ -59,6 +77,7 @@ jobs:
           php-version: ${{ matrix.php-version }}
           arch: ${{ matrix.arch }}
           ts: ${{ matrix.ts }}
+          args: --enable-win32service
 
   # This job uploads the build artifacts to the immutable GitHub release it creates.
 #  release:
