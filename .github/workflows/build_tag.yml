@@ -79,6 +79,10 @@ jobs:
           ts: ${{ matrix.ts }}
           args: --enable-win32service
           run-tests: false
+      - name: display artifact directory
+        shell: powershell
+        run: |
+          Get-ChildItem -Force -LiteralPath artifacts
 
   check_artifact:
     runs-on: ubuntu-latest

@@ -1,0 +1,102 @@
+{
+	"$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
+	"bomFormat": "CycloneDX",
+	"specVersion": "1.6",
+	"serialNumber": "urn:uuid:{@file_uuid}",
+	"version": 1,
+	"metadata": {
+		"timestamp": "2026-04-24T12:11:22Z",
+		"tools": [
+			{
+				"vendor": "macintoshplus",
+				"name": "sbom-generator",
+				"version": "0.1.0"
+			}
+		],
+		"component": {
+			"type": "library",
+			"bom-ref": "pkg:generic/win32service/win32service@{@version}",
+			"purl": "pkg:generic/win32service/win32service",
+			"cpe": "cpe:2.3:a:win32service:win32service:*:*:*:*:*:*:*:*",
+			"group": "win32service",
+			"name": "win32service",
+			"version": "{@version}",
+			"authors": [
+				{
+					"name": "Wez Furlong"
+				},
+				{
+					"name": "Richard Quadling"
+				},
+				{
+					"name": "Jean-Baptiste Nahan"
+				}
+			],
+			"evidence": {
+				"licenses": [
+					{
+						"license": {
+							"name": "PHP License v3.01"
+						}
+					}
+				]
+			},
+			"supplier": {
+				"name": "Win32Service",
+				"url": [
+					"https://github.com/win32service"
+				]
+			},
+			"licenses": [
+				{
+					"license": {
+						"acknowledgement": "declared",
+						"name": "PHP License v3.01",
+						"url": "https://spdx.org/licenses/PHP-3.01.html"
+					}
+				}
+			],
+			"externalReferences": [
+				{
+					"type": "source-distribution",
+					"url": "{@source_url}",
+					"hashes": [
+						{
+							"alg": "SHA-256",
+							"content": "{@source_hash}"
+						}
+					]
+				},
+				{
+					"type": "distribution",
+					"url": "{@distribution_url}",
+					"hashes": [
+						{
+							"alg": "SHA-256",
+							"content": "{@distribution_hash}"
+						}
+					]
+				},
+				{
+					"type": "license",
+					"url": "https://spdx.org/licenses/PHP-3.01.html"
+				},
+				{
+					"type": "website",
+					"url": "https://github.com/win32service/win32service"
+				},
+				{
+					"type": "support",
+					"url": "https://github.com/orgs/win32service/discussions"
+				},
+				{
+					"type": "issue-tracker",
+					"url": "https://github.com/win32service/win32service/issues"
+				}
+			]
+		}
+	},
+	"dependencies": [],
+	"components": [],
+	"vulnerabilities": []
+}
