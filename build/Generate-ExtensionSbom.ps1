@@ -31,7 +31,7 @@ if ($zipFiles.Count -eq 0) {
 }
 
 # 4. Informations sur les sources (Code source de la release / version)
-$SourceUrl = "https://github.com/win32service/win32service/archive/refs/tags/v${Version}.zip"
+$SourceUrl = "https://github.com/win32service/win32service/archive/refs/tags/${Version}.zip"
 $TempSourceZip = [System.IO.Path]::GetTempFileName() + ".zip"
 
 Write-Host "Téléchargement de l'archive source : $SourceUrl" -ForegroundColor Cyan
@@ -57,7 +57,7 @@ foreach ($zipFile in $zipFiles) {
     $fileUuid = [guid]::NewGuid().ToString()
 
     # Calcul de l'URL de téléchargement de l'asset GitHub
-    $distributionUrl = "https://github.com/win32service/win32service/releases/download/v${Version}/$($zipFile.Name)"
+    $distributionUrl = "https://github.com/win32service/win32service/releases/download/${Version}/$($zipFile.Name)"
 
     # Calcul du Hash SHA256 du fichier ZIP local
     $distributionHash = (Get-FileHash -Path $zipFile.FullName -Algorithm SHA256).Hash.ToLower()
