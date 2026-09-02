@@ -1,11 +1,13 @@
-name: Build extension
+name: CI test
 on:
   # When a new tag is pushed, we can build, and upload the DLLs to it.
   push:
+    branches: [ v1.1.x ]
     # branches: ['**'] # Uncomment this to run on push to a branch
-    tags: ['*']
   # create: # Uncomment this to run on tag/branch creation
   # pull_request: # Uncomment this to run on pull requests
+  pull_request:
+    branches: [ v1.1.x ]
 
 permissions:
   contents: write
@@ -37,9 +39,9 @@ jobs:
         id: extension-matrix
         uses: php/php-windows-builder/extension-matrix@v1
         with:
-          php-version-list: '8.1, 8.2, 8.3, 8.4, 8.5'
-          arch-list: 'x64, x86'
-          ts-list: 'nts, ts'
+          php-version-list: '8.5'
+          arch-list: 'x64'
+          ts-list: 'nts'
 
   # This job builds the extension on Windows using the matrix generated from the previous job.
   build:
@@ -52,23 +54,13 @@ jobs:
         uses: actions/checkout@v7
       - name: Set commit in source code
         shell: powershell
-        if: ${{ !startsWith(github.ref, 'refs/tags') }}
         run: |
           $version = "${{ github.sha }}"
           Write-Host "Update version to: $version"
           $filePath = "php_win32service.h"
           (Get-Content $filePath) -replace '(PHP_WIN32SERVICE_VERSION\s+)"[^"]+"', ('$1' + "`"$version`"") | Set-Content $filePath
           Write-Host "File $filePath updated."
-      - name: Set version in source code
-        shell: powershell
-        if: ${{ startsWith(github.ref, 'refs/tags') }}
-        run: |
-          $tag = "${{ github.ref_name }}"
-          $version = $tag -replace '^v', ''
-          Write-Host "Update version to: $version"
-          $filePath = "php_win32service.h"
-          (Get-Content $filePath) -replace '(PHP_WIN32SERVICE_VERSION\s+)"[^"]+"', ('$1' + "`"$version`"") | Set-Content $filePath
-          Write-Host "File $filePath updated."
+
       - name: Build the extension
         uses: php/php-windows-builder/extension@v1
         with:
@@ -78,39 +70,17 @@ jobs:
           arch: ${{ matrix.arch }}
           ts: ${{ matrix.ts }}
           args: --enable-win32service
-          run-tests: false
+          run-tests: true
 
-  check_artifact:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      id-token: write
-      attestations: write
-    needs: build
-    steps:
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
-        if: github.event_name != 'pull_request'
-        with:
-          merge-multiple: true
-
-      - name: Display structure of downloaded files
-        if: github.event_name != 'pull_request'
-        run: ls -R
-
-      - name: Generate build provenance attestation
-        # It does not make sense to do this for PR builds, nor do contributors
-        # have permission to do. We can't write attestations to `php/pie` in an
-        # unprivileged context, otherwise anyone could send a PR with malicious
-        # code, which would store attestation that `php/pie` built the binaries,
-        # and it would look genuine. So this should NOT run for PR builds.
-        if: github.event_name != 'pull_request'
-        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
-        with:
-          subject-path: 'php_win32service-*.zip'
-
-      - name: Upload all artifacts
-        if: ${{ startsWith(github.ref, 'refs/tags') }}
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Create new user
         run: |
-          gh release upload ${{ github.ref_name }} php_win32service-*.zip --clobber  --repo win32service/win32service
+          net user subuser p@ssw0rd /add
+      - name: test
+        shell: powershell
+        run: |
+          chcp 65001
+          sc delete WindowsServicePhpTest
+          sc delete WindowsServicePhpTestRun
+          mkdir c:\tests_tmp
+          $env:TEST_PHP_JUNIT = "c:\junit.out.xml"
+          nmake test TESTS="-c null -q --offline --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp"
