@@ -10,6 +10,21 @@ param (
     [string]$ArtifactsDir = "artifacts"
 )
 
+# Fonction native .NET pour calculer le SHA256 d'un fichier
+function Get-Sha256Native {
+    param ([string]$Path)
+    $stream = [System.IO.File]::OpenRead($Path)
+    try {
+        $sha256 = [System.Security.Cryptography.SHA256]::Create()
+        $hashBytes = $sha256.ComputeHash($stream)
+        return ([System.BitConverter]::ToString($hashBytes)).Replace('-', '').ToLower()
+    }
+    finally {
+        $stream.Close()
+        $stream.Dispose()
+    }
+}
+
 $ErrorActionPreference = "Stop"
 
 # 1. Vérification de l'existence du template
@@ -37,7 +52,7 @@ $TempSourceZip = [System.IO.Path]::GetTempFileName() + ".zip"
 Write-Host "Téléchargement de l'archive source : $SourceUrl" -ForegroundColor Cyan
 try {
     Invoke-WebRequest -Uri $SourceUrl -OutFile $TempSourceZip
-    $SourceHash = (Get-FileHash -Path $TempSourceZip -Algorithm SHA256).Hash.ToLower()
+    $SourceHash = Get-Sha256Native -Path $TempSourceZip
     Write-Host "Hash SHA256 des sources calculé : $SourceHash" -ForegroundColor Green
 }
 finally {
@@ -60,7 +75,7 @@ foreach ($zipFile in $zipFiles) {
     $distributionUrl = "https://github.com/win32service/win32service/releases/download/${Version}/$($zipFile.Name)"
 
     # Calcul du Hash SHA256 du fichier ZIP local
-    $distributionHash = (Get-FileHash -Path $zipFile.FullName -Algorithm SHA256).Hash.ToLower()
+    $distributionHash = Get-Sha256Native -Path $zipFile.FullName
 
     # Replacement des placeholders
     $sbomContent = $templateContent `
