@@ -85,6 +85,13 @@ jobs:
           .\build\Generate-ExtensionSbom.ps1 -Version "${{ github.ref_name }}" -TemplatePath .\build\template-sbom.cdx.json
           Get-ChildItem -Force -LiteralPath artifacts
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: php_win32service-${{ github.ref_name }}-${{ matrix.php-version }}-${{ matrix.ts }}-${{ matrix.arch }}
+          path: artifacts/*
+          overwrite: true
+
   check_artifact:
     runs-on: ubuntu-latest
     permissions:
@@ -118,4 +125,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload ${{ github.ref_name }} php_win32service-*.zip --clobber  --repo win32service/win32service
+          gh release upload ${{ github.ref_name }} php_win32service-*.zip php_win32service-*-sbom.cdx.json--clobber  --repo win32service/win32service

@@ -29,19 +29,19 @@ $ErrorActionPreference = "Stop"
 
 # 1. Vérification de l'existence du template
 if (-not (Test-Path -Path $TemplatePath)) {
-    throw "Le fichier template '$TemplatePath' est introuvable."
+    throw "Unable to finc template file '$TemplatePath'"
 }
 
 # 2. Emplacement de recherche des ZIPs
 if (-not (Test-Path -Path $ArtifactsDir)) {
-    throw "Le dossier d'artefacts '$ArtifactsDir' est introuvable."
+    throw "Unable to func artifact folder '$ArtifactsDir'"
 }
 
 # 3. Récupération des fichiers ZIP cibles
 $zipFiles = Get-ChildItem -Path $ArtifactsDir -Filter "php_win32service*.zip"
 
 if ($zipFiles.Count -eq 0) {
-    Write-Warning "Aucun fichier correspondant à 'php_win32service*.zip' n'a été trouvé dans '$ArtifactsDir'."
+    Write-Warning "No file for 'php_win32service*.zip' n'a été trouvé dans '$ArtifactsDir'."
     exit 0
 }
 
@@ -49,11 +49,11 @@ if ($zipFiles.Count -eq 0) {
 $SourceUrl = "https://github.com/win32service/win32service/archive/refs/tags/${Version}.zip"
 $TempSourceZip = [System.IO.Path]::GetTempFileName() + ".zip"
 
-Write-Host "Téléchargement de l'archive source : $SourceUrl" -ForegroundColor Cyan
+Write-Host "Download sources archive : $SourceUrl" -ForegroundColor Cyan
 try {
     Invoke-WebRequest -Uri $SourceUrl -OutFile $TempSourceZip
     $SourceHash = Get-Sha256Native -Path $TempSourceZip
-    Write-Host "Hash SHA256 des sources calculé : $SourceHash" -ForegroundColor Green
+    Write-Host "Source archive Hash SHA256 : $SourceHash" -ForegroundColor Green
 }
 finally {
     if (Test-Path -Path $TempSourceZip) {
@@ -66,7 +66,7 @@ $templateContent = Get-Content -Path $TemplatePath -Raw -Encoding UTF8
 
 # 6. Traitement pour chaque archive ZIP d'extension compilée
 foreach ($zipFile in $zipFiles) {
-    Write-Host "`nTraitement de l'artefact : $($zipFile.Name)" -ForegroundColor Cyan
+    Write-Host "`nArtifact processing : $($zipFile.Name)" -ForegroundColor Cyan
 
     # Calcul de l'UUID pour ce fichier SBOM
     $fileUuid = [guid]::NewGuid().ToString()
@@ -92,5 +92,5 @@ foreach ($zipFile in $zipFiles) {
 
     # Écriture du fichier final en UTF-8
     Set-Content -Path $outputPath -Value $sbomContent -Encoding UTF8
-    Write-Host "SBOM généré avec succès : $outputPath" -ForegroundColor Green
+    Write-Host "SBOM generated : $outputPath" -ForegroundColor Green
 }
