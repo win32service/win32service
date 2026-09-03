@@ -87,7 +87,7 @@ foreach ($zipFile in $zipFiles) {
         -replace '\{@source_url\}', $SourceUrl `
         -replace '\{@source_hash\}', $SourceHash `
         -replace '\{@distribution_url\}', $distributionUrl `
-        -replace '\{@distribution_hash\}', $distributionHash
+        -replace '\{@distribution_hash\}', $distributionHash `
         -replace '\{@php_version\}', $PhpVersion
 
     # Nom du fichier SBOM généré (remplacement de .zip par -sbom.cdx.json)
