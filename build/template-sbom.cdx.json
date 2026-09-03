@@ -1,7 +1,7 @@
 {
-	"$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
+	"$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
 	"bomFormat": "CycloneDX",
-	"specVersion": "1.6",
+	"specVersion": "1.7",
 	"serialNumber": "urn:uuid:{@file_uuid}",
 	"version": 1,
 	"metadata": {
@@ -16,8 +16,8 @@
 		"component": {
 			"type": "library",
 			"bom-ref": "pkg:generic/win32service/win32service@{@version}",
-			"purl": "pkg:generic/win32service/win32service",
-			"cpe": "cpe:2.3:a:win32service:win32service:*:*:*:*:*:*:*:*",
+			"purl": "pkg:generic/win32service/win32service@{@version}",
+			"cpe": "cpe:2.3:a:win32service:win32service:{@version}:*:*:*:*:*:*:*",
 			"group": "win32service",
 			"name": "win32service",
 			"version": "{@version}",
@@ -96,7 +96,27 @@
 			]
 		}
 	},
-	"dependencies": [],
-	"components": [],
+	"dependencies": [
+		{
+			"ref": "pkg:generic/win32service/win32service@{@version}",
+			"dependsOn": [
+				"pkg:generic/php@{@php_version}"
+			]
+		}
+	],
+	"components": [
+		{
+			"type": "application",
+			"bom-ref": "pkg:generic/php@{@php_version}",
+			"purl": "pkg:generic/php@vers:semver/>={@php_version}.0|<={@php_version}.9999",
+			"name": "php",
+			"versionRange": "vers:semver/>={@php_version}.0|<={@php_version}.9999",
+			"isExternal": true,
+			"scope": "required",
+			"supplier": {
+				"name": "PHP Group"
+			}
+		}
+	],
 	"vulnerabilities": []
 }

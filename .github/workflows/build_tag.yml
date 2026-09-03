@@ -82,7 +82,7 @@ jobs:
       - name: display artifact directory
         shell: powershell
         run: |
-          .\build\Generate-ExtensionSbom.ps1 -Version "${{ github.ref_name }}" -TemplatePath .\build\template-sbom.cdx.json
+          .\build\Generate-ExtensionSbom.ps1 -Version "${{ github.ref_name }}" -PhpVersion "${{ matrix.php-version }}" -TemplatePath .\build\template-sbom.cdx.json
           Get-ChildItem -Force -LiteralPath artifacts
 
       - name: Upload artifact

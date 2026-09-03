@@ -3,6 +3,9 @@ param (
     [Parameter(Mandatory = $true)]
     [string]$Version,
 
+    [Parameter(Mandatory = $true)]
+    [string]$PhpVersion,
+
     [Parameter(Mandatory = $false)]
     [string]$TemplatePath = "template-sbom.cdx.json",
 
@@ -85,6 +88,7 @@ foreach ($zipFile in $zipFiles) {
         -replace '\{@source_hash\}', $SourceHash `
         -replace '\{@distribution_url\}', $distributionUrl `
         -replace '\{@distribution_hash\}', $distributionHash
+        -replace '\{@php_version\}', $PhpVersion
 
     # Nom du fichier SBOM généré (remplacement de .zip par -sbom.cdx.json)
     $sbomFileName = [System.IO.Path]::GetFileNameWithoutExtension($zipFile.Name) + "-sbom.cdx.json"
