@@ -6,13 +6,6 @@
 	"version": 1,
 	"metadata": {
 		"timestamp": "{@date_now}",
-		"tools": [
-			{
-				"vendor": "macintoshplus",
-				"name": "sbom-generator",
-				"version": "0.1.0"
-			}
-		],
 		"component": {
 			"type": "library",
 			"bom-ref": "pkg:generic/win32service/win32service@{@version}",

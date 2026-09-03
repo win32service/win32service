@@ -27,7 +27,7 @@ function Get-Sha256Native {
         $stream.Dispose()
     }
 }
-
+$generatorVersion = "0.1.0"
 $ErrorActionPreference = "Stop"
 
 # 1. Vérification de l'existence du template
@@ -91,6 +91,34 @@ foreach ($zipFile in $zipFiles) {
         -replace '\{@distribution_hash\}', $distributionHash `
         -replace '\{@date_now\}', $dateNow `
         -replace '\{@php_version\}', $PhpVersion
+
+		$jsonObject = $sbomContent | ConvertFrom-Json
+		if (-not $jsonObject.metadata) {
+				$jsonObject | Add-Member -MemberType NoteProperty -Name "metadata" -Value ([PSCustomObject]@{})
+		}
+
+		$newToolComponent = [PSCustomObject]@{
+		    purl = "pkg:generic/macintoshplus/sbom-generator@${generatorVersion}"
+				type    = "application"
+				publisher  = "Macintoshplus"
+				group  = "macintoshplus"
+				name    = "sbom-generator"
+				version = $generatorVersion
+				licenses = @(
+                [PSCustomObject]@{
+                    license = [PSCustomObject]@{
+                        acknowledgement = "declared"
+                        name            = "European Union Public License 1.2"
+                        url             = "https://spdx.org/licenses/EUPL-1.2.html"
+                    }
+                }
+            )
+		}
+
+		$jsonObject.metadata | Add-Member -MemberType NoteProperty -Name "tools" -Value ([PSCustomObject]@{
+				components = @($newToolComponent)
+		}) -Force
+		$sbomContent = $jsonObject | ConvertTo-Json -Depth 100
 
     # Nom du fichier SBOM généré (remplacement de .zip par -sbom.cdx.json)
     $sbomFileName = [System.IO.Path]::GetFileNameWithoutExtension($zipFile.Name) + "-sbom.cdx.json"
