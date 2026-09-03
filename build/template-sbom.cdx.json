@@ -78,6 +78,10 @@
 					]
 				},
 				{
+					"type": "documentation",
+					"url": "https://www.php.net/manual/en/book.win32service.php"
+				},
+				{
 					"type": "license",
 					"url": "https://spdx.org/licenses/PHP-3.01.html"
 				},
