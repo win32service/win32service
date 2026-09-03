@@ -79,6 +79,7 @@ foreach ($zipFile in $zipFiles) {
 
     # Calcul du Hash SHA256 du fichier ZIP local
     $distributionHash = Get-Sha256Native -Path $zipFile.FullName
+    $dateNow = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
 
     # Replacement des placeholders
     $sbomContent = $templateContent `
@@ -88,6 +89,7 @@ foreach ($zipFile in $zipFiles) {
         -replace '\{@source_hash\}', $SourceHash `
         -replace '\{@distribution_url\}', $distributionUrl `
         -replace '\{@distribution_hash\}', $distributionHash `
+        -replace '\{@date_now\}', $dateNow `
         -replace '\{@php_version\}', $PhpVersion
 
     # Nom du fichier SBOM généré (remplacement de .zip par -sbom.cdx.json)

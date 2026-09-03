@@ -5,7 +5,7 @@
 	"serialNumber": "urn:uuid:{@file_uuid}",
 	"version": 1,
 	"metadata": {
-		"timestamp": "2026-04-24T12:11:22Z",
+		"timestamp": "{@date_now}",
 		"tools": [
 			{
 				"vendor": "macintoshplus",
