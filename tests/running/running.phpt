@@ -10,14 +10,19 @@ function displayException(Throwable $e){
     printf("%s: (%d) %s\n", get_class($e), $e->getCode(), $e->getMessage());
 }
 
+$phpArgs = trim((string) getenv('TEST_PHP_ARGS'));
 $service = [
 		'service' => 'WindowsServicePhpTestRun',
 		'display' => 'Windows service PHP test',
 		'description' => 'This service is an PHP example for test',
 		'path' => '"' . (PHP_BINARY) . '"',
-		'params' => '"' . __DIR__ . '\\run.php"',
+		'params' => ($phpArgs !== '' ? $phpArgs . ' ' : '') . '"' . __DIR__ . '\\run.php"',
 		'start_type' => WIN32_SERVICE_AUTO_START,
 ];
+if (win32_exists_service($service['service'])) {
+    win32_delete_service($service['service']);
+}
+@unlink(__DIR__.'/run.log');
 try {
 var_dump(win32_create_service($service));
 var_dump(win32_start_service($service['service']));
