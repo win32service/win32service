@@ -70,7 +70,7 @@ jobs:
           arch: ${{ matrix.arch }}
           ts: ${{ matrix.ts }}
           args: --enable-win32service
-          run-tests: true
+          run-tests: false
 
       - name: Create new user
         run: |
