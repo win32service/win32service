@@ -60,18 +60,6 @@ jobs:
           $filePath = "php_win32service.h"
           (Get-Content $filePath) -replace '(PHP_WIN32SERVICE_VERSION\s+)"[^"]+"', ('$1' + "`"$version`"") | Set-Content $filePath
           Write-Host "File $filePath updated."
-
-      - name: Build the extension
-        uses: php/php-windows-builder/extension@v1
-        with:
-          # Always specify the php-version, arch, and ts as they are required inputs.
-          # Please refer to https://github.com/php/php-windows-builder#build-a-php-extension
-          php-version: ${{ matrix.php-version }}
-          arch: ${{ matrix.arch }}
-          ts: ${{ matrix.ts }}
-          args: --enable-win32service
-          run-tests: false
-
       - name: Create new user
         run: |
           net user subuser p@ssw0rd /add
@@ -83,4 +71,15 @@ jobs:
           sc delete WindowsServicePhpTestRun
           mkdir c:\tests_tmp
           $env:TEST_PHP_JUNIT = "c:\junit.out.xml"
-          nmake test TESTS="-c null -q --offline --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp"
+#          nmake test TESTS="-c null -q --offline --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp"
+
+      - name: Build the extension
+        uses: php/php-windows-builder/extension@v1
+        with:
+          # Always specify the php-version, arch, and ts as they are required inputs.
+          # Please refer to https://github.com/php/php-windows-builder#build-a-php-extension
+          php-version: ${{ matrix.php-version }}
+          arch: ${{ matrix.arch }}
+          ts: ${{ matrix.ts }}
+          args: --enable-win32service
+          run-tests: true
