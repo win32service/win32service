@@ -1,0 +1,104 @@
+foreach:
+  dir: ../artifacts
+  pattern: "php_win32service*.zip"
+
+variables:
+  version:
+    value: "1.0.0"
+  php_version:
+    value: "8.1.0"
+  tag:
+    value: "0.0.0"
+  source_url:
+    value: "https://example.com/source"
+  source_hash:
+    value: "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
+
+steps:
+  - id: set serial number
+    action: add
+    target: $.serialNumber
+    valueFrom:
+      generator: uuid
+    value: "urn:uuid:{@value}"
+
+  - id: set timestamp
+    action: add
+    target: $.metadata.timestamp
+    valueFrom:
+      generator: timestamp
+
+  - id: set component supplier
+    action: add
+    target: $.metadata.component.supplier
+    value:
+      name: "Win32Service"
+      url: ["https://github.com/win32service"]
+
+  - id: fix component properties version
+    action: add
+    target: $.metadata.component.version
+    value: "{$version}"
+
+  - id: fix component properties bom-ref
+    action: merge
+    target: "$.metadata.component"
+    value: "{ \"bom-ref\": \"pkg:generic/win32service/win32service@{$version}\"}"
+
+  - id: fix component properties purl
+    action: add
+    target: $.metadata.component.purl
+    value: "pkg:generic/win32service/win32service@{$version}"
+
+  - id: fix component properties cpe
+    action: add
+    target: $.metadata.component.cpe
+    value: "cpe:2.3:a:win32service:win32service:{$version}:*:*:*:*:*:*:*"
+
+  - id: update source distribution url
+    action: add
+    target: $.metadata.component.externalReferences[?type==source-distribution].url
+    value: "{$source_url}"
+
+  - id: add source distribution hash
+    action: add
+    target: $.metadata.component.externalReferences[?type==source-distribution].hashes
+    value:
+      - alg: "SHA-256"
+        content: "{$source_hash}"
+
+  - id: update distribution url
+    action: add
+    target: $.metadata.component.externalReferences[?type==distribution].url
+    value: "https://github.com/win32service/win32service/releases/download/{$tag}/{$artifact_name}"
+
+  - id: add distribution hash
+    action: add
+    target: $.metadata.component.externalReferences[?type==distribution].hashes
+    valueFrom:
+      generator: hash
+      algo: sha256
+      path: "{$artifact_path}"
+    value:
+      - alg: "SHA-256"
+        content: "{@value}"
+
+  - id: fix php component bom-ref
+    action: add
+    target: $.components[?name==php]["bom-ref"]
+    value: "pkg:generic/php@{$php_version}"
+
+  - id: fix php component purl
+    action: add
+    target: $.components[?name==php].purl
+    value: "pkg:generic/php@vers:semver/>={$php_version}.0|<={$php_version}.9999"
+
+  - id: fix php component versionRange
+    action: add
+    target: $.components[?name==php].versionRange
+    value: "vers:semver/>={$php_version}.0|<={$php_version}.9999"
+
+  - id: fix dependencies
+    action: merge
+    target: $.dependencies[]
+    value: '[{"ref": "pkg:generic/win32service/win32service@{$version}", "dependsOn": ["pkg:generic/php@{$php_version}"]}]'

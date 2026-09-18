@@ -1,0 +1,113 @@
+{
+	"$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
+	"bomFormat": "CycloneDX",
+	"specVersion": "1.7",
+	"serialNumber": "urn:uuid:b392e593-9077-4696-8a4c-64957bcc5e0b",
+	"version": 1,
+	"metadata": {
+		"timestamp": "2026-09-16T14:04:20.271814551Z",
+		"component": {
+			"type": "library",
+			"bom-ref": "pkg:generic/win32service/win32service@{@version}",
+			"purl": "pkg:generic/win32service/win32service@{@version}",
+			"cpe": "cpe:2.3:a:win32service:win32service:{@version}:*:*:*:*:*:*:*",
+			"group": "win32service",
+			"name": "win32service",
+			"version": "{@version}",
+			"authors": [
+				{
+					"name": "Wez Furlong"
+				},
+				{
+					"name": "Richard Quadling"
+				},
+				{
+					"name": "Jean-Baptiste Nahan"
+				}
+			],
+			"evidence": {
+				"licenses": [
+					{
+						"license": {
+							"name": "PHP License v3.01"
+						}
+					}
+				]
+			},
+			"supplier": {
+				"name": "Win32Service",
+				"url": [
+					"https://github.com/win32service"
+				]
+			},
+			"licenses": [
+				{
+					"license": {
+						"acknowledgement": "declared",
+						"name": "PHP License v3.01",
+						"url": "https://spdx.org/licenses/PHP-3.01.html"
+					}
+				}
+			],
+			"externalReferences": [
+				{
+					"type": "source-distribution",
+					"url": "https://github.com",
+					"hashes": [
+						{
+							"alg": "SHA-256",
+							"content": "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
+						}
+					]
+				},
+				{
+					"type": "distribution",
+					"url": "https://github.com",
+					"hashes": [
+						{
+							"alg": "SHA-256",
+							"content": "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
+						}
+					]
+				},
+				{
+					"type": "documentation",
+					"url": "https://www.php.net/manual/en/book.win32service.php"
+				},
+				{
+					"type": "license",
+					"url": "https://spdx.org/licenses/PHP-3.01.html"
+				},
+				{
+					"type": "website",
+					"url": "https://github.com/win32service/win32service"
+				},
+				{
+					"type": "support",
+					"url": "https://github.com/orgs/win32service/discussions"
+				},
+				{
+					"type": "issue-tracker",
+					"url": "https://github.com/win32service/win32service/issues"
+				}
+			]
+		}
+	},
+	"dependencies": [
+	],
+	"components": [
+		{
+			"type": "application",
+			"bom-ref": "pkg:generic/php@{@php_version}",
+			"purl": "pkg:generic/php@vers:semver/>={@php_version}.0|<={@php_version}.9999",
+			"name": "php",
+			"versionRange": "vers:semver/>={@php_version}.0|<={@php_version}.9999",
+			"isExternal": true,
+			"scope": "required",
+			"supplier": {
+				"name": "PHP Group"
+			}
+		}
+	],
+	"vulnerabilities": []
+}

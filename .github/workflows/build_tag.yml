@@ -79,10 +79,31 @@ jobs:
           ts: ${{ matrix.ts }}
           args: --enable-win32service
           run-tests: false
-      - name: display artifact directory
-        shell: powershell
+      - name: Download cyclonelab
+        shell: pwsh
         run: |
-          .\build\Generate-ExtensionSbom.ps1 -Version "${{ github.ref_name }}" -PhpVersion "${{ matrix.php-version }}" -TemplatePath .\build\template-sbom.cdx.json
+          Invoke-WebRequest -Uri "https://github.com/code-rhapsodie/cyclonelab/releases/latest/download/cyclonelab-windows-x86_64.exe" -OutFile cyclonelab.exe
+
+      - name: Generate SBOM
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $version = $tag -replace '^v', ''
+          $sourceUrl = "https://github.com/win32service/win32service/archive/refs/tags/$tag.zip"
+          $tempSourceZip = [System.IO.Path]::GetTempFileName() + ".zip"
+          Write-Host "Download sources archive: $sourceUrl" -ForegroundColor Cyan
+          Invoke-WebRequest -Uri $sourceUrl -OutFile $tempSourceZip
+          $sourceHash = (Get-FileHash -Path $tempSourceZip -Algorithm SHA256).Hash.ToLower()
+          Remove-Item -Path $tempSourceZip -Force
+          Write-Host "Source archive hash SHA256: $sourceHash" -ForegroundColor Green
+
+          .\cyclonelab.exe transform build\sbom.cdx.json build\transform.yaml 'artifacts\{$artifact_stem}-sbom.cdx.json' `
+            --variable version=$version `
+            --variable php_version="${{ matrix.php-version }}" `
+            --variable tag=$tag `
+            --variable source_url=$sourceUrl `
+            --variable source_hash=$sourceHash
+
           Get-ChildItem -Force -LiteralPath artifacts
 
       - name: Upload artifact
