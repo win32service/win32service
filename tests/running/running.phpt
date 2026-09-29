@@ -73,5 +73,8 @@ string(50) "Error service cannot accept ctrl (on send control)"
 NULL
 pause/resume old state yes
 pause/resume old state no
+exit code old 1
+exit code read 42
+exit code read again 42
 Win32ServiceException: (0) Service ctrl dispatcher already running
 ValueError: (0) win32_set_service_pause_resume_state(): Argument #1 ($enable) Unable to change the pause/resume state when control dispatcher is already running. Call without argument if you want the state or call before win32_start_service_ctrl_dispatcher function.
