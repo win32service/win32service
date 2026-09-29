@@ -406,14 +406,16 @@ static PHP_FUNCTION(win32_set_service_exit_code) {
                                 "This function work only when using the CLI SAPI and called into the service code.");
         RETURN_THROWS();
     }
-    zend_long exitCodeParam = SVCG(gracefulExit);
-    zend_long old_exitCodeParam = SVCG(gracefulExit);
+    zend_long exitCodeParam = SVCG(exitCode);
+    zend_long old_exitCodeParam = SVCG(exitCode);
 
     if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &exitCodeParam)) {
         RETURN_THROWS();
     }
 
-    SVCG(exitCode) = exitCodeParam;
+    if (ZEND_NUM_ARGS() > 0) {
+        SVCG(exitCode) = exitCodeParam;
+    }
 
     RETURN_LONG(old_exitCodeParam);
 }
@@ -664,17 +666,17 @@ static PHP_FUNCTION(win32_add_right_access_service) {
     }
 
     if (service == NULL || strlen(service) < 2) {
-        zend_argument_value_error(1, "the value of argument 'serviceName' cannot be empty");
+        zend_argument_value_error(1, "the value cannot be empty");
         RETURN_THROWS();
     }
 
     if (username == NULL || strlen(username) < 2) {
-        zend_argument_value_error(1, "the value of argument 'username' cannot be empty");
+        zend_argument_value_error(2, "the value cannot be empty");
         RETURN_THROWS();
     }
 
     if (right <= 0 || right > 0xF01FF) {
-        zend_argument_value_error(1, "the value of argument 'right' must between 0x00001 and 0xF01FF");
+        zend_argument_value_error(3, "the value must be between 0x00001 and 0xF01FF");
         RETURN_THROWS();
     }
     errorMessage = emalloc(sizeof(char) * 150);
@@ -706,12 +708,12 @@ static PHP_FUNCTION(win32_remove_right_access_service) {
     }
 
     if (service == NULL || strlen(service) < 2) {
-        zend_argument_value_error(1, "the value of argument 'serviceName' cannot be empty");
+        zend_argument_value_error(1, "the value cannot be empty");
         RETURN_THROWS();
     }
 
     if (username == NULL || strlen(username) < 2) {
-        zend_argument_value_error(1, "the value of argument 'username' cannot be empty");
+        zend_argument_value_error(2, "the value cannot be empty");
         RETURN_THROWS();
     }
     errorMessage = emalloc(sizeof(char) * 150);
@@ -775,8 +777,8 @@ static PHP_FUNCTION(win32_create_service) {
             convert_to_null_ex(tmp); \
         } \
         if (strlen(Z_STRVAL_P(tmp)) != Z_STRLEN_P(tmp)) { \
-            php_error_docref(NULL, E_WARNING, "malformed " name); \
-            RETURN_FALSE; \
+            zend_argument_value_error(1, "the value for key '%s' must not contain any null bytes", name); \
+            RETURN_THROWS(); \
         } \
         var = Z_STRVAL_P(tmp); \
     } else { \
