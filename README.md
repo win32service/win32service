@@ -10,7 +10,10 @@ The win32service extension is a Windows-specific extension that allows PHP to co
 | v0.3.x | 5.x         | Unmaintained   |
 | v0.4.x | 7.X         | Unmaintained   |
 | v1.0.x | 8.0-8.5     | Unmaintained   |
-| v1.1.x | 8.x         | Maintained     |
+| v1.1.x | 8.1-8.5     | Maintained     |
+| v1.2.x | 8.1-8.6     | Development    |
+
+Since v1.1.0 PHP 8.0 is not maintained anymore.
 
 # Installation
 
