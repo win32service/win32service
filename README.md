@@ -13,6 +13,34 @@ The win32service extension is a Windows-specific extension that allows PHP to co
 | v1.1.x | 8.x         | Maintained     |
 | v1.2.x | 8.x         | Development    |
 
+# Installation
+
+## PIE Installation (recommanded)
+
+Execute this command to install and activate Win32Service on your Windows PHP installation:
+
+```shell
+pie install win32service/win32service
+```
+
+Into you CI, you can lock the extension used to install a specific extension required by the project:
+
+```shell
+pie install --select win32service=win32service/win32service
+```
+
+## Manually
+
+Download the latest DLL from release and copy it into your PHP ext directory.
+
+# Build attestation
+
+Since the version 1.1.1beta4, this repository generates a build attestation to certify the build provenance.
+
+To verify the provenance, use the GitHub cli tool `gh attestation verify --owner win32service <release_dll_archive_path>`.
+
+If you want to verify with [cosign](https://github.com/sigstore/cosign), use these options: `--certificate-oidc-issuer="https://token.actions.githubusercontent.com" --certificate-identity-regexp="^https://github.com/win32service/win32service/"`
+
 # Documentation
 
 See: [https://www.php.net/manual/en/book.win32service.php](https://www.php.net/manual/en/book.win32service.php)

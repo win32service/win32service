@@ -7,7 +7,7 @@ function win32_set_service_pause_resume_state(bool $enable = true): bool {}
 
 function win32_set_service_exit_mode(bool $gracefulExit = true): bool {}
 
-function win32_set_service_exit_code(int $exitCode = 0): long {}
+function win32_set_service_exit_code(int $exitCode = 0): int {}
 
 function win32_set_service_status(int $status, int $checkpoint = 0): bool {}
 
@@ -29,7 +29,7 @@ function win32_set_service_priority(string $servicename, int $priority): void {}
 
 function win32_get_service_priority(string $servicename): int {}
 
-function win32_get_last_control_message(): long {}
+function win32_get_last_control_message(): int {}
 
 function win32_query_service_status(string $servicename, string $machine = ''): array {}
 

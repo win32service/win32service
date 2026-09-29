@@ -1,0 +1,85 @@
+name: CI test
+on:
+  # When a new tag is pushed, we can build, and upload the DLLs to it.
+  push:
+    branches: [ v1.1.x ]
+    # branches: ['**'] # Uncomment this to run on push to a branch
+  # create: # Uncomment this to run on tag/branch creation
+  # pull_request: # Uncomment this to run on pull requests
+  pull_request:
+    branches: [ v1.1.x ]
+
+permissions:
+  contents: write
+
+jobs:
+  # This job generates a matrix of PHP versions, architectures, and thread safety options
+  # This is done by reading the constraints from composer.json or the package.xml file.
+  # Please refer to https://github.com/php/php-windows-builder#get-the-job-matrix-to-build-a-php-extension
+  get-extension-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.extension-matrix.outputs.matrix }}
+    steps:
+      - name: make draft release
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          opt='--prerelease'
+          if [[ $v =~ "^v?[0-9]+\.[0-9]+\.[0-9]+$" ]] ; then
+            opt='--latest'
+          fi
+          gh release create ${{ github.ref_name }} --draft --generate-notes --repo win32service/win32service --verify-tag $opt
+
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Get the extension matrix
+        id: extension-matrix
+        uses: php/php-windows-builder/extension-matrix@v1
+        with:
+          php-version-list: '8.5'
+          arch-list: 'x64'
+          ts-list: 'nts'
+
+  # This job builds the extension on Windows using the matrix generated from the previous job.
+  build:
+    needs: get-extension-matrix
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix: ${{fromJson(needs.get-extension-matrix.outputs.matrix)}}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set commit in source code
+        shell: powershell
+        run: |
+          $version = "${{ github.sha }}"
+          Write-Host "Update version to: $version"
+          $filePath = "php_win32service.h"
+          (Get-Content $filePath) -replace '(PHP_WIN32SERVICE_VERSION\s+)"[^"]+"', ('$1' + "`"$version`"") | Set-Content $filePath
+          Write-Host "File $filePath updated."
+      - name: Create new user
+        run: |
+          net user subuser p@ssw0rd /add
+      - name: test
+        shell: powershell
+        run: |
+          chcp 65001
+          sc delete WindowsServicePhpTest
+          sc delete WindowsServicePhpTestRun
+          mkdir c:\tests_tmp
+          $env:TEST_PHP_JUNIT = "c:\junit.out.xml"
+#          nmake test TESTS="-c null -q --offline --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp"
+
+      - name: Build the extension
+        uses: php/php-windows-builder/extension@v1
+        with:
+          # Always specify the php-version, arch, and ts as they are required inputs.
+          # Please refer to https://github.com/php/php-windows-builder#build-a-php-extension
+          php-version: ${{ matrix.php-version }}
+          arch: ${{ matrix.arch }}
+          ts: ${{ matrix.ts }}
+          args: --enable-win32service
+          run-tests: true
