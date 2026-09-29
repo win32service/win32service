@@ -39,7 +39,7 @@ jobs:
         id: extension-matrix
         uses: php/php-windows-builder/extension-matrix@v1
         with:
-          php-version-list: '8.5'
+          php-version-list: '8.5, 8.6'
           arch-list: 'x64'
           ts-list: 'nts'
 
