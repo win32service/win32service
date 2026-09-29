@@ -1,6 +1,7 @@
 # Version 1.1.1 (2026-03-30)
 
 * Add build attestation for Windows DLLs.
+* Add PHP 8.6 support.
 * Fix `win32_set_service_exit_code()` returning the graceful exit flag instead of the previous exit code. Calling it without argument no longer overwrites the configured exit code. (@macintoshplus) (issue [#111](https://github.com/win32service/win32service/issues/111))
 * Fix the argument position reported in `ValueError` messages of `win32_add_right_access_service()` and `win32_remove_right_access_service()`. (@macintoshplus) (issue [#111](https://github.com/win32service/win32service/issues/111))
 * `win32_create_service()` now throws a `ValueError` instead of emitting a warning when a value of the details array contains a null byte. (@macintoshplus) (issue [#111](https://github.com/win32service/win32service/issues/111))
