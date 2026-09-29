@@ -2,6 +2,7 @@
 
 * Add `win32_set_service_priority` and `win32_get_service_priority` function. (@macintoshplus) (issue [#100](https://github.com/win32service/win32service/issues/100))
 * Add `win32_query_service_config` and `win32_update_service_config` function. (@macintoshplus) (issue [#101](https://github.com/win32service/win32service/issues/101))
+* Migration Windows API from A to W. Pay attention to sending only UTF-8 chars to Win32Service functions.
 
 # Version 1.1.1 (2026-03-30)
 

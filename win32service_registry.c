@@ -19,46 +19,107 @@
 #include "php.h"
 #include <windows.h>
 #include <winreg.h>
+#include "win32service_wide.h"
 
 
+/* Open the registry key of a service. The key name is built in UTF-16. */
+static LONG win32_internal_open_service_key(char *service, int service_len, HKEY *hKey) {
+    wchar_t *service_w = win32_internal_to_wide_n(service, service_len, NULL);
+    wchar_t *keyName;
+    LONG lReturnValue;
+
+    if (service_w == NULL) {
+        return ERROR_NO_UNICODE_TRANSLATION;
+    }
+    keyName = (wchar_t *) safe_emalloc(wcslen(SERVICES_REG_KEY_ROOT_W) + wcslen(service_w) + 1, sizeof(wchar_t), 0);
+    wcscpy(keyName, SERVICES_REG_KEY_ROOT_W);
+    wcscat(keyName, service_w);
+
+    lReturnValue = RegOpenKeyExW(HKEY_LOCAL_MACHINE, keyName, 0, KEY_ALL_ACCESS, hKey);
+    efree(service_w);
+    efree(keyName);
+
+    if (lReturnValue == ERROR_FILE_NOT_FOUND) {
+        return ERROR_SERVICE_DOES_NOT_EXIST;
+    }
+    return lReturnValue;
+}
+
+/* Read the Environment value. The registry stores UTF-16, the value is returned as a UTF-8 multi string
+   (each string ends with a NUL, and the list with an additional NUL). *pvDataLen is the size in bytes. */
 long get_service_environment_vars(char * service, int service_len, char ** pvData, int * pvDataLen) {
 
     HKEY hKey;
     LONG lReturnValue = 0;
-    char * keyName = NULL;
-    int keyNameLen = 0;
-    get_service_registry_key(service, service_len, &keyName, &keyNameLen);
+    DWORD dataSize = 0;
+    wchar_t *dataW = NULL;
 
-    lReturnValue = RegOpenKeyEx(HKEY_LOCAL_MACHINE, keyName, 0, KEY_ALL_ACCESS, &hKey);
+    *pvData = NULL;
+    *pvDataLen = 0;
+
+    lReturnValue = win32_internal_open_service_key(service, service_len, &hKey);
     if (lReturnValue != ERROR_SUCCESS) {
-        efree(keyName);
-        if (lReturnValue == ERROR_FILE_NOT_FOUND) {
-            return ERROR_SERVICE_DOES_NOT_EXIST;
-        }
-
         return lReturnValue;
     }
 
-    LPDWORD pdwType = NULL;
-
-    lReturnValue = RegGetValue(hKey, NULL ,SERVICES_REG_ENVIRONMENT, RRF_RT_REG_MULTI_SZ|RRF_ZEROONFAILURE, pdwType, NULL, pvDataLen);
+    lReturnValue = RegGetValueW(hKey, NULL, SERVICES_REG_ENVIRONMENT_W, RRF_RT_REG_MULTI_SZ|RRF_ZEROONFAILURE, NULL, NULL, &dataSize);
     if (lReturnValue != ERROR_SUCCESS) {
-        efree(keyName);
         RegCloseKey(hKey);
         return lReturnValue;
     }
-    *pvData = emalloc(sizeof(char) * *pvDataLen);
+    dataW = (wchar_t *) safe_emalloc(dataSize + sizeof(wchar_t), 1, 0);
 
-    lReturnValue = RegGetValue(hKey, NULL ,SERVICES_REG_ENVIRONMENT, RRF_RT_REG_MULTI_SZ|RRF_ZEROONFAILURE, pdwType, *pvData, pvDataLen);
-    if (lReturnValue != ERROR_SUCCESS) {
-        efree(keyName);
-        RegCloseKey(hKey);
-        return lReturnValue;
-    }
-
-    efree(keyName);
+    lReturnValue = RegGetValueW(hKey, NULL, SERVICES_REG_ENVIRONMENT_W, RRF_RT_REG_MULTI_SZ|RRF_ZEROONFAILURE, NULL, dataW, &dataSize);
     RegCloseKey(hKey);
+    if (lReturnValue != ERROR_SUCCESS) {
+        efree(dataW);
+        return lReturnValue;
+    }
+
+    if (dataSize >= sizeof(wchar_t)) {
+        *pvData = win32_internal_to_utf8_n(dataW, (int)(dataSize / sizeof(wchar_t)), pvDataLen);
+        if (*pvData == NULL) {
+            efree(dataW);
+            return ERROR_NO_UNICODE_TRANSLATION;
+        }
+    } else {
+        *pvData = (char *) emalloc(1);
+        (*pvData)[0] = '\0';
+        *pvDataLen = 0;
+    }
+    efree(dataW);
     return ERROR_SUCCESS;
+}
+
+/* Write the Environment value from a UTF-8 multi string of data_len bytes.
+   With data_len = 0 the value is deleted. *step names the failing step. */
+long set_service_environment_vars(char * service, int service_len, char * data, int data_len, const char ** step) {
+    HKEY hKey;
+    LONG lReturnValue;
+    int dataW_len = 0;
+    wchar_t *dataW = NULL;
+
+    *step = "Error open key";
+    lReturnValue = win32_internal_open_service_key(service, service_len, &hKey);
+    if (lReturnValue != ERROR_SUCCESS) {
+        return lReturnValue;
+    }
+
+    if (data_len > 0) {
+        *step = "Error create key";
+        dataW = win32_internal_to_wide_n(data, data_len, &dataW_len);
+        if (dataW == NULL) {
+            RegCloseKey(hKey);
+            return ERROR_NO_UNICODE_TRANSLATION;
+        }
+        lReturnValue = RegSetValueExW(hKey, SERVICES_REG_ENVIRONMENT_W, 0, REG_MULTI_SZ, (const BYTE *) dataW, (DWORD)(dataW_len * sizeof(wchar_t)));
+        efree(dataW);
+    } else {
+        *step = "Error remove key";
+        lReturnValue = RegDeleteValueW(hKey, SERVICES_REG_ENVIRONMENT_W);
+    }
+    RegCloseKey(hKey);
+    return lReturnValue;
 }
 
 void get_service_registry_key(char * service, int service_len, char ** service_key, int * service_key_len) {
@@ -194,52 +255,34 @@ void remove_environment_value(char *data, int data_len, const char *env_name, ch
 
 long set_service_base_priority(char *service, int service_len, int priority) {
     HKEY hKey;
-    LONG lReturnValue = 0;
-    char * keyName = NULL;
-    int keyNameLen = 0;
-    get_service_registry_key(service, service_len, &keyName, &keyNameLen);
-    lReturnValue = RegOpenKeyEx(HKEY_LOCAL_MACHINE, keyName, 0, KEY_ALL_ACCESS, &hKey);
-		if (lReturnValue != ERROR_SUCCESS) {
-				efree(keyName);
-				if (lReturnValue == ERROR_FILE_NOT_FOUND) {
-						return ERROR_SERVICE_DOES_NOT_EXIST;
-				}
+    LONG lReturnValue = win32_internal_open_service_key(service, service_len, &hKey);
+    DWORD value = (DWORD) priority;
 
-				return lReturnValue;
-		}
+    if (lReturnValue != ERROR_SUCCESS) {
+        return lReturnValue;
+    }
 
-		lReturnValue = RegSetValueEx(hKey, SERVICES_REG_BASE_PRIORITY, 0, REG_DWORD, (CONST BYTE *)&priority, sizeof(REG_DWORD));
+    lReturnValue = RegSetValueExW(hKey, SERVICES_REG_BASE_PRIORITY_W, 0, REG_DWORD, (CONST BYTE *)&value, sizeof(value));
 
-		RegCloseKey(hKey);
-		efree(keyName);
+    RegCloseKey(hKey);
 
-		return lReturnValue;
+    return lReturnValue;
 }
 
 
 long get_service_base_priority(char *service, int service_len, int *priority) {
     HKEY hKey;
-    LONG lReturnValue = 0;
-    char * keyName = NULL;
-    int keyNameLen = 0;
+    LONG lReturnValue = win32_internal_open_service_key(service, service_len, &hKey);
     DWORD dwType = REG_DWORD;
     DWORD dwSize = sizeof(DWORD);
 
-    get_service_registry_key(service, service_len, &keyName, &keyNameLen);
-    lReturnValue = RegOpenKeyEx(HKEY_LOCAL_MACHINE, keyName, 0, KEY_ALL_ACCESS, &hKey);
-		if (lReturnValue != ERROR_SUCCESS) {
-				efree(keyName);
-				if (lReturnValue == ERROR_FILE_NOT_FOUND) {
-						return ERROR_SERVICE_DOES_NOT_EXIST;
-				}
+    if (lReturnValue != ERROR_SUCCESS) {
+        return lReturnValue;
+    }
 
-				return lReturnValue;
-		}
+    lReturnValue = RegQueryValueExW(hKey, SERVICES_REG_BASE_PRIORITY_W, 0, &dwType, (LPBYTE)priority, &dwSize);
 
-		lReturnValue = RegQueryValueEx(hKey, SERVICES_REG_BASE_PRIORITY, 0, &dwType, (LPBYTE)priority, &dwSize);
+    RegCloseKey(hKey);
 
-		RegCloseKey(hKey);
-		efree(keyName);
-
-		return lReturnValue;
+    return lReturnValue;
 }

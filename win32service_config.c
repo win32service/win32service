@@ -24,6 +24,7 @@
 #include "php.h"
 #include "php_win32service.h"
 #include "win32service_config.h"
+#include "win32service_wide.h"
 
 char *win32_generate_path_and_params(char *path, char *params, long svc_type, char *user) {
     char *result = NULL;
@@ -40,8 +41,12 @@ char *win32_generate_path_and_params(char *path, char *params, long svc_type, ch
     /* If interact with desktop is set and no username supplied (Only LocalSystem allows InteractWithDesktop) then pass the path and params through %COMSPEC% /C "..." */
     if (result && SERVICE_INTERACTIVE_PROCESS & svc_type && user == NULL) {
         char *tmp = result;
-				result = NULL;
-        spprintf(&result, 0, "\"%s\" /C \"%s\"", getenv("COMSPEC"), tmp);
+        char *comspec = win32_internal_getenv_utf8(L"COMSPEC");
+        result = NULL;
+        spprintf(&result, 0, "\"%s\" /C \"%s\"", comspec ? comspec : "cmd.exe", tmp);
+        if (comspec) {
+            efree(comspec);
+        }
         efree(tmp);
     }
 	return result;
@@ -52,12 +57,21 @@ DWORD win32_configure_service_ex(SC_HANDLE hsvc, zval *details, BOOL is_update, 
 
     /* Description */
     BOOL description_changed = FALSE;
-    SERVICE_DESCRIPTION sd;
-    WIN32_GET_STR_DETAIL(details, INFO_DESCRIPTION, sd.lpDescription, NULL, description_changed);
+    SERVICE_DESCRIPTIONW sd;
+    char *description = NULL;
+    WIN32_GET_STR_DETAIL(details, INFO_DESCRIPTION, description, NULL, description_changed);
     if (description_changed || !is_update) {
-        if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, &sd)) {
+        BOOL description_ok = win32_internal_to_wide(description, &sd.lpDescription);
+        if (description_ok) {
+            description_ok = ChangeServiceConfig2W(hsvc, SERVICE_CONFIG_DESCRIPTION, &sd);
+        }
+        DWORD description_error = GetLastError();
+        if (sd.lpDescription) {
+            efree(sd.lpDescription);
+        }
+        if (!description_ok) {
             *error_msg = "error when defining the description";
-            return GetLastError();
+            return description_error;
         }
     }
 
@@ -66,7 +80,7 @@ DWORD win32_configure_service_ex(SC_HANDLE hsvc, zval *details, BOOL is_update, 
     SERVICE_DELAYED_AUTO_START_INFO sdasi;
     WIN32_GET_BOOL_DETAIL(details, INFO_DELAYED_START, sdasi.fDelayedAutostart, FALSE, delayed_start_changed);
     if (delayed_start_changed || (!is_update && (start_type & SERVICE_AUTO_START))) {
-        if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, &sdasi)) {
+        if (!ChangeServiceConfig2W(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, &sdasi)) {
             /* If it's an update, we might ignore the error if the service is not auto-start,
                but for now let's be strict if it was explicitly requested or during creation. */
             if (!is_update || delayed_start_changed) {
@@ -81,7 +95,7 @@ DWORD win32_configure_service_ex(SC_HANDLE hsvc, zval *details, BOOL is_update, 
     SERVICE_FAILURE_ACTIONS_FLAG sfaf;
     WIN32_GET_BOOL_DETAIL(details, INFO_RECOVERY_ENABLED, sfaf.fFailureActionsOnNonCrashFailures, FALSE, recovery_enabled_changed);
     if (recovery_enabled_changed) {
-        if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, &sfaf)) {
+        if (!ChangeServiceConfig2W(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, &sfaf)) {
             *error_msg = "error on change the failure action flag";
             return GetLastError();
         }
@@ -89,14 +103,16 @@ DWORD win32_configure_service_ex(SC_HANDLE hsvc, zval *details, BOOL is_update, 
 
     /* Recovery Actions */
     BOOL update_failure_actions = FALSE;
-    SERVICE_FAILURE_ACTIONS sfa;
+    SERVICE_FAILURE_ACTIONSW sfa;
+    char *reboot_msg = NULL;
+    char *command = NULL;
     memset(&sfa, 0, sizeof(sfa));
     SC_ACTION actions[3];
     //memset(actions, 0, sizeof(actions));
 
     WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_RESET_PERIOD, sfa.dwResetPeriod, (is_update ? 0 : 86400), update_failure_actions);
-    WIN32_GET_STR_DETAIL(details, INFO_RECOVERY_REBOOT_MSG, sfa.lpRebootMsg, NULL, update_failure_actions);
-    WIN32_GET_STR_DETAIL(details, INFO_RECOVERY_COMMAND, sfa.lpCommand, NULL, update_failure_actions);
+    WIN32_GET_STR_DETAIL(details, INFO_RECOVERY_REBOOT_MSG, reboot_msg, NULL, update_failure_actions);
+    WIN32_GET_STR_DETAIL(details, INFO_RECOVERY_COMMAND, command, NULL, update_failure_actions);
 
     long recovery_delay;
     WIN32_GET_LONG_DETAIL(details, INFO_RECOVERY_DELAY, recovery_delay, 60000, update_failure_actions);
@@ -122,9 +138,21 @@ DWORD win32_configure_service_ex(SC_HANDLE hsvc, zval *details, BOOL is_update, 
     sfa.cActions = 3;
 
     if (update_failure_actions) {
-        if (!ChangeServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, &sfa)) {
+        BOOL actions_ok = win32_internal_to_wide(reboot_msg, &sfa.lpRebootMsg) &&
+                          win32_internal_to_wide(command, &sfa.lpCommand);
+        if (actions_ok) {
+            actions_ok = ChangeServiceConfig2W(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, &sfa);
+        }
+        DWORD actions_error = GetLastError();
+        if (sfa.lpRebootMsg) {
+            efree(sfa.lpRebootMsg);
+        }
+        if (sfa.lpCommand) {
+            efree(sfa.lpCommand);
+        }
+        if (!actions_ok) {
             *error_msg = "error on change the failure action";
-            return GetLastError();
+            return actions_error;
         }
     }
 

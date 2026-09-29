@@ -163,36 +163,4 @@ static inline win32service_right_info_object *php_win32service_right_info_object
         var = def; \
     }
 
-#define WIN32_GET_DEPS_DETAIL(details, var, def, changed_flag) \
-    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_DEPENDENCIES, sizeof(INFO_DEPENDENCIES)-1)) != NULL) { \
-        if (Z_TYPE_P(tmp) == IS_ARRAY) { \
-            HashTable *ht = Z_ARRVAL_P(tmp); \
-            zval *val; \
-            size_t total_len = 0; \
-            ZEND_HASH_FOREACH_VAL(ht, val) { \
-                convert_to_string_ex(val); \
-                total_len += Z_STRLEN_P(val) + 1; \
-            } ZEND_HASH_FOREACH_END(); \
-            total_len++; \
-            var = (char *) safe_emalloc(total_len, sizeof(char), 0); \
-            char *p = var; \
-            ZEND_HASH_FOREACH_VAL(ht, val) { \
-                strcpy(p, Z_STRVAL_P(val)); \
-                p += Z_STRLEN_P(val) + 1; \
-            } ZEND_HASH_FOREACH_END(); \
-            *p = '\0'; \
-            changed_flag = TRUE; \
-        } else if (Z_TYPE_P(tmp) == IS_STRING) { \
-             var = Z_STRVAL_P(tmp); \
-             changed_flag = TRUE; \
-        } else if (Z_TYPE_P(tmp) == IS_NULL) { \
-             var = NULL; \
-             changed_flag = TRUE; \
-        } \
-    } else { \
-        var = def; \
-    }
-
 #endif
-
-

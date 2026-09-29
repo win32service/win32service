@@ -40,11 +40,69 @@
 #include "win32service_registry.h"
 #include "win32service_error.h"
 #include "win32service_config.h"
+#include "win32service_wide.h"
 
 
 /* gargh! service_main run from a new thread that we don't spawn, so we can't do this nicely */
 static void *tmp_service_g = NULL;
 
+
+/* Read the dependencies of the service as a UTF-16 multi string (list of names, terminated by a double NUL).
+   Returns FALSE if a name is not a valid UTF-8 string. */
+static BOOL win32_get_dependencies_detail(zval *details, wchar_t **deps, BOOL *changed) {
+    zval *tmp;
+
+    *deps = NULL;
+    if ((tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_DEPENDENCIES, sizeof(INFO_DEPENDENCIES) - 1)) == NULL) {
+        return TRUE;
+    }
+
+    if (Z_TYPE_P(tmp) == IS_NULL) {
+        *changed = TRUE;
+        return TRUE;
+    }
+
+    if (Z_TYPE_P(tmp) == IS_STRING) {
+        /* a single dependency: the name and the list terminator */
+        int name_len = 0;
+        wchar_t *name = win32_internal_to_wide_n(Z_STRVAL_P(tmp), (int) Z_STRLEN_P(tmp) + 1, &name_len);
+        if (name == NULL) {
+            return FALSE;
+        }
+        *deps = (wchar_t *) erealloc(name, ((size_t) name_len + 2) * sizeof(wchar_t));
+        (*deps)[name_len] = L'\0';
+        (*deps)[name_len + 1] = L'\0';
+        *changed = TRUE;
+        return TRUE;
+    }
+
+    if (Z_TYPE_P(tmp) == IS_ARRAY) {
+        zval *val;
+        size_t total = 0;
+        wchar_t *buffer = (wchar_t *) emalloc(2 * sizeof(wchar_t));
+
+        buffer[0] = L'\0';
+        ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(tmp), val) {
+            zend_string *str = zval_get_string(val);
+            int item_len = 0;
+            wchar_t *item = win32_internal_to_wide_n(ZSTR_VAL(str), (int) ZSTR_LEN(str) + 1, &item_len);
+            zend_string_release(str);
+            if (item == NULL) {
+                efree(buffer);
+                return FALSE;
+            }
+            buffer = (wchar_t *) erealloc(buffer, (total + (size_t) item_len + 2) * sizeof(wchar_t));
+            memcpy(buffer + total, item, (size_t) item_len * sizeof(wchar_t));
+            total += (size_t) item_len;
+            efree(item);
+        } ZEND_HASH_FOREACH_END();
+        buffer[total] = L'\0';
+        buffer[total + 1] = L'\0';
+        *deps = buffer;
+        *changed = TRUE;
+    }
+    return TRUE;
+}
 
 static DWORD WINAPI service_handler(DWORD dwControl, DWORD dwEventType, LPVOID lpEventData, LPVOID lpContext) {
     zend_win32service_globals *g = (zend_win32service_globals *) lpContext;
@@ -63,7 +121,7 @@ static DWORD WINAPI service_handler(DWORD dwControl, DWORD dwEventType, LPVOID l
     return code;
 }
 
-static void WINAPI service_main(DWORD argc, char **argv) {
+static void WINAPI service_main(DWORD argc, LPWSTR *argv) {
     zend_win32service_globals *g = (zend_win32service_globals *) tmp_service_g;
     DWORD base_priority;
     HKEY hKey;
@@ -102,7 +160,7 @@ static void WINAPI service_main(DWORD argc, char **argv) {
     g->st.dwCurrentState = SERVICE_START_PENDING;
     g->st.dwControlsAccepted = g->dwControlsAccepted;
 
-    g->sh = RegisterServiceCtrlHandlerEx(g->service_name, service_handler, g);
+    g->sh = RegisterServiceCtrlHandlerExW(g->service_name, service_handler, g);
 
     if (g->sh == (SERVICE_STATUS_HANDLE)0) {
         g->code = GetLastError();
@@ -119,7 +177,7 @@ static DWORD WINAPI svc_thread_proc(LPVOID _globals) {
 
     tmp_service_g = g;
 
-    if (!StartServiceCtrlDispatcher(g->te)) {
+    if (!StartServiceCtrlDispatcherW(g->te)) {
         g->code = GetLastError();
         SetEvent(g->event);
         return 1;
@@ -135,7 +193,7 @@ static bool win32_check_if_is_service() {
     if (hWinStation != NULL) {
         USEROBJECTFLAGS uof;
         DWORD lenNeeded;
-        if (GetUserObjectInformation(hWinStation, UOI_FLAGS, &uof, sizeof(uof), &lenNeeded)) {
+        if (GetUserObjectInformationW(hWinStation, UOI_FLAGS, &uof, sizeof(uof), &lenNeeded)) {
             return ((uof.dwFlags & WSF_VISIBLE) == 0 && GetConsoleWindow() == NULL);
         }
     }
@@ -169,13 +227,21 @@ static PHP_FUNCTION(win32_start_service_ctrl_dispatcher) {
         RETURN_THROWS();
     }
 
-    SVCG(service_name) = estrdup(name);
+    if (SVCG(service_name)) {
+        efree(SVCG(service_name));
+        SVCG(service_name) = NULL;
+    }
+    SVCG(service_name) = win32_internal_to_wide_n(name, -1, NULL);
+    if (SVCG(service_name) == NULL) {
+        zend_argument_value_error(1, "the value is not a valid UTF-8 string");
+        RETURN_THROWS();
+    }
 
     SVCG(gracefulExit) = gracefulExitParam;
 
     SVCG(te)[0].lpServiceName = SVCG(service_name);
     SVCG(te)[0].lpServiceProc = service_main;
-    SVCG(event) = CreateEvent(NULL, TRUE, FALSE, NULL);
+    SVCG(event) = CreateEventW(NULL, TRUE, FALSE, NULL);
 
     SVCG(svc_thread) = CreateThread(NULL, 0, svc_thread_proc, &SVCG(svc_thread), 0, &SVCG(svc_thread_id));
 
@@ -327,8 +393,10 @@ static PHP_FUNCTION(win32_read_right_access_service) {
     PSECURITY_DESCRIPTOR pSD = NULL;
     ACCESS_MASK pAccess;
     PACL pACL = NULL;
-    TRUSTEE trustee;
+    TRUSTEE_W trustee;
     DWORD dwRes;
+    wchar_t *service_w = NULL;
+    wchar_t *username_w = NULL;
 
     if (FAILURE ==
         zend_parse_parameters(ZEND_NUM_ARGS(), "ss|s!", &service, &service_len, &username, &username_len, &machine,
@@ -336,9 +404,15 @@ static PHP_FUNCTION(win32_read_right_access_service) {
         RETURN_THROWS();
     }
 
-    dwRes = GetNamedSecurityInfo(service, SE_SERVICE,
-                                 DACL_SECURITY_INFORMATION,
-                                 NULL, NULL, &pACL, NULL, &pSD);
+    if (!win32_internal_to_wide(service, &service_w)) {
+        convert_error_to_exception(ERROR_NO_UNICODE_TRANSLATION, "service name");
+        RETURN_THROWS();
+    }
+
+    dwRes = GetNamedSecurityInfoW(service_w, SE_SERVICE,
+                                  DACL_SECURITY_INFORMATION,
+                                  NULL, NULL, &pACL, NULL, &pSD);
+    efree(service_w);
 
     if (ERROR_SUCCESS != dwRes) {
         if (pSD != NULL) { LocalFree((HLOCAL) pSD); }
@@ -354,11 +428,18 @@ static PHP_FUNCTION(win32_read_right_access_service) {
     }
 
 
-    ZeroMemory(&trustee, sizeof(PTRUSTEE_A));
+    if (!win32_internal_to_wide(username, &username_w)) {
+        if (pSD != NULL) { LocalFree((HLOCAL) pSD); }
+        convert_error_to_exception(ERROR_NO_UNICODE_TRANSLATION, "username");
+        RETURN_THROWS();
+    }
 
-    BuildTrusteeWithName(&trustee, username);
+    ZeroMemory(&trustee, sizeof(trustee));
 
-    dwRes = GetEffectiveRightsFromAcl(pACL, &trustee, &pAccess);
+    BuildTrusteeWithNameW(&trustee, username_w);
+
+    dwRes = GetEffectiveRightsFromAclW(pACL, &trustee, &pAccess);
+    efree(username_w);
     if (ERROR_SUCCESS != dwRes) {
         if (pSD != NULL) { LocalFree((HLOCAL) pSD); }
         convert_error_to_exception(dwRes, "GetEffectiveRightsFromAcl Error");
@@ -410,19 +491,27 @@ static PHP_FUNCTION(win32_read_all_rights_access_service) {
     PSECURITY_DESCRIPTOR pSD = NULL;
     ACCESS_MASK pAccess;
     PACL pACL = NULL;
-    TRUSTEE trustee;
+    TRUSTEE_W trustee;
     DWORD dwRes;
     long pcCountOfExplicitEntries = 0;
-    PEXPLICIT_ACCESS_A pListOfExplicitEntries = NULL;
+    PEXPLICIT_ACCESS_W pListOfExplicitEntries = NULL;
     long index = 0;
+    wchar_t *service_w = NULL;
+    wchar_t *machine_w = NULL;
 
     if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!", &service, &service_len, &machine, &machine_len)) {
         RETURN_THROWS();
     }
 
-    dwRes = GetNamedSecurityInfo(service, SE_SERVICE,
-                                 DACL_SECURITY_INFORMATION,
-                                 NULL, NULL, &pACL, NULL, &pSD);
+    if (!win32_internal_to_wide(service, &service_w)) {
+        convert_error_to_exception(ERROR_NO_UNICODE_TRANSLATION, "service name");
+        RETURN_THROWS();
+    }
+
+    dwRes = GetNamedSecurityInfoW(service_w, SE_SERVICE,
+                                  DACL_SECURITY_INFORMATION,
+                                  NULL, NULL, &pACL, NULL, &pSD);
+    efree(service_w);
 
     if (ERROR_SUCCESS != dwRes) {
         if (pSD != NULL) { LocalFree((HLOCAL) pSD); }
@@ -437,7 +526,7 @@ static PHP_FUNCTION(win32_read_all_rights_access_service) {
         RETURN_THROWS();
     }
 
-    dwRes = GetExplicitEntriesFromAcl(
+    dwRes = GetExplicitEntriesFromAclW(
             pACL,
             &pcCountOfExplicitEntries,
             &pListOfExplicitEntries
@@ -449,11 +538,18 @@ static PHP_FUNCTION(win32_read_all_rights_access_service) {
         convert_error_to_exception(dwRes, "GetExplicitEntriesFromAcl Error");
         RETURN_THROWS();
     }
-    char *sid;
-    char name[256];
-    long dwSize;
-    char domainName[256];
-    long dwDomaineSize;
+    LPWSTR sid_w = NULL;
+    wchar_t name[256];
+    DWORD dwSize;
+    wchar_t domainName[256];
+    DWORD dwDomaineSize;
+
+    if (!win32_internal_to_wide(machine, &machine_w)) {
+        if (pSD != NULL) { LocalFree((HLOCAL) pSD); }
+        if (pListOfExplicitEntries != NULL) { LocalFree((HLOCAL) pListOfExplicitEntries); }
+        convert_error_to_exception(ERROR_NO_UNICODE_TRANSLATION, "machine name");
+        RETURN_THROWS();
+    }
 
     SID_NAME_USE peUse;
 
@@ -467,15 +563,15 @@ static PHP_FUNCTION(win32_read_all_rights_access_service) {
         if ((pListOfExplicitEntries[index].Trustee.TrusteeForm & TRUSTEE_IS_SID) != TRUSTEE_IS_SID) {
             continue;
         }
-        if (!ConvertSidToStringSidA(pListOfExplicitEntries[index].Trustee.ptstrName, &sid)) {
-            continue;
-        }
         if (!IsValidSid(pListOfExplicitEntries[index].Trustee.ptstrName)) {
             continue;
         }
+        if (!ConvertSidToStringSidW(pListOfExplicitEntries[index].Trustee.ptstrName, &sid_w)) {
+            continue;
+        }
 
-        if (LookupAccountSid(
-                machine,
+        if (LookupAccountSidW(
+                machine_w,
                 pListOfExplicitEntries[index].Trustee.ptstrName,
                 name,
                 &dwSize,
@@ -483,25 +579,34 @@ static PHP_FUNCTION(win32_read_all_rights_access_service) {
                 &dwDomaineSize,
                 &peUse
         )) {
-//            printf("name: %s domain: %s ", name, domainName);
-            char *domainNamePtr = &domainName[0];
-            char *namePtr = &name[0];
-            win32service_create_right_info(&result, domainNamePtr, dwDomaineSize, namePtr, dwSize,
-                                           pListOfExplicitEntries[index].grfAccessPermissions,
-                                           pListOfExplicitEntries[index].grfAccessMode);
-//            printf(" init OK");
-            add_next_index_zval(return_value, &result);
-//            printf(" add in array OK\n");
+            char *domain_utf8 = win32_internal_to_utf8(domainName);
+            char *name_utf8 = win32_internal_to_utf8(name);
+            if (domain_utf8 != NULL && name_utf8 != NULL) {
+                win32service_create_right_info(&result, domain_utf8, strlen(domain_utf8), name_utf8, strlen(name_utf8),
+                                               pListOfExplicitEntries[index].grfAccessPermissions,
+                                               pListOfExplicitEntries[index].grfAccessMode);
+                add_next_index_zval(return_value, &result);
+            }
+            if (domain_utf8) efree(domain_utf8);
+            if (name_utf8) efree(name_utf8);
         } else {
-//            printf("SID: %s %d nameSize: %d domain size: %d\n", sid, GetLastError(), dwSize, dwDomaineSize);
-            win32service_create_right_info(&result, NULL, 0, sid, strlen(sid),
-                                           pListOfExplicitEntries[index].grfAccessPermissions,
-                                           pListOfExplicitEntries[index].grfAccessMode);
-            add_next_index_zval(return_value, &result);
+            /* SID is ASCII only */
+            char *sid_utf8 = win32_internal_to_utf8(sid_w);
+            if (sid_utf8 != NULL) {
+                win32service_create_right_info(&result, NULL, 0, sid_utf8, strlen(sid_utf8),
+                                               pListOfExplicitEntries[index].grfAccessPermissions,
+                                               pListOfExplicitEntries[index].grfAccessMode);
+                add_next_index_zval(return_value, &result);
+                efree(sid_utf8);
+            }
         }
-        LocalFree((HLOCAL) sid);
+        LocalFree((HLOCAL) sid_w);
+        sid_w = NULL;
     }
 
+    if (machine_w) efree(machine_w);
+    if (pListOfExplicitEntries != NULL)
+        LocalFree((HLOCAL) pListOfExplicitEntries);
     if (pSD != NULL)
         LocalFree((HLOCAL) pSD);
 
@@ -612,7 +717,7 @@ static PHP_FUNCTION(win32_create_service) {
     long recovery_reset_period;
 
     char *load_order;
-    char *deps = NULL;
+    wchar_t *deps = NULL;
     SC_HANDLE hsvc, hmgr;
     DWORD base_priority;
     HKEY hKey;
@@ -631,7 +736,6 @@ static PHP_FUNCTION(win32_create_service) {
     WIN32_GET_STR_DETAIL(details, INFO_PATH, path, NULL, dummy_changed);
     WIN32_GET_STR_DETAIL(details, INFO_PARAMS, params, "", dummy_changed);
     WIN32_GET_STR_DETAIL(details, INFO_LOAD_ORDER, load_order, NULL, dummy_changed);
-    WIN32_GET_DEPS_DETAIL(details, deps, NULL, dummy_changed);
     WIN32_GET_LONG_DETAIL(details, INFO_SVC_TYPE, svc_type, SERVICE_WIN32_OWN_PROCESS, dummy_changed);
     WIN32_GET_LONG_DETAIL(details, INFO_START_TYPE, start_type, SERVICE_AUTO_START, dummy_changed);
     WIN32_GET_LONG_DETAIL(details, INFO_ERROR_CONTROL, error_control, SERVICE_ERROR_IGNORE, dummy_changed);
@@ -750,34 +854,46 @@ static PHP_FUNCTION(win32_create_service) {
     }
 
 
+    if (!win32_get_dependencies_detail(details, &deps, &dummy_changed)) {
+        zend_argument_value_error(1, "the value for key '%s' must contain valid UTF-8 strings", INFO_DEPENDENCIES);
+        RETURN_THROWS();
+    }
+
     /* Connect to the SCManager. */
-    hmgr = OpenSCManager(machine, NULL, SC_MANAGER_ALL_ACCESS);
+    hmgr = win32_internal_open_sc_manager(machine, SC_MANAGER_ALL_ACCESS);
 
     /* Quit if no connection. */
     if (!hmgr) {
-        convert_error_to_exception(GetLastError(), "");
+        DWORD manager_error = GetLastError();
+        if (deps) {
+            efree(deps);
+        }
+        convert_error_to_exception(manager_error, "");
         RETURN_THROWS();
     }
 
     char * path_and_params = win32_generate_path_and_params(path, params, svc_type, user);
 
     /* Register the service. */
-    hsvc = CreateService(hmgr,
-                         service,
-                         display ? display : service,
-                         SERVICE_ALL_ACCESS,
-                         svc_type,
-                         start_type,
-                         error_control,
-                         path_and_params,
-                         load_order,
-                         NULL,
-                         (LPCSTR) deps,
-                         (LPCSTR) user,
-                         (LPCSTR) password);
+    hsvc = win32_internal_create_service(hmgr,
+                                         service,
+                                         display,
+                                         svc_type,
+                                         start_type,
+                                         error_control,
+                                         path_and_params,
+                                         load_order,
+                                         deps,
+                                         user,
+                                         password);
+    /* keep the error of the creation for the exception */
+    DWORD create_error = GetLastError();
 
     if (path_and_params) {
         efree(path_and_params);
+    }
+    if (deps) {
+        efree(deps);
     }
 
 
@@ -788,7 +904,7 @@ static PHP_FUNCTION(win32_create_service) {
        then track the error. */
     if (!hsvc) {
         CloseServiceHandle(hmgr);
-        convert_error_to_exception(GetLastError(), "on create service");
+        convert_error_to_exception(create_error, "on create service");
         RETURN_THROWS();
     }
 
@@ -831,12 +947,12 @@ static PHP_FUNCTION(win32_exists_service) {
         RETURN_THROWS();
     }
 
-    hmgr = OpenSCManager(machine, NULL, SC_MANAGER_ALL_ACCESS);
+    hmgr = win32_internal_open_sc_manager(machine, SC_MANAGER_ALL_ACCESS);
     if (!hmgr) {
         convert_error_to_exception(GetLastError(), "");
         RETURN_THROWS();
     }
-    hsvc = OpenService(hmgr, service, DELETE);
+    hsvc = win32_internal_open_service(hmgr, service, DELETE);
     if (!hsvc) {
         CloseServiceHandle(hmgr);
         error = GetLastError();
@@ -873,12 +989,12 @@ static PHP_FUNCTION(win32_delete_service) {
         RETURN_THROWS();
     }
 
-    hmgr = OpenSCManager(machine, NULL, SC_MANAGER_ALL_ACCESS);
+    hmgr = win32_internal_open_sc_manager(machine, SC_MANAGER_ALL_ACCESS);
     if (!hmgr) {
         convert_error_to_exception(GetLastError(), "");
         RETURN_THROWS();
     }
-    hsvc = OpenService(hmgr, service, DELETE);
+    hsvc = win32_internal_open_service(hmgr, service, DELETE);
     if (!hsvc) {
         CloseServiceHandle(hmgr);
         convert_error_to_exception(GetLastError(), "");
@@ -998,12 +1114,12 @@ static PHP_FUNCTION(win32_query_service_status) {
         RETURN_THROWS();
     }
 
-    hmgr = OpenSCManager(machine, NULL, GENERIC_READ);
+    hmgr = win32_internal_open_sc_manager(machine, GENERIC_READ);
     if (!hmgr) {
         convert_error_to_exception(GetLastError(), "");
         RETURN_THROWS();
     }
-    hsvc = OpenService(hmgr, service, SERVICE_QUERY_STATUS);
+    hsvc = win32_internal_open_service(hmgr, service, SERVICE_QUERY_STATUS);
     if (!hsvc) {
         CloseServiceHandle(hmgr);
         convert_error_to_exception(GetLastError(), "");
@@ -1048,6 +1164,18 @@ static PHP_FUNCTION(win32_query_service_status) {
 }
 /* }}} */
 
+/* Add a UTF-16 string to an array as UTF-8, or null when the string is missing (or not convertible). */
+static void win32_add_assoc_wstring_or_null(zval *arr, const char *key, const wchar_t *value) {
+    char *utf8 = value ? win32_internal_to_utf8(value) : NULL;
+
+    if (utf8) {
+        add_assoc_string(arr, key, utf8);
+        efree(utf8);
+    } else {
+        add_assoc_null(arr, key);
+    }
+}
+
 /* {{{ proto array win32_query_service_config(string servicename [, string machine])
    Queries the configuration of a service */
 static PHP_FUNCTION(win32_query_service_config) {
@@ -1057,11 +1185,11 @@ static PHP_FUNCTION(win32_query_service_config) {
     size_t service_len = 0;
     SC_HANDLE hsvc;
     SC_HANDLE hmgr;
-    LPQUERY_SERVICE_CONFIGA cfg = NULL;
-    LPSERVICE_DESCRIPTIONA desc = NULL;
+    LPQUERY_SERVICE_CONFIGW cfg = NULL;
+    LPSERVICE_DESCRIPTIONW desc = NULL;
     LPSERVICE_DELAYED_AUTO_START_INFO delayed_start = NULL;
     LPSERVICE_FAILURE_ACTIONS_FLAG failure_actions_flag = NULL;
-    LPSERVICE_FAILURE_ACTIONSA failure_actions = NULL;
+    LPSERVICE_FAILURE_ACTIONSW failure_actions = NULL;
     DWORD size, needed;
 
     if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!", &service, &service_len, &machine, &machine_len)) {
@@ -1073,12 +1201,12 @@ static PHP_FUNCTION(win32_query_service_config) {
         RETURN_THROWS();
     }
 
-    hmgr = OpenSCManager(machine, NULL, GENERIC_READ);
+    hmgr = win32_internal_open_sc_manager(machine, GENERIC_READ);
     if (!hmgr) {
         convert_error_to_exception(GetLastError(), "");
         RETURN_THROWS();
     }
-    hsvc = OpenService(hmgr, service, SERVICE_QUERY_CONFIG);
+    hsvc = win32_internal_open_service(hmgr, service, SERVICE_QUERY_CONFIG);
     if (!hsvc) {
         CloseServiceHandle(hmgr);
         convert_error_to_exception(GetLastError(), "");
@@ -1086,15 +1214,15 @@ static PHP_FUNCTION(win32_query_service_config) {
     }
 
     /* Query Service Config */
-    if (!QueryServiceConfig(hsvc, NULL, 0, &needed)) {
+    if (!QueryServiceConfigW(hsvc, NULL, 0, &needed)) {
         if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
             CloseServiceHandle(hsvc);
             CloseServiceHandle(hmgr);
             convert_error_to_exception(GetLastError(), "");
             RETURN_THROWS();
         }
-        cfg = (LPQUERY_SERVICE_CONFIGA) emalloc(needed);
-        if (!QueryServiceConfig(hsvc, cfg, needed, &needed)) {
+        cfg = (LPQUERY_SERVICE_CONFIGW) emalloc(needed);
+        if (!QueryServiceConfigW(hsvc, cfg, needed, &needed)) {
             efree(cfg);
             CloseServiceHandle(hsvc);
             CloseServiceHandle(hmgr);
@@ -1109,65 +1237,47 @@ static PHP_FUNCTION(win32_query_service_config) {
     add_assoc_long(return_value, INFO_START_TYPE, cfg->dwStartType);
     add_assoc_long(return_value, INFO_ERROR_CONTROL, cfg->dwErrorControl);
 
-    if (cfg->lpBinaryPathName) {
-        add_assoc_string(return_value, INFO_PATH, cfg->lpBinaryPathName);
-    } else {
-        add_assoc_null(return_value, INFO_PATH);
-    }
-
-    if (cfg->lpLoadOrderGroup) {
-        add_assoc_string(return_value, INFO_LOAD_ORDER, cfg->lpLoadOrderGroup);
-    } else {
-        add_assoc_null(return_value, INFO_LOAD_ORDER);
-    }
+    win32_add_assoc_wstring_or_null(return_value, INFO_PATH, cfg->lpBinaryPathName);
+    win32_add_assoc_wstring_or_null(return_value, INFO_LOAD_ORDER, cfg->lpLoadOrderGroup);
 
     add_assoc_long(return_value, INFO_TAG_ID, cfg->dwTagId);
 
     if (cfg->lpDependencies) {
         zval deps;
         array_init(&deps);
-        char *p = cfg->lpDependencies;
+        wchar_t *p = cfg->lpDependencies;
         while (*p) {
-            add_next_index_string(&deps, p);
-            p += strlen(p) + 1;
+            char *dep = win32_internal_to_utf8(p);
+            if (dep) {
+                add_next_index_string(&deps, dep);
+                efree(dep);
+            }
+            p += wcslen(p) + 1;
         }
         add_assoc_zval(return_value, INFO_DEPENDENCIES, &deps);
     } else {
         add_assoc_null(return_value, INFO_DEPENDENCIES);
     }
 
-    if (cfg->lpServiceStartName) {
-        add_assoc_string(return_value, INFO_USER, cfg->lpServiceStartName);
-    } else {
-        add_assoc_null(return_value, INFO_USER);
-    }
-
-    if (cfg->lpDisplayName) {
-        add_assoc_string(return_value, INFO_DISPLAY, cfg->lpDisplayName);
-    } else {
-        add_assoc_null(return_value, INFO_DISPLAY);
-    }
+    win32_add_assoc_wstring_or_null(return_value, INFO_USER, cfg->lpServiceStartName);
+    win32_add_assoc_wstring_or_null(return_value, INFO_DISPLAY, cfg->lpDisplayName);
 
     /* Query Service Description */
-    if (!QueryServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, NULL, 0, &needed)) {
+    if (!QueryServiceConfig2W(hsvc, SERVICE_CONFIG_DESCRIPTION, NULL, 0, &needed)) {
         if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
-            desc = (LPSERVICE_DESCRIPTIONA) emalloc(needed);
-            if (QueryServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, (LPBYTE)desc, needed, &needed)) {
-                if (desc->lpDescription) {
-                    add_assoc_string(return_value, INFO_DESCRIPTION, desc->lpDescription);
-                } else {
-                    add_assoc_null(return_value, INFO_DESCRIPTION);
-                }
+            desc = (LPSERVICE_DESCRIPTIONW) emalloc(needed);
+            if (QueryServiceConfig2W(hsvc, SERVICE_CONFIG_DESCRIPTION, (LPBYTE)desc, needed, &needed)) {
+                win32_add_assoc_wstring_or_null(return_value, INFO_DESCRIPTION, desc->lpDescription);
             }
             efree(desc);
         }
     }
 
     /* Query Delayed Auto Start Info */
-    if (!QueryServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, NULL, 0, &needed)) {
+    if (!QueryServiceConfig2W(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, NULL, 0, &needed)) {
         if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
             delayed_start = (LPSERVICE_DELAYED_AUTO_START_INFO) emalloc(needed);
-            if (QueryServiceConfig2(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, (LPBYTE)delayed_start, needed, &needed)) {
+            if (QueryServiceConfig2W(hsvc, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, (LPBYTE)delayed_start, needed, &needed)) {
                 add_assoc_bool(return_value, INFO_DELAYED_START, delayed_start->fDelayedAutostart);
             }
             efree(delayed_start);
@@ -1175,10 +1285,10 @@ static PHP_FUNCTION(win32_query_service_config) {
     }
 
     /* Query Failure Actions Flag */
-    if (!QueryServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, NULL, 0, &needed)) {
+    if (!QueryServiceConfig2W(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, NULL, 0, &needed)) {
         if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
             failure_actions_flag = (LPSERVICE_FAILURE_ACTIONS_FLAG) emalloc(needed);
-            if (QueryServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, (LPBYTE)failure_actions_flag, needed, &needed)) {
+            if (QueryServiceConfig2W(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, (LPBYTE)failure_actions_flag, needed, &needed)) {
                 add_assoc_bool(return_value, INFO_RECOVERY_ENABLED, failure_actions_flag->fFailureActionsOnNonCrashFailures);
             }
             efree(failure_actions_flag);
@@ -1186,21 +1296,13 @@ static PHP_FUNCTION(win32_query_service_config) {
     }
 
     /* Query Failure Actions */
-    if (!QueryServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, NULL, 0, &needed)) {
+    if (!QueryServiceConfig2W(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, NULL, 0, &needed)) {
         if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
-            failure_actions = (LPSERVICE_FAILURE_ACTIONSA) emalloc(needed);
-            if (QueryServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, (LPBYTE)failure_actions, needed, &needed)) {
+            failure_actions = (LPSERVICE_FAILURE_ACTIONSW) emalloc(needed);
+            if (QueryServiceConfig2W(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, (LPBYTE)failure_actions, needed, &needed)) {
                 add_assoc_long(return_value, INFO_RECOVERY_RESET_PERIOD, failure_actions->dwResetPeriod);
-                if (failure_actions->lpRebootMsg) {
-                    add_assoc_string(return_value, INFO_RECOVERY_REBOOT_MSG, failure_actions->lpRebootMsg);
-                } else {
-                    add_assoc_null(return_value, INFO_RECOVERY_REBOOT_MSG);
-                }
-                if (failure_actions->lpCommand) {
-                    add_assoc_string(return_value, INFO_RECOVERY_COMMAND, failure_actions->lpCommand);
-                } else {
-                    add_assoc_null(return_value, INFO_RECOVERY_COMMAND);
-                }
+                win32_add_assoc_wstring_or_null(return_value, INFO_RECOVERY_REBOOT_MSG, failure_actions->lpRebootMsg);
+                win32_add_assoc_wstring_or_null(return_value, INFO_RECOVERY_COMMAND, failure_actions->lpCommand);
 
                 if (failure_actions->cActions >= 1) {
                     add_assoc_long(return_value, INFO_RECOVERY_ACTION_1, failure_actions->lpsaActions[0].Type);
@@ -1235,7 +1337,8 @@ static PHP_FUNCTION(win32_update_service_config) {
     long svc_type = SERVICE_NO_CHANGE;
     DWORD start_type = SERVICE_NO_CHANGE;
     DWORD error_control = SERVICE_NO_CHANGE;
-    char *path = NULL, *load_order = NULL, *deps = NULL, *user = NULL, *password = NULL, *display = NULL;
+    char *path = NULL, *load_order = NULL, *user = NULL, *password = NULL, *display = NULL;
+    wchar_t *deps = NULL;
     char *params = NULL;
     BOOL update_main_config = FALSE;
 
@@ -1248,12 +1351,12 @@ static PHP_FUNCTION(win32_update_service_config) {
         RETURN_THROWS();
     }
 
-    hmgr = OpenSCManager(machine, NULL, SC_MANAGER_ALL_ACCESS);
+    hmgr = win32_internal_open_sc_manager(machine, SC_MANAGER_ALL_ACCESS);
     if (!hmgr) {
         convert_error_to_exception(GetLastError(), "");
         RETURN_THROWS();
     }
-    hsvc = OpenService(hmgr, service, SERVICE_ALL_ACCESS);
+    hsvc = win32_internal_open_service(hmgr, service, SERVICE_ALL_ACCESS);
     if (!hsvc) {
         CloseServiceHandle(hmgr);
         convert_error_to_exception(GetLastError(), "");
@@ -1369,17 +1472,17 @@ static PHP_FUNCTION(win32_update_service_config) {
     }
 
 	if (svc_type == SERVICE_NO_CHANGE) {
-    	LPQUERY_SERVICE_CONFIGA cfg = NULL;
+    	LPQUERY_SERVICE_CONFIGW cfg = NULL;
         DWORD needed;
-	    if (!QueryServiceConfig(hsvc, NULL, 0, &needed)) {
+	    if (!QueryServiceConfigW(hsvc, NULL, 0, &needed)) {
             if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
                 CloseServiceHandle(hsvc);
                 CloseServiceHandle(hmgr);
                 convert_error_to_exception(GetLastError(), "");
                 RETURN_THROWS();
             }
-            cfg = (LPQUERY_SERVICE_CONFIGA) emalloc(needed);
-            if (!QueryServiceConfig(hsvc, cfg, needed, &needed)) {
+            cfg = (LPQUERY_SERVICE_CONFIGW) emalloc(needed);
+            if (!QueryServiceConfigW(hsvc, cfg, needed, &needed)) {
                 efree(cfg);
                 CloseServiceHandle(hsvc);
                 CloseServiceHandle(hmgr);
@@ -1394,23 +1497,29 @@ static PHP_FUNCTION(win32_update_service_config) {
 
 
     /* Dependencies */
-    WIN32_GET_DEPS_DETAIL(details, deps, NULL, update_main_config);
+    if (!win32_get_dependencies_detail(details, &deps, &update_main_config)) {
+        CloseServiceHandle(hsvc);
+        CloseServiceHandle(hmgr);
+        zend_argument_value_error(2, "the value for key '%s' must contain valid UTF-8 strings", INFO_DEPENDENCIES);
+        RETURN_THROWS();
+    }
 
     char * path_and_params = win32_generate_path_and_params(path, params, svc_type, user);
 
     if (update_main_config) {
-        if (!ChangeServiceConfig(hsvc, svc_type, start_type, error_control, path_and_params, load_order, NULL, deps, user, password, display)) {
+        if (!win32_internal_change_service_config(hsvc, svc_type, start_type, error_control, path_and_params, load_order, deps, user, password, display)) {
+            DWORD change_error = GetLastError();
             if (path_and_params) efree(path_and_params);
-            if (deps && (tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_DEPENDENCIES, sizeof(INFO_DEPENDENCIES)-1)) != NULL && Z_TYPE_P(tmp) == IS_ARRAY) efree(deps);
+            if (deps) efree(deps);
             CloseServiceHandle(hsvc);
             CloseServiceHandle(hmgr);
-            convert_error_to_exception(GetLastError(), "");
+            convert_error_to_exception(change_error, "");
             RETURN_THROWS();
         }
     }
 
     if (path_and_params) efree(path_and_params);
-    if (deps && (tmp = zend_hash_str_find(Z_ARRVAL_P(details), INFO_DEPENDENCIES, sizeof(INFO_DEPENDENCIES)-1)) != NULL && Z_TYPE_P(tmp) == IS_ARRAY) efree(deps);
+    if (deps) efree(deps);
 
 
     char *error_msg = "";
@@ -1447,18 +1556,18 @@ static PHP_FUNCTION(win32_start_service) {
         RETURN_THROWS();
     }
 
-    hmgr = OpenSCManager(machine, NULL, SC_MANAGER_CONNECT);
+    hmgr = win32_internal_open_sc_manager(machine, SC_MANAGER_CONNECT);
     if (!hmgr) {
         convert_error_to_exception(GetLastError(), "");
         RETURN_THROWS();
     }
-    hsvc = OpenService(hmgr, service, SERVICE_START);
+    hsvc = win32_internal_open_service(hmgr, service, SERVICE_START);
     if (!hsvc) {
         CloseServiceHandle(hmgr);
         convert_error_to_exception(GetLastError(), "");
         RETURN_THROWS();
     }
-    if (!StartService(hsvc, 0, NULL)) {
+    if (!StartServiceW(hsvc, 0, NULL)) {
         CloseServiceHandle(hsvc);
         CloseServiceHandle(hmgr);
         convert_error_to_exception(GetLastError(), "");
@@ -1475,7 +1584,6 @@ static PHP_FUNCTION(win32_start_service) {
 static PHP_FUNCTION(win32_get_service_env_vars) {
     char *service = NULL;
     size_t service_len = 0;
-    HKEY hKey;
     LONG lReturnValue = 0;
 
     if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s", &service, &service_len)) {
@@ -1549,9 +1657,7 @@ static PHP_FUNCTION(win32_add_service_env_var) {
     size_t var_name_len = 0;
     char *var_value = NULL;
     size_t var_value_len = 0;
-    HKEY hKey;
     LONG lReturnValue = 0;
-    DWORD dwDisposition;
 
     if (FAILURE ==
         zend_parse_parameters(ZEND_NUM_ARGS(), "sss", &service, &service_len, &var_name, &var_name_len, &var_value,
@@ -1598,29 +1704,14 @@ static PHP_FUNCTION(win32_add_service_env_var) {
     }
 
 
-    char *keyName = NULL;
-    int keyNameLen = 0;
-    get_service_registry_key(service, service_len, &keyName, &keyNameLen);
-
-    lReturnValue = RegOpenKeyEx(HKEY_LOCAL_MACHINE, keyName, 0, KEY_ALL_ACCESS, &hKey);
-    if (lReturnValue != ERROR_SUCCESS) {
-        efree(keyName);
-        efree(new_data);
-        convert_error_to_exception(lReturnValue, "Error open key");
-        RETURN_THROWS();
-    }
-
-    lReturnValue = RegSetValueEx(hKey, SERVICES_REG_ENVIRONMENT, 0, REG_MULTI_SZ, new_data, new_data_len);
-    if (lReturnValue != ERROR_SUCCESS) {
-        efree(keyName);
-        efree(new_data);
-        convert_error_to_exception(lReturnValue, "Error create key");
-        RETURN_THROWS();
-    }
-
-    RegCloseKey(hKey);
-    efree(keyName);
+    const char *step = "";
+    lReturnValue = set_service_environment_vars(service, service_len, new_data, new_data_len, &step);
     efree(new_data);
+    if (lReturnValue != ERROR_SUCCESS) {
+        convert_error_to_exception(lReturnValue, step);
+        RETURN_THROWS();
+    }
+
     RETURN_NULL();
 }
 /* }}} */
@@ -1633,9 +1724,7 @@ static PHP_FUNCTION(win32_remove_service_env_var) {
     size_t service_len = 0;
     char *var_name = NULL;
     size_t var_name_len = 0;
-    HKEY hKey;
     LONG lReturnValue = 0;
-    DWORD dwDisposition;
 
     if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &service, &service_len, &var_name, &var_name_len)) {
         RETURN_THROWS();
@@ -1675,37 +1764,13 @@ static PHP_FUNCTION(win32_remove_service_env_var) {
     }
 
 
-    char *keyName = NULL;
-    int keyNameLen = 0;
-    get_service_registry_key(service, service_len, &keyName, &keyNameLen);
-
-    lReturnValue = RegOpenKeyEx(HKEY_LOCAL_MACHINE, keyName, 0, KEY_ALL_ACCESS, &hKey);
+    const char *step = "";
+    lReturnValue = set_service_environment_vars(service, service_len, new_data, new_data_len, &step);
+    efree(new_data);
     if (lReturnValue != ERROR_SUCCESS) {
-        efree(keyName);
-        efree(new_data);
-        convert_error_to_exception(lReturnValue, "Error open key");
+        convert_error_to_exception(lReturnValue, step);
         RETURN_THROWS();
     }
-    if (new_data_len > 0) {
-        lReturnValue = RegSetValueEx(hKey, SERVICES_REG_ENVIRONMENT, 0, REG_MULTI_SZ, new_data, new_data_len);
-        if (lReturnValue != ERROR_SUCCESS) {
-            efree(keyName);
-            efree(new_data);
-            convert_error_to_exception(lReturnValue, "Error create key");
-            RETURN_THROWS();
-        }
-    } else {
-        lReturnValue = RegDeleteValue(hKey, SERVICES_REG_ENVIRONMENT);
-        if (lReturnValue != ERROR_SUCCESS) {
-            efree(keyName);
-            efree(new_data);
-            convert_error_to_exception(lReturnValue, "Error remove key");
-            RETURN_THROWS();
-        }
-    }
-    RegCloseKey(hKey);
-    efree(keyName);
-    efree(new_data);
     RETURN_NULL();
 }
 
@@ -1732,12 +1797,12 @@ static void win32_handle_service_controls(INTERNAL_FUNCTION_PARAMETERS, long acc
         RETURN_THROWS();
     }
 
-    hmgr = OpenSCManager(machine, NULL, SC_MANAGER_CONNECT);
+    hmgr = win32_internal_open_sc_manager(machine, SC_MANAGER_CONNECT);
     if (!hmgr) {
         convert_error_to_exception(GetLastError(), "on openning manager");
         RETURN_THROWS();
     }
-    hsvc = OpenService(hmgr, service, access);
+    hsvc = win32_internal_open_service(hmgr, service, access);
     if (!hsvc) {
         CloseServiceHandle(hmgr);
         convert_error_to_exception(GetLastError(), "on openning service");
@@ -1802,13 +1867,13 @@ static PHP_FUNCTION(win32_send_custom_control) {
         RETURN_THROWS();
     }
 
-    hmgr = OpenSCManager(machine, NULL, SC_MANAGER_CONNECT);
+    hmgr = win32_internal_open_sc_manager(machine, SC_MANAGER_CONNECT);
     if (!hmgr) {
         convert_error_to_exception(GetLastError(), "");
         RETURN_THROWS();
     }
 
-    hsvc = OpenService(hmgr, service, SERVICE_USER_DEFINED_CONTROL);
+    hsvc = win32_internal_open_service(hmgr, service, SERVICE_USER_DEFINED_CONTROL);
     if (!hsvc) {
         CloseServiceHandle(hmgr);
         convert_error_to_exception(GetLastError(), "");
