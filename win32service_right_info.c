@@ -238,18 +238,13 @@ static PHP_METHOD(win32service_right_info_class, getRights) {
     long pAccess = rIObject->mask;// Z_LVAL_P(mask);
     array_init(return_value);
 
-    if (((pAccess & GENERIC_ALL) == GENERIC_ALL)
-        || ((pAccess & FILE_ALL_ACCESS) == FILE_ALL_ACCESS)) {
+    if ((pAccess & GENERIC_ALL) == GENERIC_ALL)
         add_index_string(return_value, GENERIC_ALL, "GENERIC_ALL");
-    }
-    if (((pAccess & GENERIC_READ) == GENERIC_READ)
-        || ((pAccess & FILE_GENERIC_READ) == FILE_GENERIC_READ))
+    if ((pAccess & GENERIC_READ) == GENERIC_READ)
         add_index_string(return_value, GENERIC_READ, "GENERIC_READ");
-    if (((pAccess & GENERIC_WRITE) == GENERIC_WRITE)
-        || ((pAccess & FILE_GENERIC_WRITE) == FILE_GENERIC_WRITE))
+    if ((pAccess & GENERIC_WRITE) == GENERIC_WRITE)
         add_index_string(return_value, GENERIC_WRITE, "GENERIC_WRITE");
-    if (((pAccess & GENERIC_EXECUTE) == GENERIC_EXECUTE)
-        || ((pAccess & FILE_GENERIC_EXECUTE) == FILE_GENERIC_EXECUTE))
+    if ((pAccess & GENERIC_EXECUTE) == GENERIC_EXECUTE)
         add_index_string(return_value, GENERIC_EXECUTE, "GENERIC_EXECUTE");
 
     if ((pAccess & SERVICE_ALL_ACCESS) == SERVICE_ALL_ACCESS)
@@ -392,7 +387,7 @@ PHP_MINIT_FUNCTION (win32service_right_info) {
 //    PHP_WIN32SERVICE_DECLARE_TYPED_PROPERTY_WITH_DEFAULT(this_ce, "domain", ZEND_ACC_PUBLIC, IS_STRING, 1, ZVAL_NULL);
 
     memcpy(&win32service_right_info_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-    win32service_right_info_object_handlers.offset = XtOffsetOf(win32service_right_info_object, zo);
+    win32service_right_info_object_handlers.offset = offsetof(win32service_right_info_object, zo);
     win32service_right_info_object_handlers.free_obj = win32service_right_info_free;
 
     return SUCCESS;
