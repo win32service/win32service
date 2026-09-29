@@ -336,14 +336,16 @@ static PHP_FUNCTION(win32_set_service_exit_code) {
                                 "This function work only when using the CLI SAPI and called into the service code.");
         RETURN_THROWS();
     }
-    zend_long exitCodeParam = SVCG(gracefulExit);
-    zend_long old_exitCodeParam = SVCG(gracefulExit);
+    zend_long exitCodeParam = SVCG(exitCode);
+    zend_long old_exitCodeParam = SVCG(exitCode);
 
     if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &exitCodeParam)) {
         RETURN_THROWS();
     }
 
-    SVCG(exitCode) = exitCodeParam;
+    if (ZEND_NUM_ARGS() > 0) {
+        SVCG(exitCode) = exitCodeParam;
+    }
 
     RETURN_LONG(old_exitCodeParam);
 }
@@ -381,6 +383,10 @@ static PHP_FUNCTION(win32_set_service_status) {
 }
 /* }}} */
 
+/* Every right accepted by win32_add_right_access_service(): service specific and standard rights,
+   ACCESS_SYSTEM_SECURITY and the generic rights. */
+#define WIN32_RIGHT_VALID_MASK ((zend_long) (SERVICE_ALL_ACCESS | ACCESS_SYSTEM_SECURITY | GENERIC_ALL | GENERIC_READ | GENERIC_WRITE | GENERIC_EXECUTE))
+
 /* {{{ proto object win32_read_right_access_service(string servicename, string username [, string machine])
    Read right to service for account */
 static PHP_FUNCTION(win32_read_right_access_service) {
@@ -403,6 +409,15 @@ static PHP_FUNCTION(win32_read_right_access_service) {
                               &machine_len)) {
         RETURN_THROWS();
     }
+	    if (service == NULL || strlen(service) < 2) {
+            zend_argument_value_error(1, "the value cannot be empty");
+            RETURN_THROWS();
+        }
+
+        if (username == NULL || strlen(username) < 2) {
+            zend_argument_value_error(2, "the value cannot be empty");
+            RETURN_THROWS();
+        }
 
     if (!win32_internal_to_wide(service, &service_w)) {
         convert_error_to_exception(ERROR_NO_UNICODE_TRANSLATION, "service name");
@@ -500,6 +515,11 @@ static PHP_FUNCTION(win32_read_all_rights_access_service) {
     wchar_t *machine_w = NULL;
 
     if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!", &service, &service_len, &machine, &machine_len)) {
+        RETURN_THROWS();
+    }
+
+    if (service == NULL || strlen(service) < 2) {
+        zend_argument_value_error(1, "the value cannot be empty");
         RETURN_THROWS();
     }
 
@@ -622,7 +642,7 @@ static PHP_FUNCTION(win32_add_right_access_service) {
     size_t service_len;
     char *username = NULL;
     size_t username_len;
-    long right = 0;
+    zend_long right = 0;
     long result = 0;
     char *errorMessage = NULL;
 
@@ -633,17 +653,17 @@ static PHP_FUNCTION(win32_add_right_access_service) {
     }
 
     if (service == NULL || strlen(service) < 2) {
-        zend_argument_value_error(1, "the value of argument 'serviceName' cannot be empty");
+        zend_argument_value_error(1, "the value cannot be empty");
         RETURN_THROWS();
     }
 
     if (username == NULL || strlen(username) < 2) {
-        zend_argument_value_error(1, "the value of argument 'username' cannot be empty");
+        zend_argument_value_error(2, "the value cannot be empty");
         RETURN_THROWS();
     }
 
-    if (right <= 0 || right > 0xF01FF) {
-        zend_argument_value_error(1, "the value of argument 'right' must between 0x00001 and 0xF01FF");
+    if (right <= 0 || (right & ~WIN32_RIGHT_VALID_MASK) != 0) {
+        zend_argument_value_error(3, "the value must be a combination of the WIN32_* rights constants");
         RETURN_THROWS();
     }
     errorMessage = emalloc(sizeof(char) * 150);
@@ -675,12 +695,12 @@ static PHP_FUNCTION(win32_remove_right_access_service) {
     }
 
     if (service == NULL || strlen(service) < 2) {
-        zend_argument_value_error(1, "the value of argument 'serviceName' cannot be empty");
+        zend_argument_value_error(1, "the value cannot be empty");
         RETURN_THROWS();
     }
 
     if (username == NULL || strlen(username) < 2) {
-        zend_argument_value_error(1, "the value of argument 'username' cannot be empty");
+        zend_argument_value_error(2, "the value cannot be empty");
         RETURN_THROWS();
     }
     errorMessage = emalloc(sizeof(char) * 150);
@@ -2128,6 +2148,7 @@ static PHP_MINIT_FUNCTION(win32service) {
     MKCONST(WRITE_DAC);                                            /* 0x00040000 Needed to write the security descriptor */
     MKCONST(WRITE_OWNER);                                        /* 0x00080000 Needed to change the owner and group of security descriptor */
 
+    MKCONST(GENERIC_ALL);                                        /* 0x10000000 Right sum of all rights */
     MKCONST(GENERIC_READ);                                        /* Right sum of STANDARD_RIGHTS_READ
 																														SERVICE_QUERY_CONFIG
 																														SERVICE_QUERY_STATUS

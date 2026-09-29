@@ -8,6 +8,10 @@ try {
     fwrite($flog, 'pause/resume old state '.(win32_set_service_pause_resume_state(false) ? 'yes':'no')."\n");
     fwrite($flog, 'pause/resume old state '.(win32_set_service_pause_resume_state(true) ? 'yes':'no')."\n");
 
+    fwrite($flog, 'exit code old '.win32_set_service_exit_code(42)."\n");
+    fwrite($flog, 'exit code read '.win32_set_service_exit_code()."\n");
+    fwrite($flog, 'exit code read again '.win32_set_service_exit_code()."\n");
+
     win32_set_service_pause_resume_state(false);
     win32_start_service_ctrl_dispatcher($serviceName);
 
