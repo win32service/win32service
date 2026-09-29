@@ -712,6 +712,22 @@ static PHP_FUNCTION(win32_remove_right_access_service) {
 }
 /* }}} */
 
+/* Throws a ValueError when a string value of the details array contains a null byte.
+   The values are later converted to wide strings up to the first null byte, so the rest would be silently dropped. */
+static zend_result win32_internal_check_details_null_bytes(zval *details, uint32_t arg_num) {
+    zend_string *key;
+    zval *val;
+
+    ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(details), key, val) {
+        if (key != NULL && Z_TYPE_P(val) == IS_STRING && strlen(Z_STRVAL_P(val)) != Z_STRLEN_P(val)) {
+            zend_argument_value_error(arg_num, "the value for key '%s' must not contain any null bytes", ZSTR_VAL(key));
+            return FAILURE;
+        }
+    } ZEND_HASH_FOREACH_END();
+
+    return SUCCESS;
+}
+
 /* {{{ proto void win32_create_service(array details [, string machine])
    Creates a new service entry in the SCM database */
 static PHP_FUNCTION(win32_create_service) {
@@ -746,6 +762,10 @@ static PHP_FUNCTION(win32_create_service) {
     BOOL dummy_changed = FALSE;
 
     if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "a|s!", &details, &machine, &machine_len)) {
+        RETURN_THROWS();
+    }
+
+    if (FAILURE == win32_internal_check_details_null_bytes(details, 1)) {
         RETURN_THROWS();
     }
 
@@ -1368,6 +1388,10 @@ static PHP_FUNCTION(win32_update_service_config) {
 
     if (service_len == 0) {
         zend_argument_value_error(1, "the value cannot be empty");
+        RETURN_THROWS();
+    }
+
+    if (FAILURE == win32_internal_check_details_null_bytes(details, 2)) {
         RETURN_THROWS();
     }
 
