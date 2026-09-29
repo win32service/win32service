@@ -387,7 +387,7 @@ PHP_MINIT_FUNCTION (win32service_right_info) {
 //    PHP_WIN32SERVICE_DECLARE_TYPED_PROPERTY_WITH_DEFAULT(this_ce, "domain", ZEND_ACC_PUBLIC, IS_STRING, 1, ZVAL_NULL);
 
     memcpy(&win32service_right_info_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-    win32service_right_info_object_handlers.offset = XtOffsetOf(win32service_right_info_object, zo);
+    win32service_right_info_object_handlers.offset = offsetof(win32service_right_info_object, zo);
     win32service_right_info_object_handlers.free_obj = win32service_right_info_free;
 
     return SUCCESS;
