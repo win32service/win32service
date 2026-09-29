@@ -17,7 +17,7 @@
 * Add the constant `WIN32_GENERIC_ALL`, matching the `GENERIC_ALL` entry returned by `RightInfo::getRights()`. (@macintoshplus) (issue [#112](https://github.com/win32service/win32service/issues/112))
 * `RightInfo::getRights()` no longer reports generic rights from the file access masks (`FILE_ALL_ACCESS`, `FILE_GENERIC_*`). (@macintoshplus) (issue [#112](https://github.com/win32service/win32service/issues/112))
 * `win32_add_right_access_service()` now accepts the generic rights and `WIN32_ACCESS_SYSTEM_SECURITY` for `$right`. (@macintoshplus) (issue [#112](https://github.com/win32service/win32service/issues/112))
-
+* The homepage URL has been updated.
 
 # Version 1.1.0 (2026-01-12)
 
