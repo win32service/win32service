@@ -52,3 +52,5 @@ function win32_pause_service(string $servicename, string $machine = ''): void {}
 function win32_continue_service(string $servicename, string $machine = ''): void {}
 
 function win32_send_custom_control(string $servicename, int $control, string $machine = ''): void {}
+
+function win32_send_log(string $appname, int $eventCode, int $eventLevel, string $description): void {}

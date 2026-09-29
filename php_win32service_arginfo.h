@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5cc2808d07751d341a0155076070b9453546e1b6 */
+ * Stub hash: d02d1586b4a7cfdcdb0035b6045ece95b9c026ad */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_win32_start_service_ctrl_dispatcher, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -111,5 +111,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_win32_send_custom_control, 0, 2,
 	ZEND_ARG_TYPE_INFO(0, servicename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, control, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, machine, IS_STRING, 0, "\'\'")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_win32_send_log, 0, 4, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, appname, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, eventCode, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, eventLevel, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, description, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
