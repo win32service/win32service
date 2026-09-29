@@ -941,7 +941,7 @@ static PHP_FUNCTION(win32_set_service_priority) {
 static PHP_FUNCTION(win32_get_service_priority) {
     char *service = NULL;
     size_t service_len = 0;
-    long base_priority = NULL;
+    long base_priority = 0;
     long registry_result = 0;
 
     if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s", &service, &service_len)) {
@@ -1057,11 +1057,11 @@ static PHP_FUNCTION(win32_query_service_config) {
     size_t service_len = 0;
     SC_HANDLE hsvc;
     SC_HANDLE hmgr;
-    LPQUERY_SERVICE_CONFIGW cfg = NULL;
-    LPSERVICE_DESCRIPTIONW desc = NULL;
+    LPQUERY_SERVICE_CONFIGA cfg = NULL;
+    LPSERVICE_DESCRIPTIONA desc = NULL;
     LPSERVICE_DELAYED_AUTO_START_INFO delayed_start = NULL;
     LPSERVICE_FAILURE_ACTIONS_FLAG failure_actions_flag = NULL;
-    LPSERVICE_FAILURE_ACTIONSW failure_actions = NULL;
+    LPSERVICE_FAILURE_ACTIONSA failure_actions = NULL;
     DWORD size, needed;
 
     if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!", &service, &service_len, &machine, &machine_len)) {
@@ -1093,7 +1093,7 @@ static PHP_FUNCTION(win32_query_service_config) {
             convert_error_to_exception(GetLastError(), "");
             RETURN_THROWS();
         }
-        cfg = (LPQUERY_SERVICE_CONFIG) emalloc(needed);
+        cfg = (LPQUERY_SERVICE_CONFIGA) emalloc(needed);
         if (!QueryServiceConfig(hsvc, cfg, needed, &needed)) {
             efree(cfg);
             CloseServiceHandle(hsvc);
@@ -1151,7 +1151,7 @@ static PHP_FUNCTION(win32_query_service_config) {
     /* Query Service Description */
     if (!QueryServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, NULL, 0, &needed)) {
         if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
-            desc = (LPSERVICE_DESCRIPTION) emalloc(needed);
+            desc = (LPSERVICE_DESCRIPTIONA) emalloc(needed);
             if (QueryServiceConfig2(hsvc, SERVICE_CONFIG_DESCRIPTION, (LPBYTE)desc, needed, &needed)) {
                 if (desc->lpDescription) {
                     add_assoc_string(return_value, INFO_DESCRIPTION, desc->lpDescription);
@@ -1188,7 +1188,7 @@ static PHP_FUNCTION(win32_query_service_config) {
     /* Query Failure Actions */
     if (!QueryServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, NULL, 0, &needed)) {
         if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
-            failure_actions = (LPSERVICE_FAILURE_ACTIONS) emalloc(needed);
+            failure_actions = (LPSERVICE_FAILURE_ACTIONSA) emalloc(needed);
             if (QueryServiceConfig2(hsvc, SERVICE_CONFIG_FAILURE_ACTIONS, (LPBYTE)failure_actions, needed, &needed)) {
                 add_assoc_long(return_value, INFO_RECOVERY_RESET_PERIOD, failure_actions->dwResetPeriod);
                 if (failure_actions->lpRebootMsg) {
@@ -1369,7 +1369,7 @@ static PHP_FUNCTION(win32_update_service_config) {
     }
 
 	if (svc_type == SERVICE_NO_CHANGE) {
-    	LPQUERY_SERVICE_CONFIGW cfg = NULL;
+    	LPQUERY_SERVICE_CONFIGA cfg = NULL;
         DWORD needed;
 	    if (!QueryServiceConfig(hsvc, NULL, 0, &needed)) {
             if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
@@ -1378,7 +1378,7 @@ static PHP_FUNCTION(win32_update_service_config) {
                 convert_error_to_exception(GetLastError(), "");
                 RETURN_THROWS();
             }
-            cfg = (LPQUERY_SERVICE_CONFIG) emalloc(needed);
+            cfg = (LPQUERY_SERVICE_CONFIGA) emalloc(needed);
             if (!QueryServiceConfig(hsvc, cfg, needed, &needed)) {
                 efree(cfg);
                 CloseServiceHandle(hsvc);
