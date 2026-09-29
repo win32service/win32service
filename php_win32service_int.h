@@ -38,9 +38,9 @@ ZEND_BEGIN_MODULE_GLOBALS(win32service)
 	zend_long exitCode;
 	SERVICE_STATUS 			st;
 	SERVICE_STATUS_HANDLE	sh;
-	SERVICE_TABLE_ENTRY		te[2];
+	SERVICE_TABLE_ENTRYW	te[2];
     DWORD dwControlsAccepted;
-	char *service_name;
+	wchar_t *service_name; /* UTF-16, as expected by the SCM */
 	/* args for the control handler */
 	struct {
 		DWORD dwControl, dwEventType;

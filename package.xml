@@ -56,6 +56,8 @@
             <file name="win32service_right_info.c" role="src"/>
             <file name="win32service_registry.h" role="src"/>
             <file name="win32service_registry.c" role="src"/>
+            <file name="win32service_wide.h" role="src"/>
+            <file name="win32service_wide.c" role="src"/>
             <file name="examples/sample.php" role="php"/>
             <file name="examples/service.php" role="php"/>
             <file name="examples/service_dummy.php" role="php"/>

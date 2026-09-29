@@ -16,14 +16,22 @@
   +----------------------------------------------------------------------+
 */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "php.h"
 #include "win32service_right.h"
 
 #include <aclapi.h>
 
+#include "win32service_wide.h"
+
 long change_service_right(char *service, char *username, long right, long type, char *machine, char *returnMessage) {
 
     long returnValue = 0;
-    EXPLICIT_ACCESS      ea;
+    EXPLICIT_ACCESS_W    ea;
+    wchar_t             *username_w     = NULL;
     SECURITY_DESCRIPTOR  sd;
     PSECURITY_DESCRIPTOR psd            = NULL;
     PACL                 pacl           = NULL;
@@ -40,9 +48,8 @@ long change_service_right(char *service, char *username, long right, long type, 
 
     // Get a handle to the SCM database.
 
-    schSCManager = OpenSCManager(
+    schSCManager = win32_internal_open_sc_manager(
             machine,                    // local computer
-            NULL,                    // ServicesActive database
             SC_MANAGER_ALL_ACCESS);  // full access rights
 
     if (!schSCManager) {
@@ -53,9 +60,9 @@ long change_service_right(char *service, char *username, long right, long type, 
 
     // Get a handle to the service
 
-    schService = OpenService(
+    schService = win32_internal_open_service(
             schSCManager,              // SCManager database
-            service,                 // name of service
+            service,                 // name of service (UTF-8)
             READ_CONTROL | WRITE_DAC); // access
 
     if (schService == NULL)
@@ -113,11 +120,17 @@ long change_service_right(char *service, char *username, long right, long type, 
     }
 
     // Build the ACE.
-    BuildExplicitAccessWithName(&ea, username,
-                                right,
-                                type, NO_INHERITANCE);
+    if (!win32_internal_to_wide(username, &username_w)) {
+        sprintf(returnMessage, "Invalid username" );
+        returnValue = GetLastError();
+        goto dacl_cleanup;
+    }
 
-    dwError = SetEntriesInAcl(1, &ea, pacl, &pNewAcl);
+    BuildExplicitAccessWithNameW(&ea, username_w,
+                                 right,
+                                 type, NO_INHERITANCE);
+
+    dwError = SetEntriesInAclW(1, &ea, pacl, &pNewAcl);
     if (dwError != ERROR_SUCCESS)
     {
         sprintf(returnMessage, "SetEntriesInAcl failed");
@@ -160,6 +173,8 @@ long change_service_right(char *service, char *username, long right, long type, 
     CloseServiceHandle(schSCManager);
     CloseServiceHandle(schService);
 
+    if(NULL != username_w)
+        efree(username_w);
     if(NULL != pNewAcl)
         LocalFree((HLOCAL)pNewAcl);
     if(NULL != psd)

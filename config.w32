@@ -9,7 +9,8 @@ if (PHP_WIN32SERVICE != "no") {
 	" win32service_right_info.c" +
 	" win32service_registry.c" +
 	" win32service_error.c" +
-	" win32service_config.c"
+	" win32service_config.c" +
+	" win32service_wide.c"
 	);
 }
 

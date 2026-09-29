@@ -153,6 +153,15 @@ void convert_error_to_exception(DWORD code, const char *message) {
                                 "No mapping between account names and security IDs was done. (%s)", message);
         return;
     }
+    if (code == ERROR_NO_UNICODE_TRANSLATION) {
+        /* Invalid UTF-8 comes from a user supplied string: it is an argument error, not an operational one. */
+        if (message != NULL && message[0] != '\0') {
+            zend_value_error("A string argument must be valid UTF-8 (%s)", message);
+        } else {
+            zend_value_error("A string argument must be valid UTF-8");
+        }
+        return;
+    }
     if (code == 16000) {
         zend_throw_exception_ex(Win32ServiceException_ce_ptr, code, "Internal extension error (%s)", message);
         return;
