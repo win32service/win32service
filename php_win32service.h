@@ -90,7 +90,7 @@ struct _win32service_right_info_object {
 
 static inline win32service_right_info_object *php_win32service_right_info_object_fetch(zend_object *obj)
 {
-    return (win32service_right_info_object *) ((char *) obj - XtOffsetOf(win32service_right_info_object, zo));
+    return (win32service_right_info_object *) ((char *) obj - offsetof(win32service_right_info_object, zo));
 }
 
 #define PHP_WIN32SERVICE_DECLARE_PROPERTY_TYPE(type, nullable) (zend_type) ZEND_TYPE_INIT_CODE(type, nullable, 0)
