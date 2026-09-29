@@ -4,6 +4,7 @@
 * Add `win32_query_service_config` and `win32_update_service_config` function. (@macintoshplus) (issue [#101](https://github.com/win32service/win32service/issues/101))
 * Migration Windows API from A to W. Pay attention to sending only UTF-8 chars to Win32Service functions.
 * `win32_create_service()` and `win32_update_service_config()` now throw a `ValueError` when any string value of the details array (including `description` and the recovery settings) contains a null byte. (@macintoshplus) (issue [#111](https://github.com/win32service/win32service/issues/111))
+* The homepage URL has been updated.
 
 # Version 1.1.1 (2026-03-30)
 
