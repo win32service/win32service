@@ -238,18 +238,13 @@ static PHP_METHOD(win32service_right_info_class, getRights) {
     long pAccess = rIObject->mask;// Z_LVAL_P(mask);
     array_init(return_value);
 
-    if (((pAccess & GENERIC_ALL) == GENERIC_ALL)
-        || ((pAccess & FILE_ALL_ACCESS) == FILE_ALL_ACCESS)) {
+    if ((pAccess & GENERIC_ALL) == GENERIC_ALL)
         add_index_string(return_value, GENERIC_ALL, "GENERIC_ALL");
-    }
-    if (((pAccess & GENERIC_READ) == GENERIC_READ)
-        || ((pAccess & FILE_GENERIC_READ) == FILE_GENERIC_READ))
+    if ((pAccess & GENERIC_READ) == GENERIC_READ)
         add_index_string(return_value, GENERIC_READ, "GENERIC_READ");
-    if (((pAccess & GENERIC_WRITE) == GENERIC_WRITE)
-        || ((pAccess & FILE_GENERIC_WRITE) == FILE_GENERIC_WRITE))
+    if ((pAccess & GENERIC_WRITE) == GENERIC_WRITE)
         add_index_string(return_value, GENERIC_WRITE, "GENERIC_WRITE");
-    if (((pAccess & GENERIC_EXECUTE) == GENERIC_EXECUTE)
-        || ((pAccess & FILE_GENERIC_EXECUTE) == FILE_GENERIC_EXECUTE))
+    if ((pAccess & GENERIC_EXECUTE) == GENERIC_EXECUTE)
         add_index_string(return_value, GENERIC_EXECUTE, "GENERIC_EXECUTE");
 
     if ((pAccess & SERVICE_ALL_ACCESS) == SERVICE_ALL_ACCESS)
