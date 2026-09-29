@@ -2,12 +2,12 @@ name: CI test
 on:
   # When a new tag is pushed, we can build, and upload the DLLs to it.
   push:
-    branches: [ v1.1.x ]
+    branches: [ v1.1.x, v1.2.x ]
     # branches: ['**'] # Uncomment this to run on push to a branch
   # create: # Uncomment this to run on tag/branch creation
   # pull_request: # Uncomment this to run on pull requests
   pull_request:
-    branches: [ v1.1.x ]
+    branches: [ v1.1.x, v1.2.x ]
 
 permissions:
   contents: write
@@ -39,7 +39,7 @@ jobs:
         id: extension-matrix
         uses: php/php-windows-builder/extension-matrix@v1
         with:
-          php-version-list: '8.5'
+          php-version-list: '8.5, 8.6'
           arch-list: 'x64'
           ts-list: 'nts'
 
