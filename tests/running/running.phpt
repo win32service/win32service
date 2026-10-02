@@ -26,6 +26,26 @@ if (win32_exists_service($service['service'])) {
 try {
 var_dump(win32_create_service($service));
 var_dump(win32_start_service($service['service']));
+try {
+    var_dump(win32_start_service($service['service'], null));
+} catch (Win32ServiceException $e) {
+    var_dump($e->getMessage());
+}
+try {
+    var_dump(win32_start_service($service['service'], ''));
+} catch (Win32ServiceException $e) {
+    var_dump($e->getMessage());
+}
+try {
+    var_dump(win32_start_service($service['service'], 'localhost'));
+} catch (Win32ServiceException $e) {
+    var_dump($e->getMessage());
+}
+try {
+    var_dump(win32_start_service($service['service'], php_uname('n')));
+} catch (Win32ServiceException $e) {
+    var_dump($e->getMessage());
+}
 sleep(15);
 $status = win32_query_service_status($service['service']);
 $status['ProcessId'] = 0;
@@ -48,6 +68,10 @@ echo file_get_contents(__DIR__.'/run.log');
 --EXPECT--
 NULL
 NULL
+string(32) "Error service already running ()"
+string(32) "Error service already running ()"
+string(32) "Error service already running ()"
+string(32) "Error service already running ()"
 array(9) {
   ["ServiceType"]=>
   int(16)
